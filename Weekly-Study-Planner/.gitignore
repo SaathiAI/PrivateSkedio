@@ -4,6 +4,8 @@
 # ─── Markdown docs (keep diagrams only) ───────────────
 *.md
 !README.md
+!documentation/
+!documentation/*.md
 !*_diagram.md
 !GENERAL_AGENT_ARCHITECTURE_DIAGRAM.md
 
