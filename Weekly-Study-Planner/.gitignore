@@ -1,0 +1,92 @@
+# ─── Opencode Skills ──────────────────────────────────
+*_skill.md
+
+# ─── Markdown docs (keep diagrams only) ───────────────
+*.md
+!*_diagram.md
+!GENERAL_AGENT_ARCHITECTURE_DIAGRAM.md
+
+# ─── Legacy / Redundant files (keep locally, don't deploy) ───────
+src/database/neo4j_client.py
+src/agents/supervisor4.py
+src/agents/planner_agent2.py
+src/agents/intake_agent2.py
+railway.toml
+
+# ─── Python ──────────────────────────────────────────
+__pycache__/
+*.py[codz]
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+MANIFEST
+
+# ─── Virtual Environments ─────────────────────────────
+.venv/
+.venv_linux/
+venv/
+venv_linux*/
+env/
+ENV/
+
+# ─── Environment Variables (NEVER commit these) ───────
+.env
+.envrc
+
+# ─── Test & Coverage ──────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# ─── Databases (local only) ───────────────────────────
+*.db
+*.sqlite
+*.db-shm
+*.db-wal
+saathi.db
+test_checkpointer.db
+
+# ─── Node / Frontend ──────────────────────────────────
+node_modules/
+saathi-ui/dist/
+saathi-ui/.env
+
+# ─── Logs & Debug ─────────────────────────────────────
+*.log
+logs/
+config/logs/
+mcp_debug.log
+
+# ─── Credentials & Secrets ────────────────────────────
+token.json
+credentials.json
+client_secret*.json
+*.json.bak
+src/config/google/*.json
+
+# ─── Redundant / Dev-only directories ─────────────────
+openhands_final/
+eval/
+results/
+transcript/
+tests/
+docs/
+archive/
+
+# ─── Misc ─────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.mypy_cache/
+.ruff_cache/
+*.ipynb
+
+# OAuth token files (contain secrets)
+create_events.json
+src/agents/create_events.json
+src/config/google/create_events.json

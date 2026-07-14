@@ -1,0 +1,321 @@
+{
+  "has_plan": true,
+  "plan": {
+    "plan_id": "plan_20260605_a8f21c9d",
+    "status": "ACTIVE",
+    "source": "planner",
+    "total_hours": 8.5,
+    "start_date": "2026-06-05",
+    "end_date": "2026-06-09",
+
+    "work_item_progress": {
+      "Mathematics::Polynomials": {
+        "estimated_hours": 3.5,
+        "spent_hours": 0,
+        "remaining_hours": 3.5,
+        "status": "pending"
+      },
+      "Mathematics::Statistics": {
+        "estimated_hours": 2.5,
+        "spent_hours": 0,
+        "remaining_hours": 2.5,
+        "status": "pending"
+      },
+      "Mathematics::Quadratic Equations": {
+        "estimated_hours": 2.5,
+        "spent_hours": 0,
+        "remaining_hours": 2.5,
+        "status": "pending"
+      }
+    },
+
+    "intake_snapshot": {
+      "goal": {
+        "title": "Maths chapter prep",
+        "subjects": ["Mathematics"],
+        "start_date": "2026-06-05",
+        "end_date": "2026-06-09",
+        "study_scope": [
+          {
+            "subject": "Mathematics",
+            "chapter": "Polynomials",
+            "intent": "Finish concept revision and exam-style practice"
+          },
+          {
+            "subject": "Mathematics",
+            "chapter": "Statistics",
+            "intent": "Clear backlog and practice graphs"
+          },
+          {
+            "subject": "Mathematics",
+            "chapter": "Quadratic Equations",
+            "intent": "Practice solving methods and discriminant"
+          }
+        ]
+      },
+      "availability": {
+    "timezone": "Asia/Calcutta",
+    "daily_study_hours": {
+      "2026-06-03": 3.0,
+      "2026-06-04": 2.5,
+      "2026-06-05": 3.5,
+      "2026-06-06": 4.0,
+      "2026-06-07": 6.0,
+      "2026-06-08": 1.5,
+      "2026-06-09": 3.0
+    },
+    "time_blocks":{
+    "2026-06-05": [
+      { "title": "Tuition", "start": "17:00", "end": "18:00", "source": "manual" },
+      { "title": "Standup", "start": "09:00", "end": "09:30", "source": "calendar" }
+    ],
+    "2026-06-09": [
+      { "title": "Tuition", "start": "14:00", "end": "15:00", "source": "manual" }
+    ]
+  },
+    "planning_notes": [
+      "Prefers morning study session blocks on weekends",
+      "Needs a 10 min break after every 50 mins of study"
+    ]
+  }
+    },
+
+    "days": [
+      {
+        "day_num": 1,
+        "date": "2026-06-05",
+        "capacity_hours": 2,
+        "total_hours": 2,
+        "sessions": [
+          {
+            "session_id": "sess_001",
+            "title": "Polynomials: zeros and coefficients",
+            "session_type": "focused_chapter",
+            "start_time": "18:00",
+            "end_time": "20:00",
+            "estimated_hours": 2,
+            "actual_time": 0,
+            "status": "pending",
+            "allocated_hours": [
+              {
+                "subject": "Mathematics",
+                "chapter": "Polynomials",
+                "hours": 2
+              }
+            ],
+            "contents": [
+              {
+                "match_key": "mathematics.polynomials.zeros",
+                "name": "Zeros of a polynomial",
+                "subjects": ["Mathematics"],
+                "chapters": ["Polynomials"],
+                "type": "subtopic",
+                "status": "pending",
+                "time_spent": 0
+              },
+              {
+                "match_key": "mathematics.polynomials.coefficients",
+                "name": "Relationship between zeros and coefficients",
+                "subjects": ["Mathematics"],
+                "chapters": ["Polynomials"],
+                "type": "subtopic",
+                "status": "pending",
+                "time_spent": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "day_num": 2,
+        "date": "2026-06-06",
+        "capacity_hours": 2,
+        "total_hours": 2,
+        "sessions": [
+          {
+            "session_id": "sess_002",
+            "title": "Statistics: cumulative frequency and ogive",
+            "session_type": "practice",
+            "start_time": "10:00",
+            "end_time": "12:00",
+            "estimated_hours": 2,
+            "actual_time": 0,
+            "status": "pending",
+            "allocated_hours": [
+              {
+                "subject": "Mathematics",
+                "chapter": "Statistics",
+                "hours": 2
+              }
+            ],
+            "contents": [
+              {
+                "match_key": "mathematics.statistics.cumulative_frequency",
+                "name": "Cumulative frequency",
+                "subjects": ["Mathematics"],
+                "chapters": ["Statistics"],
+                "type": "subtopic",
+                "status": "pending",
+                "time_spent": 0
+              },
+              {
+                "match_key": "mathematics.statistics.ogive",
+                "name": "Ogive",
+                "subjects": ["Mathematics"],
+                "chapters": ["Statistics"],
+                "type": "subtopic",
+                "status": "pending",
+                "time_spent": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "day_num": 3,
+        "date": "2026-06-07",
+        "capacity_hours": 2,
+        "total_hours": 2,
+        "sessions": [
+          {
+            "session_id": "sess_003",
+            "title": "Quadratic Equations: factorisation and formula",
+            "session_type": "focused_chapter",
+            "start_time": "17:30",
+            "end_time": "19:30",
+            "estimated_hours": 2,
+            "actual_time": 0,
+            "status": "pending",
+            "allocated_hours": [
+              {
+                "subject": "Mathematics",
+                "chapter": "Quadratic Equations",
+                "hours": 2
+              }
+            ],
+            "contents": [
+              {
+                "match_key": "mathematics.quadratic.factorisation",
+                "name": "Solving by factorisation",
+                "subjects": ["Mathematics"],
+                "chapters": ["Quadratic Equations"],
+                "type": "subtopic",
+                "status": "pending",
+                "time_spent": 0
+              },
+              {
+                "match_key": "mathematics.quadratic.formula",
+                "name": "Quadratic formula",
+                "subjects": ["Mathematics"],
+                "chapters": ["Quadratic Equations"],
+                "type": "subtopic",
+                "status": "pending",
+                "time_spent": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "day_num": 4,
+        "date": "2026-06-08",
+        "capacity_hours": 1.5,
+        "total_hours": 1.5,
+        "sessions": [
+          {
+            "session_id": "sess_004",
+            "title": "Mixed maths practice",
+            "session_type": "mixed",
+            "start_time": "18:30",
+            "end_time": "20:00",
+            "estimated_hours": 1.5,
+            "actual_time": 0,
+            "status": "pending",
+            "allocated_hours": [
+              {
+                "subject": "Mathematics",
+                "chapter": "Polynomials",
+                "hours": 1
+              },
+              {
+                "subject": "Mathematics",
+                "chapter": "Quadratic Equations",
+                "hours": 0.5
+              }
+            ],
+            "contents": [
+              {
+                "match_key": "mathematics.polynomials.graphs",
+                "name": "Graphical representation of polynomials",
+                "subjects": ["Mathematics"],
+                "chapters": ["Polynomials"],
+                "type": "practice",
+                "status": "pending",
+                "time_spent": 0
+              },
+              {
+                "match_key": "mathematics.quadratic.discriminant",
+                "name": "Nature of roots using discriminant",
+                "subjects": ["Mathematics"],
+                "chapters": ["Quadratic Equations"],
+                "type": "practice",
+                "status": "pending",
+                "time_spent": 0
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "day_num": 5,
+        "date": "2026-06-09",
+        "capacity_hours": 1,
+        "total_hours": 1,
+        "sessions": [
+          {
+            "session_id": "sess_005",
+            "title": "Light final review",
+            "session_type": "revision",
+            "start_time": "07:30",
+            "end_time": "08:30",
+            "estimated_hours": 1,
+            "actual_time": 0,
+            "status": "pending",
+            "allocated_hours": [
+              {
+                "subject": "Mathematics",
+                "chapter": "Statistics",
+                "hours": 0.5
+              },
+              {
+                "subject": "Mathematics",
+                "chapter": "Quadratic Equations",
+                "hours": 0.5
+              }
+            ],
+            "contents": [
+              {
+                "match_key": "mathematics.statistics.ogive",
+                "name": "Ogive recap",
+                "subjects": ["Mathematics"],
+                "chapters": ["Statistics"],
+                "type": "revision",
+                "status": "pending",
+                "time_spent": 0
+              },
+              {
+                "match_key": "mathematics.quadratic.discriminant",
+                "name": "Discriminant quick review",
+                "subjects": ["Mathematics"],
+                "chapters": ["Quadratic Equations"],
+                "type": "revision",
+                "status": "pending",
+                "time_spent": 0
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

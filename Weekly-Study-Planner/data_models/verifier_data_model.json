@@ -1,0 +1,44 @@
+{
+  "status": "approved",
+  "message": "The plan is realistic and balanced enough to use.",
+  "quality_score": 0.86,
+  "risk_level": "medium",
+
+  "review_summary": {
+    "strengths": [
+      "High-priority Biology Chapter 3 receives enough focused time.",
+      "The plan keeps sessions within the student's preferred length.",
+      "There is at least one review/practice-oriented session before the deadline."
+    ],
+    "concerns": [
+      "Math Algebra has less buffer than Biology.",
+      "The final day is a little dense."
+    ]
+  },
+
+  "issues": [
+    {
+      "severity": "low",
+      "code": "LOW_BUFFER_FOR_CHAPTER",
+      "subject": "Math",
+      "chapter": "Algebra",
+      "message": "Math Algebra reaches the target, but has little spare time if the student struggles."
+    }
+  ],
+
+  "recommended_adjustments": [
+    {
+      "action": "optional_add_buffer",
+      "subject": "Math",
+      "chapter": "Algebra",
+      "message": "If a spare 20-30 minute slot appears, use it for Algebra mistake review."
+    }
+  ],
+
+  "student_facing_summary": "This plan is workable. Biology gets the most attention, and Math still reaches its target, but there is not much extra room if Algebra takes longer than expected.",
+
+  "routing_hint": {
+    "next_step": "plan_committer",
+    "reason": "The plan passed soft quality review."
+  }
+}

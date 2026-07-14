@@ -1,0 +1,88 @@
+{
+  "2026-06-24": [
+    {
+      "title": "Protected sleep window",
+      "start": "23:30",
+      "end": "06:30",
+      "source": "user_rest_window"
+    }
+  ],
+  "2026-06-25": [
+    {
+      "title": "Protected sleep window",
+      "start": "23:30",
+      "end": "06:30",
+      "source": "user_rest_window"
+    },
+    {
+      "title": "Doctor follow-up",
+      "start": "18:30",
+      "end": "19:30",
+      "source": "user_commitment"
+    }
+  ],
+  "2026-06-26": [
+    {
+      "title": "Protected sleep window",
+      "start": "23:30",
+      "end": "06:30",
+      "source": "user_rest_window"
+    },
+    {
+      "title": "Family prayer visit",
+      "start": "19:00",
+      "end": "20:00",
+      "source": "user_commitment"
+    }
+  ],
+  "2026-06-27": [
+    {
+      "title": "Protected sleep window",
+      "start": "23:30",
+      "end": "06:30",
+      "source": "user_rest_window"
+    },
+    {
+      "title": "Cousin visit",
+      "start": "10:30",
+      "end": "12:00",
+      "source": "user_commitment"
+    }
+  ],
+  "2026-06-28": [
+    {
+      "title": "Protected sleep window",
+      "start": "23:30",
+      "end": "06:30",
+      "source": "user_rest_window"
+    },
+    {
+      "title": "Weekly room cleanup",
+      "start": "16:00",
+      "end": "17:00",
+      "source": "user_commitment"
+    }
+  ],
+  "2026-06-29": [
+    {
+      "title": "Protected sleep window",
+      "start": "23:30",
+      "end": "06:30",
+      "source": "user_rest_window"
+    },
+    {
+      "title": "Phone-off family dinner",
+      "start": "20:00",
+      "end": "21:00",
+      "source": "user_commitment"
+    }
+  ],
+  "2026-06-30": [
+    {
+      "title": "Protected sleep window",
+      "start": "23:30",
+      "end": "06:30",
+      "source": "user_rest_window"
+    }
+  ]
+}

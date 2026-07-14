@@ -1,0 +1,230 @@
+async def commit_plan(user_id: str, plan_data: CommitPlanInput) -> dict:
+    """
+    Commit plan to Neo4j using V2 Session-based architecture.
+    Plan → Day → Session → Content → Chapter Backlog
+    """
+    from src.database.neo4j import Neo4jManager
+    from src.database.vector_store import VectorStore
+
+    logger = logging.getLogger(__name__)
+    timings = {}
+    total_start = time.perf_counter()
+
+    try:
+        print("STARTING V2 COMMIT")
+        neo4j = Neo4jManager()
+        vector_store = VectorStore()
+
+        # Ensure user exists before plan creation
+        neo4j.create_user(user_id)
+
+        data_dict = plan_data.model_dump()
+        # Always generate a truly unique plan_id — never trust the LLM to be unique
+        base_id = data_dict.get("plan_id") or "plan"
+        plan_id = f"{base_id}-{uuid.uuid4().hex[:8]}"
+
+        # Collect all unique content from sessions
+        all_contents = []
+        for day in data_dict["days"]:
+            for session in day.get("sessions", []):
+                for content in session.get("contents", []):
+                    # Generate match_key if None (new subtopics from CBSE)
+                    if not content.get("match_key"):
+                        # Get subject and chapter from content or session
+                        subjects = (
+                            content.get("subjects") or session.get("subjects") or []
+                        )
+                        chapters = (
+                            content.get("chapters") or session.get("chapters") or []
+                        )
+                        content["match_key"] = neo4j.generate_content_match_key(
+                            subject=subjects[0] if subjects else "unknown",
+                            chapter=chapters[0] if chapters else "unknown",
+                            content_name=content.get("name", "unknown"),
+                        )
+                    all_contents.append(content)
+
+        # STEP 1: Resolve/create Content nodes
+        print("--> Resolving Content nodes...")
+        t = time.perf_counter()
+        await asyncio.to_thread(neo4j.resolve_content_nodes, all_contents)
+        timings["content_resolution"] = round(time.perf_counter() - t, 2)
+
+        # STEP 2: Build plan metadata
+        start_date = data_dict["days"][0]["date"] if data_dict["days"] else None
+        estimated_duration = len(data_dict["days"]) if data_dict["days"] else 0
+        planned_end_date = None
+
+        if start_date and estimated_duration:
+            try:
+                from datetime import datetime, timedelta
+
+                dt = datetime.strptime(start_date, "%Y-%m-%d")
+                planned_end_date = (dt + timedelta(days=estimated_duration)).strftime(
+                    "%Y-%m-%d"
+                )
+            except:
+                planned_end_date = None
+
+        plan_name = "Untitled Plan"
+        if start_date:
+            try:
+                dt = datetime.strptime(start_date, "%Y-%m-%d")
+                plan_name = f"{dt.strftime('%B')} {dt.day} Plan"
+            except:
+                plan_name = "Untitled Plan"
+
+        # Build full intake_snapshot (the full intake output that made this plan)
+        from datetime import datetime
+
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        # Extract topic_time_estimates from planner input
+        topic_time_estimates = data_dict.get("topic_time_estimates", {})
+
+        intake_snapshot = {
+            "subjects": data_dict.get("subjects", []),
+            "topics": data_dict.get("topics", []),
+            "hours_per_day": data_dict.get("hours_per_day", 0),
+            "skill_level": data_dict.get("skill_level", ""),
+            "notes": data_dict.get("notes", ""),
+            "topic_time_estimates": topic_time_estimates,
+            "backlog_match_keys": data_dict.get("backlog_match_keys", []),
+            "created_at": now_str,
+        }
+
+        # STEP 3: Create Plan node
+        print("--> Creating Plan...")
+        t = time.perf_counter()
+        await asyncio.to_thread(
+            neo4j.create_plan,
+            user_id,
+            plan_id,
+            plan_name,
+            start_date or "",
+            planned_end_date or "",
+            estimated_duration,
+            data_dict["total_hours"],
+            data_dict["risk_level"],
+            list(topic_time_estimates.keys()),
+            topic_time_estimates,
+            intake_snapshot,
+        )
+        timings["plan_creation"] = round(time.perf_counter() - t, 2)
+
+        # STEP 4: Create Day nodes
+        print("--> Creating Days...")
+        t = time.perf_counter()
+        days_query = """
+        MATCH (p:Plan {plan_id: $plan_id})
+        UNWIND $days AS day
+        CREATE (p)-[:HAS_DAY]->(d:Day {
+            day_num: day.day_num,
+            date: day.date,
+            total_hours: day.total_hours,
+            capacity_hours: day.capacity_hours
+        })
+        """
+        await asyncio.to_thread(
+            neo4j.graph.query,
+            days_query,
+            {"plan_id": plan_id, "days": data_dict["days"]},
+        )
+        timings["day_creation"] = round(time.perf_counter() - t, 2)
+
+        # STEP 5: Create Sessions with Content links
+        print("--> Creating Sessions...")
+        t = time.perf_counter()
+        session_ids = []
+        session_map = {}  # key: "day_date-index" -> session_id
+
+        for day in data_dict["days"]:
+            day_date = day["date"]
+            for idx, session in enumerate(day.get("sessions", [])):
+                session_id = f"session_{uuid.uuid4().hex[:12]}"
+                session_ids.append(session_id)
+                session_map[f"{day_date}-{idx}"] = session_id
+
+                # Create Session with both relationships
+                await asyncio.to_thread(
+                    neo4j.create_session_with_day_link,
+                    session_id,
+                    user_id,
+                    plan_id,
+                    day_date,
+                    session.get("title", "Study Session"),
+                    session.get("session_type", "chapter"),
+                    day_date,
+                    session.get("start_time", "00:00"),
+                    session.get("end_time", "01:00"),
+                    session.get("estimated_hours", 1.0),
+                )
+
+                # Link Session to Content
+                for content in session.get("contents", []):
+                    # Ensure match_key exists (fallback generation if somehow missed)
+                    if not content.get("match_key"):
+                        subjects = (
+                            content.get("subjects") or session.get("subjects") or []
+                        )
+                        chapters = (
+                            content.get("chapters") or session.get("chapters") or []
+                        )
+                        content["match_key"] = neo4j.generate_content_match_key(
+                            subject=subjects[0] if subjects else "unknown",
+                            chapter=chapters[0] if chapters else "unknown",
+                            content_name=content.get("name", "unknown"),
+                        )
+                    await asyncio.to_thread(
+                        neo4j.link_session_to_content_v2,
+                        session_id,
+                        content["match_key"],
+                        "pending",
+                        0,
+                    )
+
+        timings["session_creation"] = round(time.perf_counter() - t, 2)
+        print(f"--> Created {len(session_ids)} sessions")
+
+        # STEP 6: Sync chapter backlog to Pinecone
+        print("--> Syncing chapter backlog...")
+        t = time.perf_counter()
+        from src.services.backlog_sync import sync_chapter_backlog_v2
+
+        await sync_chapter_backlog_v2(user_id, neo4j)
+        timings["backlog_sync"] = round(time.perf_counter() - t, 2)
+
+        # STEP 7: Build session list for frontend
+        sessions_response = []
+        for day in data_dict["days"]:
+            day_date = day["date"]
+            for idx, session in enumerate(day.get("sessions", [])):
+                sid = session_map.get(f"{day_date}-{idx}")
+                sessions_response.append(
+                    {
+                        "session_id": sid,
+                        "date": day_date,
+                        "title": session.get("title", "Study Session"),
+                        "start_time": session.get("start_time", "00:00"),
+                        "end_time": session.get("end_time", "01:00"),
+                        "estimated_hours": session.get("estimated_hours", 1.0),
+                        "contents": session.get("contents", []),
+                    }
+                )
+
+        timings["total"] = round(time.perf_counter() - total_start, 2)
+        print(f"--> COMMIT TIMINGS: {timings}")
+
+        return {
+            "success": True,
+            "plan_id": plan_id,
+            "sessions_created": len(session_ids),
+            "sessions": sessions_response,
+            "message": f"Plan committed with {len(session_ids)} sessions.",
+        }
+
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        return {"success": False, "error": str(e)}

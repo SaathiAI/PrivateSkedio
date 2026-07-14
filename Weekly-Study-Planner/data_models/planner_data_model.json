@@ -1,0 +1,244 @@
+{
+  "status": "draft_ready",
+  "message": "6-day plan ready. Quadratic Equations starts tomorrow, Statistics light on test day, Electricity mid-week, Chemical Reactions closure, Nationalism spaced across two days.",
+  "math_scratchpad": "targets=10.0h planned=10.0h daily_ok=true study_items_ok=true overlap_ok=true cutoff_ok=true",
+  "warnings": [],
+  "requires_user_input": false,
+  "plan": {
+    "days": [
+      {
+        "date": "2026-06-15",
+        "sessions": [
+          {
+            "title": "Quadratic Equations: Core Methods",
+            "session_type": "chapter",
+            "start_time": "15:00",
+            "end_time": "17:30",
+            "allocated_hours": [
+              {
+                "subject": "Mathematics",
+                "chapter": "Quadratic Equations",
+                "hours": 2.5
+              }
+            ],
+            "contents": [
+              {
+                "match_key": "mathematics_quadratic_factoring",
+                "name": "Factoring methods intro",
+                "subjects": ["Mathematics"],
+                "chapters": ["Quadratic Equations"],
+                "type": "subtopic"
+              },
+              {
+                "match_key": "mathematics_quadratic_formula",
+                "name": "Quadratic formula practice",
+                "subjects": ["Mathematics"],
+                "chapters": ["Quadratic Equations"],
+                "type": "practice_target"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "date": "2026-06-16",
+        "sessions": [
+          {
+            "title": "Statistics: Cumulative Frequency and Ogive",
+            "session_type": "practice",
+            "start_time": "07:30",
+            "end_time": "09:00",
+            "allocated_hours": [
+              {
+                "subject": "Mathematics",
+                "chapter": "Statistics",
+                "hours": 1.5
+              }
+            ],
+            "contents": [
+              {
+                "match_key": "mathematics_statistics_cumulative_frequency",
+                "name": "Cumulative frequency table",
+                "subjects": ["Mathematics"],
+                "chapters": ["Statistics"],
+                "type": "subtopic"
+              },
+              {
+                "match_key": "mathematics_statistics_ogive",
+                "name": "Ogive drawing and reading",
+                "subjects": ["Mathematics"],
+                "chapters": ["Statistics"],
+                "type": "practice"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "date": "2026-06-17",
+        "sessions": [
+          {
+            "title": "Quadratic Equations: Finish + Discriminant",
+            "session_type": "chapter",
+            "start_time": "15:00",
+            "end_time": "15:30",
+            "allocated_hours": [
+              {
+                "subject": "Mathematics",
+                "chapter": "Quadratic Equations",
+                "hours": 0.5
+              }
+            ],
+            "contents": [
+              {
+                "match_key": "mathematics_quadratic_discriminant",
+                "name": "Discriminant practice",
+                "subjects": ["Mathematics"],
+                "chapters": ["Quadratic Equations"],
+                "type": "practice_target"
+              }
+            ]
+          },
+          {
+            "title": "Electricity: Resistance and Power",
+            "session_type": "chapter",
+            "start_time": "16:00",
+            "end_time": "18:00",
+            "allocated_hours": [
+              {
+                "subject": "Science",
+                "chapter": "Electricity",
+                "hours": 2.0
+              }
+            ],
+            "contents": [
+              {
+                "match_key": "science_electricity_resistance",
+                "name": "Resistance concepts and numericals",
+                "subjects": ["Science"],
+                "chapters": ["Electricity"],
+                "type": "subtopic"
+              },
+              {
+                "match_key": "science_electricity_power",
+                "name": "Power formulas and practice",
+                "subjects": ["Science"],
+                "chapters": ["Electricity"],
+                "type": "practice"
+              }
+            ]
+          },
+          {
+            "title": "Chemical Reactions: Corrosion Closure",
+            "session_type": "practice",
+            "start_time": "18:00",
+            "end_time": "18:30",
+            "allocated_hours": [
+              {
+                "subject": "Science",
+                "chapter": "Chemical Reactions and Equations",
+                "hours": 0.5
+              }
+            ],
+            "contents": [
+              {
+                "match_key": "science_chem_corrosion",
+                "name": "Corrosion recall and application",
+                "subjects": ["Science"],
+                "chapters": ["Chemical Reactions and Equations"],
+                "type": "practice"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "date": "2026-06-18",
+        "sessions": [
+          {
+            "title": "Chemical Reactions: Final Closure",
+            "session_type": "practice",
+            "start_time": "15:00",
+            "end_time": "15:30",
+            "allocated_hours": [
+              {
+                "subject": "Science",
+                "chapter": "Chemical Reactions and Equations",
+                "hours": 0.5
+              }
+            ],
+            "contents": [
+              {
+                "match_key": "science_chem_corrosion",
+                "name": "Corrosion prevention questions",
+                "subjects": ["Science"],
+                "chapters": ["Chemical Reactions and Equations"],
+                "type": "practice"
+              }
+            ]
+          },
+          {
+            "title": "Nationalism in India: Non-Cooperation Movement",
+            "session_type": "chapter",
+            "start_time": "16:00",
+            "end_time": "17:30",
+            "allocated_hours": [
+              {
+                "subject": "Social Science",
+                "chapter": "Nationalism in India",
+                "hours": 1.5
+              }
+            ],
+            "contents": [
+              {
+                "match_key": "sst_nationalism_non_cooperation_movement",
+                "name": "Non-Cooperation Movement timeline",
+                "subjects": ["Social Science"],
+                "chapters": ["Nationalism in India"],
+                "type": "subtopic"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "date": "2026-06-19",
+        "sessions": [
+          {
+            "title": "Nationalism in India: Civil Disobedience + Belonging",
+            "session_type": "chapter",
+            "start_time": "15:00",
+            "end_time": "16:00",
+            "allocated_hours": [
+              {
+                "subject": "Social Science",
+                "chapter": "Nationalism in India",
+                "hours": 1.0
+              }
+            ],
+            "contents": [
+              {
+                "match_key": "sst_nationalism_civil_disobedience",
+                "name": "Civil Disobedience Movement",
+                "subjects": ["Social Science"],
+                "chapters": ["Nationalism in India"],
+                "type": "subtopic"
+              },
+              {
+                "match_key": "sst_nationalism_sense_of_collective_belonging",
+                "name": "Sense of collective belonging",
+                "subjects": ["Social Science"],
+                "chapters": ["Nationalism in India"],
+                "type": "practice"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "date": "2026-06-20",
+        "sessions": []
+      }
+    ]
+  }
+}

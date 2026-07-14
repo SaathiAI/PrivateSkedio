@@ -1,0 +1,213 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.dash{padding:20px;background:var(--color-background-tertiary);min-height:580px}
+.dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.dash-title{font-size:16px;font-weight:500;color:var(--color-text-primary)}
+.dash-sub{font-size:12px;color:var(--color-text-tertiary);margin-top:2px}
+.exam-pill{font-size:12px;padding:6px 14px;border-radius:20px;background:#FAECE7;color:#993C1D;font-weight:500}
+
+.top-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px}
+.card-label{font-size:11px;color:var(--color-text-tertiary);margin-bottom:8px}
+.card-val{font-size:26px;font-weight:500;color:var(--color-text-primary)}
+.card-val.g{color:#1D9E75}
+.card-val.a{color:#BA7517}
+.card-val.r{color:#A32D2D}
+.card-trend{font-size:11px;margin-top:6px;color:var(--color-text-tertiary)}
+.trend-up{color:#1D9E75}
+.trend-down{color:#BA7517}
+
+.gauge-wrap{display:flex;align-items:center;gap:10px;margin-top:4px}
+.gauge-track{flex:1;height:5px;background:var(--color-background-secondary);border-radius:3px;overflow:hidden}
+.gauge-fill{height:5px;border-radius:3px;background:#1D9E75}
+
+.bottom-row{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px}
+.bcard{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:16px}
+.bcard-title{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:14px}
+
+.bar-area{display:flex;align-items:flex-end;gap:8px;height:100px}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.bar{width:100%;border-radius:3px 3px 0 0;background:#E1F5EE}
+.bar.done{background:#1D9E75}
+.bar.today{background:#5DCAA5}
+.bar.future{background:#E1F5EE}
+.bar-day{font-size:10px;color:var(--color-text-tertiary)}
+.bar-h{font-size:10px;color:#0F6E56;font-weight:500;min-height:12px}
+
+.donut-section{display:flex;align-items:center;gap:16px}
+.legend{display:flex;flex-direction:column;gap:8px;flex:1}
+.leg{display:flex;align-items:center;justify-content:space-between}
+.leg-left{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--color-text-secondary)}
+.leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.leg-val{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+
+.topic-list{display:flex;flex-direction:column;gap:8px}
+.topic-row{display:flex;flex-direction:column;gap:4px}
+.topic-name{display:flex;justify-content:space-between;font-size:12px;color:var(--color-text-primary)}
+.topic-name span:last-child{color:var(--color-text-tertiary)}
+.topic-bar-bg{height:5px;background:var(--color-background-secondary);border-radius:3px;overflow:hidden}
+.topic-bar{height:5px;border-radius:3px}
+</style>
+
+<div class="dash">
+  <div class="dash-header">
+    <div>
+      <div class="dash-title">dashboard</div>
+      <div class="dash-sub">week of April 22 — April 28, 2026</div>
+    </div>
+    <div class="exam-pill">exam in 7 days — Apr 29</div>
+  </div>
+
+  <div class="top-cards">
+    <div class="card">
+      <div class="card-label">hours studied</div>
+      <div class="card-val g">2h</div>
+      <div class="gauge-wrap">
+        <div class="gauge-track"><div class="gauge-fill" style="width:33%"></div></div>
+        <span style="font-size:11px;color:#0F6E56;font-weight:500">33%</span>
+      </div>
+      <div class="card-trend">of 6h target</div>
+    </div>
+    <div class="card">
+      <div class="card-label">remaining</div>
+      <div class="card-val">4h</div>
+      <div class="card-trend" style="margin-top:14px">across <span style="font-weight:500;color:var(--color-text-primary)">5</span> days left</div>
+    </div>
+    <div class="card">
+      <div class="card-label">subtopics done</div>
+      <div class="card-val a">2</div>
+      <div class="card-trend" style="margin-top:14px">of <span style="font-weight:500;color:var(--color-text-primary)">11</span> total subtopics</div>
+    </div>
+    <div class="card">
+      <div class="card-label">sessions completed</div>
+      <div class="card-val g">1</div>
+      <div class="card-trend" style="margin-top:14px">of <span style="font-weight:500;color:var(--color-text-primary)">6</span> sessions planned</div>
+    </div>
+  </div>
+
+  <div class="bottom-row">
+    <div class="bcard">
+      <div class="bcard-title">daily hours</div>
+      <div class="bar-area">
+        <div class="bar-col">
+          <div class="bar-h">1h</div>
+          <div class="bar done" style="height:60px"></div>
+          <div class="bar-day">Wed</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-h" style="color:#5DCAA5">1h</div>
+          <div class="bar today" style="height:60px"></div>
+          <div class="bar-day">Thu</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-h"></div>
+          <div class="bar future" style="height:60px"></div>
+          <div class="bar-day">Fri</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-h"></div>
+          <div class="bar future" style="height:4px"></div>
+          <div class="bar-day">Sat</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-h"></div>
+          <div class="bar future" style="height:60px"></div>
+          <div class="bar-day">Sun</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-h"></div>
+          <div class="bar future" style="height:60px"></div>
+          <div class="bar-day">Mon</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-h"></div>
+          <div class="bar future" style="height:60px"></div>
+          <div class="bar-day">Tue</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:10px">
+        <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--color-text-tertiary)"><div style="width:8px;height:8px;border-radius:2px;background:#1D9E75"></div>done</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--color-text-tertiary)"><div style="width:8px;height:8px;border-radius:2px;background:#5DCAA5"></div>today</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--color-text-tertiary)"><div style="width:8px;height:8px;border-radius:2px;background:#E1F5EE"></div>upcoming</div>
+      </div>
+    </div>
+
+    <div class="bcard">
+      <div class="bcard-title">topic progress</div>
+      <div class="topic-list">
+        <div class="topic-row">
+          <div class="topic-name"><span>Polynomials</span><span>1 / 3h</span></div>
+          <div class="topic-bar-bg"><div class="topic-bar" style="width:33%;background:#1D9E75"></div></div>
+        </div>
+        <div class="topic-row">
+          <div class="topic-name"><span>Quadratic Equations</span><span>0 / 3h</span></div>
+          <div class="topic-bar-bg"><div class="topic-bar" style="width:0%;background:#9FE1CB"></div></div>
+        </div>
+      </div>
+      <div style="margin-top:20px;padding-top:14px;border-top:0.5px solid var(--color-border-tertiary)">
+        <div class="bcard-title" style="margin-bottom:10px">subtopic breakdown</div>
+        <div class="topic-list">
+          <div class="topic-row">
+            <div class="topic-name"><span style="font-size:11px">Zeros of a polynomial</span><span style="color:#1D9E75">done</span></div>
+            <div class="topic-bar-bg"><div class="topic-bar" style="width:100%;background:#1D9E75"></div></div>
+          </div>
+          <div class="topic-row">
+            <div class="topic-name"><span style="font-size:11px">Meaning of zeros</span><span style="color:#1D9E75">done</span></div>
+            <div class="topic-bar-bg"><div class="topic-bar" style="width:100%;background:#1D9E75"></div></div>
+          </div>
+          <div class="topic-row">
+            <div class="topic-name"><span style="font-size:11px">Zeros — coefficients (quadratic)</span><span>pending</span></div>
+            <div class="topic-bar-bg"><div class="topic-bar" style="width:0%"></div></div>
+          </div>
+          <div class="topic-row">
+            <div class="topic-name"><span style="font-size:11px">Zeros — coefficients (cubic)</span><span>pending</span></div>
+            <div class="topic-bar-bg"><div class="topic-bar" style="width:0%"></div></div>
+          </div>
+          <div class="topic-row">
+            <div class="topic-name"><span style="font-size:11px">Graphical representation</span><span>pending</span></div>
+            <div class="topic-bar-bg"><div class="topic-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bcard">
+      <div class="bcard-title">time breakdown</div>
+      <div class="donut-section">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="40" fill="none" stroke="#E1F5EE" stroke-width="14"/>
+          <circle cx="55" cy="55" r="40" fill="none" stroke="#1D9E75" stroke-width="14" stroke-dasharray="83.8 167.6" stroke-dashoffset="62.8" stroke-linecap="butt"/>
+          <circle cx="55" cy="55" r="40" fill="none" stroke="#9FE1CB" stroke-width="14" stroke-dasharray="83.8 167.6" stroke-dashoffset="-21" stroke-linecap="butt"/>
+          <text x="55" y="51" text-anchor="middle" font-size="15" font-weight="500" fill="#1D9E75" font-family="var(--font-sans)">2h</text>
+          <text x="55" y="64" text-anchor="middle" font-size="10" fill="#5DCAA5" font-family="var(--font-sans)">studied</text>
+        </svg>
+        <div class="legend">
+          <div class="leg">
+            <div class="leg-left"><div class="leg-dot" style="background:#1D9E75"></div>Polynomials</div>
+            <div class="leg-val">1h</div>
+          </div>
+          <div class="leg">
+            <div class="leg-left"><div class="leg-dot" style="background:#9FE1CB"></div>Quadratic Eq.</div>
+            <div class="leg-val">1h</div>
+          </div>
+          <div class="leg">
+            <div class="leg-left"><div class="leg-dot" style="background:#E1F5EE"></div>Remaining</div>
+            <div class="leg-val">4h</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding-top:14px;border-top:0.5px solid var(--color-border-tertiary);display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px">
+          <div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:4px">avg session</div>
+          <div style="font-size:18px;font-weight:500;color:var(--color-text-primary)">1h</div>
+        </div>
+        <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px">
+          <div style="font-size:10px;color:var(--color-text-tertiary);margin-bottom:4px">on track</div>
+          <div style="font-size:18px;font-weight:500;color:#1D9E75">yes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

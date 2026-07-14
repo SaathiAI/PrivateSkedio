@@ -1,0 +1,30 @@
+{
+  "status": "routed",
+  "route": "replan_only",
+  "message": "The user reported a one-time availability change.",
+  "detected_events": [
+    {
+      "event_type": "unavailable_today",
+      "affects_planning_context": false,
+      "affects_schedule_reality": true,
+      "summary": "User cannot study today."
+    }
+  ],
+  "workflow": [
+    "availability_update_service",
+    "replanner_agent",
+    "code_validator",
+    "verifier_agent",
+    "plan_committer",
+    "study_coach_response"
+  ],
+  "state_requirements": {
+    "needs_active_goal": true,
+    "needs_active_plan": true,
+    "needs_calendar_context": true,
+    "needs_backlog_context": false,
+    "needs_vector_context": false
+  },
+  "requires_user_response_first": false,
+  "routing_reason": "The study goal and chapter scope did not change, so Intake is not needed."
+}

@@ -1,0 +1,252 @@
+{
+  "status": "approved",
+  "message": "The study contract is locked for planner handoff. Use the 24 June to 30 June window, keep the 30 June 11:00 PM cutoff hard, and preserve the commitments and calendar blockers already reflected below.",
+  "goal": {
+    "title": "Current-week revision block ending 30 June",
+    "subjects": [
+      "Mathematics",
+      "Science",
+      "Social Science"
+    ],
+    "start_date": "2026-06-24",
+    "end_date": "2026-06-30",
+    "deadline_datetime": "2026-06-30T23:00:00+05:30",
+    "study_scope": [
+      {
+        "subject": "Mathematics",
+        "chapter": "Surface Areas and Volumes",
+        "intent": "Clean up formula retention and application mistakes before the week closes."
+      },
+      {
+        "subject": "Mathematics",
+        "chapter": "Arithmetic Progressions",
+        "intent": "Finish direct-question practice and word-problem translation."
+      },
+      {
+        "subject": "Science",
+        "chapter": "Control and Coordination",
+        "intent": "Repair concept gaps and diagram recall while energy is still decent."
+      },
+      {
+        "subject": "Science",
+        "chapter": "Light - Reflection and Refraction",
+        "intent": "Fix numericals and sign-convention confusion."
+      },
+      {
+        "subject": "Social Science",
+        "chapter": "Nationalism in India",
+        "intent": "Retain the timeline and source-map material with light review passes."
+      },
+      {
+        "subject": "Social Science",
+        "chapter": "Resources and Development",
+        "intent": "Keep one selective revision track alive without letting it consume the whole week."
+      }
+    ]
+  },
+  "availability": {
+    "timezone": "Asia/Kolkata",
+    "daily_study_hours": {
+      "2026-06-24": 4.0,
+      "2026-06-25": 3.5,
+      "2026-06-26": 3.5,
+      "2026-06-27": 3.5,
+      "2026-06-28": 3.0,
+      "2026-06-29": 2.5,
+      "2026-06-30": 0.5
+    },
+    "time_blocks": {
+      "2026-06-24": [
+        {
+          "title": "Protected sleep window",
+          "start": "23:30",
+          "end": "06:30",
+          "source": "user_rest_window"
+        }
+      ],
+      "2026-06-25": [
+        {
+          "title": "Protected sleep window",
+          "start": "23:30",
+          "end": "06:30",
+          "source": "user_rest_window"
+        },
+        {
+          "title": "Doctor follow-up",
+          "start": "18:30",
+          "end": "19:30",
+          "source": "user_commitment"
+        }
+      ],
+      "2026-06-26": [
+        {
+          "title": "Protected sleep window",
+          "start": "23:30",
+          "end": "06:30",
+          "source": "user_rest_window"
+        },
+        {
+          "title": "Family prayer visit",
+          "start": "19:00",
+          "end": "20:00",
+          "source": "user_commitment"
+        }
+      ],
+      "2026-06-27": [
+        {
+          "title": "Protected sleep window",
+          "start": "23:30",
+          "end": "06:30",
+          "source": "user_rest_window"
+        },
+        {
+          "title": "Cousin visit",
+          "start": "10:30",
+          "end": "12:00",
+          "source": "user_commitment"
+        }
+      ],
+      "2026-06-28": [
+        {
+          "title": "Protected sleep window",
+          "start": "23:30",
+          "end": "06:30",
+          "source": "user_rest_window"
+        },
+        {
+          "title": "Weekly room cleanup",
+          "start": "16:00",
+          "end": "17:00",
+          "source": "user_commitment"
+        }
+      ],
+      "2026-06-29": [
+        {
+          "title": "Protected sleep window",
+          "start": "23:30",
+          "end": "06:30",
+          "source": "user_rest_window"
+        },
+        {
+          "title": "Phone-off family dinner",
+          "start": "20:00",
+          "end": "21:00",
+          "source": "user_commitment"
+        }
+      ],
+      "2026-06-30": [
+        {
+          "title": "Protected sleep window",
+          "start": "23:30",
+          "end": "06:30",
+          "source": "user_rest_window"
+        }
+      ]
+    },
+    "planning_notes": [
+      "Calendar-owned midday blockers are already heavy on 24, 25, 26, 29, and 30.",
+      "The student can do better in morning or late-evening windows than in fragmented noon windows.",
+      "30 June should stay as a very light landing day.",
+      "Do not treat focus-time calendar blocks as free study windows.",
+      "Visible calendar blocks should win over any optimistic scheduling instinct."
+    ]
+  },
+  "study_items": [
+    {
+      "scope_reference_key": "mathematics|surface_areas_and_volumes",
+      "subject": "Mathematics",
+      "chapter": "Surface Areas and Volumes",
+      "estimated_hours": 4.0,
+      "reason": "Still leaking marks on formula recall and mixed shape application.",
+      "planning_notes": [
+        "Use this in clear-headed slots.",
+        "Keep formula recall close to practice, not isolated."
+      ],
+      "remaining_subtopics": [
+        "mathematics_surface_area_formula_recall",
+        "mathematics_surface_area_cylinder_cone_mixed_questions",
+        "mathematics_surface_area_frustum_word_problems",
+        "mathematics_volume_conversion_units_errors"
+      ]
+    },
+    {
+      "scope_reference_key": "mathematics|arithmetic_progressions",
+      "subject": "Mathematics",
+      "chapter": "Arithmetic Progressions",
+      "estimated_hours": 3.5,
+      "reason": "Needs one more cycle of direct questions plus short word-problem translation work.",
+      "planning_notes": [
+        "Keep AP practice compact and finishable."
+      ],
+      "remaining_subtopics": [
+        "mathematics_ap_nth_term_direct_questions",
+        "mathematics_ap_sum_of_n_terms_practice",
+        "mathematics_ap_word_problem_translation"
+      ]
+    },
+    {
+      "scope_reference_key": "science|control_and_coordination",
+      "subject": "Science",
+      "chapter": "Control and Coordination",
+      "estimated_hours": 4.0,
+      "reason": "This chapter still has unstable recall and diagram confidence.",
+      "planning_notes": [
+        "Prefer concept-plus-diagram pairings."
+      ],
+      "remaining_subtopics": [
+        "science_control_coordination_reflex_arc_diagram",
+        "science_control_coordination_neuron_signal_path",
+        "science_control_coordination_hormones_table_recall",
+        "science_control_coordination_plant_tropism_examples"
+      ]
+    },
+    {
+      "scope_reference_key": "science|light_reflection_and_refraction",
+      "subject": "Science",
+      "chapter": "Light - Reflection and Refraction",
+      "estimated_hours": 3.5,
+      "reason": "Still needs numerical confidence and cleaner ray-diagram accuracy.",
+      "planning_notes": [
+        "Do this where uninterrupted concentration is available."
+      ],
+      "remaining_subtopics": [
+        "science_light_mirror_formula_sign_convention",
+        "science_light_lens_formula_numericals",
+        "science_light_ray_diagram_image_formation",
+        "science_light_magnification_direct_questions"
+      ]
+    },
+    {
+      "scope_reference_key": "social_science|nationalism_in_india",
+      "subject": "Social Science",
+      "chapter": "Nationalism in India",
+      "estimated_hours": 2.5,
+      "reason": "Works best as short review passes without stealing too much math/science time.",
+      "planning_notes": [
+        "Use short recap slots, not giant reading blocks."
+      ],
+      "remaining_subtopics": [
+        "sst_nationalism_timeline_gandhi_movements",
+        "sst_nationalism_congress_sessions_recall",
+        "sst_nationalism_visual_symbols_and_sources",
+        "sst_nationalism_map_linked_locations"
+      ]
+    },
+    {
+      "scope_reference_key": "social_science|resources_and_development",
+      "subject": "Social Science",
+      "chapter": "Resources and Development",
+      "estimated_hours": 2.0,
+      "reason": "Selective coverage only, but still worth keeping alive for breadth.",
+      "planning_notes": [
+        "This is the most cuttable item if a squeeze happens."
+      ],
+      "remaining_subtopics": [
+        "sst_resources_soil_types_recall",
+        "sst_resources_resource_classification_table",
+        "sst_resources_conservation_keywords",
+        "sst_resources_map_single_revision_cycle"
+      ]
+    }
+  ]
+}

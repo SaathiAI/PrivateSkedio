@@ -1,0 +1,31 @@
+{
+  "status": "ready_to_send",
+  "message_type": "plan_created",
+  "message": "I made your weekly plan. Biology Chapter 3 gets the most attention because it has weak backlog items, and Math Algebra is split into shorter practice sessions. The plan fits inside your buffered available time.",
+  
+  "highlights": [
+    "Total planned study time: 4.5 hours",
+    "Biology Chapter 3: 2.5 hours",
+    "Math Algebra: 2 hours",
+    "Buffer preserved: 1.5 hours"
+  ],
+
+  "questions": [],
+
+  "ui_actions": [
+    {
+      "type": "refresh_calendar",
+      "target": "active_plan"
+    },
+    {
+      "type": "show_plan_summary",
+      "plan_id": "plan_004"
+    },
+    {
+      "type": "show_risk_badge",
+      "risk_level": "low"
+    }
+  ],
+
+  "requires_user_response": false
+}

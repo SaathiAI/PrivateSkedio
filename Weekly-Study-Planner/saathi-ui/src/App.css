@@ -1,0 +1,7 @@
+/* Removed Vite default CSS to allow full-screen layout mapping. */
+#root {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}

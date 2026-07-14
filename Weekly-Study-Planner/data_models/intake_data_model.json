@@ -1,0 +1,295 @@
+{
+  "status": "approved",
+  "message": "The study contract is locked for planner handoff. Use the 22 June to 27 June window, keep the 27 June 2:00 PM cutoff hard, and preserve the time blocks and subject priorities shown below.",
+  "goal": {
+    "title": "Mid-week revision sprint before 27 June assessment block",
+    "subjects": [
+      "Mathematics",
+      "Science",
+      "Social Science"
+    ],
+    "start_date": "2026-06-22",
+    "end_date": "2026-06-27",
+    "deadline_datetime": "2026-06-27T14:00:00+05:30",
+    "study_scope": [
+      {
+        "subject": "Mathematics",
+        "chapter": "Surface Areas and Volumes",
+        "intent": "High-weight formula application and mixed-problem practice before the 27 June assessment."
+      },
+      {
+        "subject": "Mathematics",
+        "chapter": "Arithmetic Progressions",
+        "intent": "Backlog-grounded revision with sequence pattern recognition and direct problem-solving."
+      },
+      {
+        "subject": "Science",
+        "chapter": "Control and Coordination",
+        "intent": "Concept repair plus labelled-diagram recall for nervous system and hormones."
+      },
+      {
+        "subject": "Science",
+        "chapter": "Light - Reflection and Refraction",
+        "intent": "Numerical practice and ray-diagram correction with emphasis on sign convention."
+      },
+      {
+        "subject": "Social Science",
+        "chapter": "Nationalism in India",
+        "intent": "Source-based revision, timeline recall, and map-linked retention."
+      },
+      {
+        "subject": "Social Science",
+        "chapter": "Resources and Development",
+        "intent": "Selective revision of soil/resource classification and one-cycle map recap."
+      }
+    ]
+  },
+  "availability": {
+    "timezone": "Asia/Kolkata",
+    "daily_study_hours": {
+      "2026-06-22": 4.5,
+      "2026-06-23": 3.5,
+      "2026-06-24": 4.0,
+      "2026-06-25": 4.5,
+      "2026-06-26": 4.0,
+      "2026-06-27": 1.5
+    },
+    "time_blocks": {
+      "2026-06-22": [
+        {
+          "title": "Protected sleep window",
+          "start": "23:15",
+          "end": "06:45",
+          "source": "user_rest_window"
+        },
+        {
+          "title": "Sunday family lunch outing",
+          "start": "13:00",
+          "end": "15:30",
+          "source": "user_commitment"
+        },
+        {
+          "title": "Evening tuition commute and class",
+          "start": "17:30",
+          "end": "19:15",
+          "source": "user_commitment"
+        }
+      ],
+      "2026-06-23": [
+        {
+          "title": "Protected sleep window",
+          "start": "23:15",
+          "end": "06:45",
+          "source": "user_rest_window"
+        },
+        {
+          "title": "School hours",
+          "start": "07:45",
+          "end": "14:30",
+          "source": "user_commitment"
+        },
+        {
+          "title": "Maths tuition",
+          "start": "18:00",
+          "end": "19:30",
+          "source": "user_commitment"
+        }
+      ],
+      "2026-06-24": [
+        {
+          "title": "Protected sleep window",
+          "start": "23:15",
+          "end": "06:45",
+          "source": "user_rest_window"
+        },
+        {
+          "title": "School hours",
+          "start": "07:45",
+          "end": "14:30",
+          "source": "user_commitment"
+        },
+        {
+          "title": "Science practical file work",
+          "start": "16:30",
+          "end": "17:30",
+          "source": "user_commitment"
+        }
+      ],
+      "2026-06-25": [
+        {
+          "title": "Protected sleep window",
+          "start": "23:15",
+          "end": "06:45",
+          "source": "user_rest_window"
+        },
+        {
+          "title": "School hours",
+          "start": "07:45",
+          "end": "14:30",
+          "source": "user_commitment"
+        },
+        {
+          "title": "Social Science coaching",
+          "start": "17:00",
+          "end": "18:15",
+          "source": "user_commitment"
+        }
+      ],
+      "2026-06-26": [
+        {
+          "title": "Protected sleep window",
+          "start": "23:15",
+          "end": "06:30",
+          "source": "user_rest_window"
+        },
+        {
+          "title": "School half-day",
+          "start": "07:45",
+          "end": "12:30",
+          "source": "user_commitment"
+        },
+        {
+          "title": "Family grocery errand",
+          "start": "17:30",
+          "end": "18:30",
+          "source": "user_commitment"
+        }
+      ],
+      "2026-06-27": [
+        {
+          "title": "Protected sleep window",
+          "start": "23:00",
+          "end": "06:15",
+          "source": "user_rest_window"
+        },
+        {
+          "title": "Assessment reporting and travel buffer",
+          "start": "11:15",
+          "end": "14:00",
+          "source": "user_commitment"
+        }
+      ]
+    },
+    "planning_notes": [
+      "This intake is intentionally complex and planner-ready.",
+      "Respect the hard deadline on 27 June at 2:00 PM local time.",
+      "Keep the final day light: recall, formulas, and confidence-preserving review only.",
+      "Treat daily_study_hours as already negotiated realistic study capacity.",
+      "Do not schedule before 06:45 on normal days or after 23:15.",
+      "Prefer Mathematics and Science in the first half of the window; keep lighter Social Science recap closer to the deadline.",
+      "Use remaining_subtopics aggressively for sequencing because they reflect actual weak or pending work.",
+      "Avoid stacking two heavy numerical blocks back-to-back without a concept or recall buffer.",
+      "The student performs better with finishable sessions and visible progress, so the planner should avoid fragmented micro-sessions.",
+      "If feasibility becomes tight, reduce the depth of Resources and Development before cutting core Maths or Science study items."
+    ]
+  },
+  "study_items": [
+    {
+      "scope_reference_key": "mathematics|surface_areas_and_volumes",
+      "subject": "Mathematics",
+      "chapter": "Surface Areas and Volumes",
+      "estimated_hours": 5.0,
+      "reason": "Highest-value Maths chapter in this window, combining formula recall weakness with substantial mixed-problem practice demand.",
+      "planning_notes": [
+        "Do this early in the window.",
+        "Mix formula recall with cone-cylinder-frustum application sets.",
+        "End with mixed word problems rather than only direct formula substitution."
+      ],
+      "remaining_subtopics": [
+        "mathematics_surface_area_formula_recall",
+        "mathematics_surface_area_cylinder_cone_mixed_questions",
+        "mathematics_surface_area_frustum_word_problems",
+        "mathematics_volume_conversion_units_errors"
+      ]
+    },
+    {
+      "scope_reference_key": "mathematics|arithmetic_progressions",
+      "subject": "Mathematics",
+      "chapter": "Arithmetic Progressions",
+      "estimated_hours": 3.5,
+      "reason": "Secondary Maths chapter with moderate backlog, mainly around nth-term interpretation and sum-based direct questions.",
+      "planning_notes": [
+        "Keep this practice-first.",
+        "Use quick solved examples, then shift to independent questions.",
+        "Good candidate for a medium-energy slot."
+      ],
+      "remaining_subtopics": [
+        "mathematics_ap_nth_term_direct_questions",
+        "mathematics_ap_sum_of_n_terms_practice",
+        "mathematics_ap_word_problem_translation"
+      ]
+    },
+    {
+      "scope_reference_key": "science|control_and_coordination",
+      "subject": "Science",
+      "chapter": "Control and Coordination",
+      "estimated_hours": 4.0,
+      "reason": "Concept-heavy chapter with known recall gaps in neuron flow, reflex arc, and endocrine mapping, so it needs both understanding and memory reinforcement.",
+      "planning_notes": [
+        "Use labelled-diagram recall and oral self-explanation.",
+        "Break the chapter into nervous system, plant movement, and hormones.",
+        "Do not keep this too late at night because retention quality drops."
+      ],
+      "remaining_subtopics": [
+        "science_control_coordination_reflex_arc_diagram",
+        "science_control_coordination_neuron_signal_path",
+        "science_control_coordination_hormones_table_recall",
+        "science_control_coordination_plant_tropism_examples"
+      ]
+    },
+    {
+      "scope_reference_key": "science|light_reflection_and_refraction",
+      "subject": "Science",
+      "chapter": "Light - Reflection and Refraction",
+      "estimated_hours": 3.5,
+      "reason": "Needs targeted numerical correction and ray-diagram accuracy rather than full chapter relearning.",
+      "planning_notes": [
+        "Pair numericals with sign-convention correction.",
+        "Use one short formula sheet refresh before problem sets.",
+        "Place before the final day so numericals are not rushed."
+      ],
+      "remaining_subtopics": [
+        "science_light_mirror_formula_sign_convention",
+        "science_light_lens_formula_numericals",
+        "science_light_ray_diagram_image_formation",
+        "science_light_magnification_direct_questions"
+      ]
+    },
+    {
+      "scope_reference_key": "social_science|nationalism_in_india",
+      "subject": "Social Science",
+      "chapter": "Nationalism in India",
+      "estimated_hours": 2.5,
+      "reason": "Important theory chapter, but the learner mainly needs source recall, event sequencing, and concise retention rather than long reading.",
+      "planning_notes": [
+        "Keep it recap-heavy and writing-light.",
+        "Use one timeline pass and one source recall pass.",
+        "Best suited to lower-energy evening or post-Maths recovery slots."
+      ],
+      "remaining_subtopics": [
+        "sst_nationalism_timeline_gandhi_movements",
+        "sst_nationalism_congress_sessions_recall",
+        "sst_nationalism_visual_symbols_and_sources",
+        "sst_nationalism_map_linked_locations"
+      ]
+    },
+    {
+      "scope_reference_key": "social_science|resources_and_development",
+      "subject": "Social Science",
+      "chapter": "Resources and Development",
+      "estimated_hours": 2.0,
+      "reason": "Lower-priority selective revision item included for breadth, mostly to avoid a completely untouched chapter in the assessment block.",
+      "planning_notes": [
+        "Keep this shortest and easiest to cut if time pressure rises.",
+        "Focus on soil types, resource classification, and one map pass.",
+        "Do not over-read the textbook here."
+      ],
+      "remaining_subtopics": [
+        "sst_resources_soil_types_recall",
+        "sst_resources_resource_classification_table",
+        "sst_resources_conservation_keywords",
+        "sst_resources_map_single_revision_cycle"
+      ]
+    }
+  ]
+}

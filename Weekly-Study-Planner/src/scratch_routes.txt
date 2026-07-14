@@ -1,0 +1,82 @@
+--- complete_session ---
+async def complete_session(
+    req: SessionCompleteRequest, user_id: str = Depends(get_current_user)
+):
+    """
+    Mark session complete using session_id (V2 architecture).
+    """
+    neo = _get_db()
+    vs = _get_vs()
+
+    session = neo.get_session(req.session_id)
+    if not session:
+        return {"status": "error", "message": "Session not found"}
+
+    estimated_hours = session.get("estimated_hours", 0)
+    actual_hours = req.actual_hours if req.actual_hours else estimated_hours
+
+    neo.complete_session_v2(req.session_id, actual_hours)
+
+    from src.services.backlog_sync import sync_chapter_backlog_v2
+
+    try:
+        await sync_chapter_backlog_v2(user_id, neo)
+    except Exception as e:
+        print(f"⚠️ Failed to sync backlog: {e}")
+
+    return {
+        "status": "success",
+        "session_id": req.session_id,
+        "actual_hours": actual_hours,
+        "estimated_hours": estimated_hours,
+    }
+
+--- tick_subtopic ---
+async def tick_subtopic(
+    req: TickSubtopicRequest, user_id: str = Depends(get_current_user)
+):
+    """Mark content as complete using session_id (V2 architecture)."""
+    neo = _get_db()
+
+    session = neo.get_session(req.session_id)
+    if not session:
+        return {"status": "not_found", "message": "Session not found"}
+
+    neo.tick_content_v2(req.session_id, req.content_match_key, time_spent=req.time_spent)
+
+    # NEW: Update topic_hours_spent on the Plan node for Rescheduler tracking
+    try:
+        topic_name = neo.get_topic_for_session(req.session_id)
+        if topic_name and session.get("plan_id"):
+            # If time_spent is 0 (default), we might want to use a default subtopic estimate
+            # but for now, we use the actual time provided by the user (or 0)
+            neo.increment_topic_hours_spent(
+                plan_id=session["plan_id"],
+                topic=topic_name,
+                hours=req.time_spent or 0.25  # Fallback to 15 mins if time_spent is 0
+            )
+    except Exception as e:
+        print(f"⚠️ Failed to update topic_hours_spent: {e}")
+
+    from src.services.backlog_sync import sync_chapter_backlog_v2
+
+    try:
+        await sync_chapter_backlog_v2(user_id, neo)
+    except Exception as e:
+        print(f"⚠️ Failed to sync backlog: {e}")
+
+    session_with_contents = neo.get_session_with_contents(req.session_id)
+    completed_contents = []
+    if session_with_contents and session_with_contents.get("contents"):
+        completed_contents = [
+            c.get("canonical_name", c.get("match_key"))
+            for c in session_with_contents["contents"]
+            if c.get("status") == "done"  # Fixed from rel_status to status
+        ]
+
+    return {
+        "status": "success",
+        "session_id": req.session_id,
+        "content_match_key": req.content_match_key,
+        "subtopics_completed": completed_contents,
+    }

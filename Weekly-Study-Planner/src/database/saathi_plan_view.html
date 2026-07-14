@@ -1,0 +1,321 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.wrap{display:grid;grid-template-columns:260px 1fr;height:600px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;background:var(--color-background-tertiary);gap:1px}
+
+.sidebar{background:var(--color-background-primary);display:flex;flex-direction:column;overflow:hidden}
+.sb-header{padding:14px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.sb-title{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.sb-sub{font-size:11px;color:var(--color-text-tertiary);margin-top:2px}
+.sb-list{flex:1;overflow-y:auto;padding:8px}
+.plan-item{padding:10px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);margin-bottom:6px;cursor:pointer;background:var(--color-background-primary)}
+.plan-item:hover{border-color:var(--color-border-secondary)}
+.plan-item.sel{border-color:#1D9E75;background:#E1F5EE}
+.pi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.pi-name{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.plan-item.sel .pi-name{color:#085041}
+.pi-badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500}
+.active-b{background:#E1F5EE;color:#0F6E56}
+.done-b{background:var(--color-background-secondary);color:var(--color-text-tertiary)}
+.pi-meta{font-size:11px;color:var(--color-text-tertiary);margin-bottom:7px}
+.pi-bar-bg{height:3px;background:var(--color-background-secondary);border-radius:2px;overflow:hidden}
+.pi-bar{height:3px;border-radius:2px;background:#1D9E75}
+.pi-prog{display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:var(--color-text-tertiary)}
+.pi-prog span:last-child{color:#0F6E56;font-weight:500}
+
+.main{background:var(--color-background-primary);display:flex;flex-direction:column;overflow:hidden}
+.main-header{padding:14px 18px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between}
+.mh-left{}
+.mh-title{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.mh-meta{font-size:11px;color:var(--color-text-tertiary);margin-top:3px}
+.mh-right{display:flex;align-items:center;gap:8px}
+.risk{font-size:11px;padding:4px 10px;border-radius:20px;background:#E1F5EE;color:#0F6E56;font-weight:500}
+.overall-prog{display:flex;align-items:center;gap:8px}
+.prog-bar-bg{width:80px;height:4px;background:var(--color-background-secondary);border-radius:2px;overflow:hidden}
+.prog-bar{height:4px;border-radius:2px;background:#1D9E75}
+.prog-txt{font-size:11px;color:#0F6E56;font-weight:500}
+
+.days-area{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:8px}
+
+.day-block{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.day-hdr{padding:10px 14px;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.dh-left{display:flex;align-items:center;gap:10px}
+.day-arrow{font-size:10px;color:var(--color-text-tertiary);transition:transform 0.2s}
+.day-arrow.open{transform:rotate(90deg)}
+.dh-name{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.dh-tag{font-size:10px;color:var(--color-text-tertiary)}
+.dh-pill{font-size:10px;padding:2px 8px;border-radius:20px}
+.pill-has{background:#E1F5EE;color:#0F6E56}
+.pill-empty{background:var(--color-background-tertiary);color:var(--color-text-tertiary)}
+.pill-done{background:#9FE1CB;color:#085041;font-weight:500}
+
+.day-body{border-top:0.5px solid var(--color-border-tertiary)}
+.session{padding:12px 14px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.session:last-child{border-bottom:none}
+.sess-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.sess-cb{width:17px;height:17px;border-radius:5px;border:1.5px solid var(--color-border-secondary);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.sess-cb.done{background:#1D9E75;border-color:#1D9E75}
+.sess-info{flex:1}
+.sess-name{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.sess-time{font-size:11px;color:var(--color-text-tertiary);margin-top:1px}
+.sess-hrs{font-size:12px;color:#0F6E56;font-weight:500;background:#E1F5EE;padding:2px 8px;border-radius:20px}
+
+.subs{padding-left:27px;display:flex;flex-direction:column;gap:6px}
+.sub{display:flex;align-items:center;gap:8px;cursor:pointer}
+.sub-cb{width:13px;height:13px;border-radius:3px;border:1.5px solid var(--color-border-tertiary);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.sub-cb.done{background:#9FE1CB;border-color:#5DCAA5}
+.sub-txt{font-size:12px;color:var(--color-text-secondary);line-height:1.4}
+.sub-txt.done{color:var(--color-text-tertiary);text-decoration:line-through}
+</style>
+
+<div class="wrap">
+  <div class="sidebar">
+    <div class="sb-header">
+      <div class="sb-title">my plans</div>
+      <div class="sb-sub">click a plan to view</div>
+    </div>
+    <div class="sb-list">
+      <div class="plan-item sel">
+        <div class="pi-top"><span class="pi-name">April 22 Plan</span><span class="pi-badge active-b">active</span></div>
+        <div class="pi-meta">Maths · Apr 22–28 · 6h total</div>
+        <div class="pi-bar-bg"><div class="pi-bar" style="width:33%"></div></div>
+        <div class="pi-prog"><span>2 / 6h done</span><span>33%</span></div>
+      </div>
+      <div class="plan-item">
+        <div class="pi-top"><span class="pi-name">April 10 Plan</span><span class="pi-badge done-b">completed</span></div>
+        <div class="pi-meta">Science · Apr 10–16 · 8h total</div>
+        <div class="pi-bar-bg"><div class="pi-bar" style="width:100%"></div></div>
+        <div class="pi-prog"><span>8 / 8h done</span><span>100%</span></div>
+      </div>
+      <div class="plan-item">
+        <div class="pi-top"><span class="pi-name">March 28 Plan</span><span class="pi-badge done-b">completed</span></div>
+        <div class="pi-meta">SST · Mar 28–Apr 4 · 5h total</div>
+        <div class="pi-bar-bg"><div class="pi-bar" style="width:100%"></div></div>
+        <div class="pi-prog"><span>5 / 5h done</span><span>100%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="main-header">
+      <div class="mh-left">
+        <div class="mh-title">April 22 Plan — Mathematics</div>
+        <div class="mh-meta">Polynomials · Quadratic Equations · 6h · 1h/day · exam Apr 29</div>
+      </div>
+      <div class="mh-right">
+        <div class="overall-prog">
+          <div class="prog-bar-bg"><div class="prog-bar" style="width:33%"></div></div>
+          <div class="prog-txt">33%</div>
+        </div>
+        <div class="risk">LOW risk</div>
+      </div>
+    </div>
+
+    <div class="days-area">
+
+      <div class="day-block">
+        <div class="day-hdr" onclick="toggleDay(this)">
+          <div class="dh-left">
+            <div class="day-arrow open">▶</div>
+            <div><div class="dh-name">Wednesday, 22 April</div><div class="dh-tag">Today</div></div>
+          </div>
+          <div class="dh-pill pill-done">1 / 1 sessions done</div>
+        </div>
+        <div class="day-body">
+          <div class="session">
+            <div class="sess-top">
+              <div class="sess-cb done" onclick="toggleSess(this)">
+                <svg width="9" height="9" viewBox="0 0 9 9"><polyline points="1.5,4.5 3.5,6.5 7.5,2.5" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </div>
+              <div class="sess-info">
+                <div class="sess-name">Polynomials</div>
+                <div class="sess-time">18:00 – 19:00</div>
+              </div>
+              <div class="sess-hrs">1h</div>
+            </div>
+            <div class="subs">
+              <div class="sub" onclick="toggleSub(this)">
+                <div class="sub-cb done"><svg width="7" height="7" viewBox="0 0 7 7"><polyline points="1,3.5 2.8,5.5 6,1.5" fill="none" stroke="#085041" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+                <span class="sub-txt done">Zeros of a polynomial</span>
+              </div>
+              <div class="sub" onclick="toggleSub(this)">
+                <div class="sub-cb done"><svg width="7" height="7" viewBox="0 0 7 7"><polyline points="1,3.5 2.8,5.5 6,1.5" fill="none" stroke="#085041" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+                <span class="sub-txt done">Meaning and interpretation of zeros</span>
+              </div>
+              <div class="sub" onclick="toggleSub(this)">
+                <div class="sub-cb done"><svg width="7" height="7" viewBox="0 0 7 7"><polyline points="1,3.5 2.8,5.5 6,1.5" fill="none" stroke="#085041" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+                <span class="sub-txt done">Relationship between zeros and coefficients (quadratic)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="day-block">
+        <div class="day-hdr" onclick="toggleDay(this)">
+          <div class="dh-left">
+            <div class="day-arrow open">▶</div>
+            <div><div class="dh-name">Thursday, 23 April</div><div class="dh-tag">Tomorrow</div></div>
+          </div>
+          <div class="dh-pill pill-has">1h scheduled</div>
+        </div>
+        <div class="day-body">
+          <div class="session">
+            <div class="sess-top">
+              <div class="sess-cb" onclick="toggleSess(this)"></div>
+              <div class="sess-info">
+                <div class="sess-name">Polynomials</div>
+                <div class="sess-time">18:00 – 19:00</div>
+              </div>
+              <div class="sess-hrs">1h</div>
+            </div>
+            <div class="subs">
+              <div class="sub" onclick="toggleSub(this)">
+                <div class="sub-cb"></div>
+                <span class="sub-txt">Relationship between zeros and coefficients (cubic)</span>
+              </div>
+              <div class="sub" onclick="toggleSub(this)">
+                <div class="sub-cb"></div>
+                <span class="sub-txt">Graphical representation of polynomials</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="day-block">
+        <div class="day-hdr" onclick="toggleDay(this)">
+          <div class="dh-left">
+            <div class="day-arrow open">▶</div>
+            <div><div class="dh-name">Friday, 24 April</div><div class="dh-tag">Quadratic Equations begins</div></div>
+          </div>
+          <div class="dh-pill pill-has">1h scheduled</div>
+        </div>
+        <div class="day-body">
+          <div class="session">
+            <div class="sess-top">
+              <div class="sess-cb" onclick="toggleSess(this)"></div>
+              <div class="sess-info">
+                <div class="sess-name">Quadratic Equations</div>
+                <div class="sess-time">18:00 – 19:00</div>
+              </div>
+              <div class="sess-hrs">1h</div>
+            </div>
+            <div class="subs">
+              <div class="sub" onclick="toggleSub(this)">
+                <div class="sub-cb"></div>
+                <span class="sub-txt">Standard form of quadratic equation ax²+bx+c=0</span>
+              </div>
+              <div class="sub" onclick="toggleSub(this)">
+                <div class="sub-cb"></div>
+                <span class="sub-txt">Solving by factorisation</span>
+              </div>
+              <div class="sub" onclick="toggleSub(this)">
+                <div class="sub-cb"></div>
+                <span class="sub-txt">Solving by completing the square</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="day-block">
+        <div class="day-hdr" onclick="toggleDay(this)">
+          <div class="dh-left">
+            <div class="day-arrow">▶</div>
+            <div><div class="dh-name">Saturday, 25 April</div></div>
+          </div>
+          <div class="dh-pill pill-empty">no sessions</div>
+        </div>
+      </div>
+
+      <div class="day-block">
+        <div class="day-hdr" onclick="toggleDay(this)">
+          <div class="dh-left">
+            <div class="day-arrow open">▶</div>
+            <div><div class="dh-name">Sunday, 26 April</div></div>
+          </div>
+          <div class="dh-pill pill-has">1h scheduled</div>
+        </div>
+        <div class="day-body">
+          <div class="session">
+            <div class="sess-top">
+              <div class="sess-cb" onclick="toggleSess(this)"></div>
+              <div class="sess-info">
+                <div class="sess-name">Quadratic Equations</div>
+                <div class="sess-time">17:00 – 18:00</div>
+              </div>
+              <div class="sess-hrs">1h</div>
+            </div>
+            <div class="subs">
+              <div class="sub" onclick="toggleSub(this)">
+                <div class="sub-cb"></div>
+                <span class="sub-txt">Quadratic formula</span>
+              </div>
+              <div class="sub" onclick="toggleSub(this)">
+                <div class="sub-cb"></div>
+                <span class="sub-txt">Nature of roots using discriminant</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="day-block">
+        <div class="day-hdr" onclick="toggleDay(this)">
+          <div class="dh-left">
+            <div class="day-arrow open">▶</div>
+            <div><div class="dh-name">Monday, 27 April</div></div>
+          </div>
+          <div class="dh-pill pill-has">1h scheduled</div>
+        </div>
+        <div class="day-body">
+          <div class="session">
+            <div class="sess-top">
+              <div class="sess-cb" onclick="toggleSess(this)"></div>
+              <div class="sess-info">
+                <div class="sess-name">Quadratic Equations</div>
+                <div class="sess-time">17:30 – 18:30</div>
+              </div>
+              <div class="sess-hrs">1h</div>
+            </div>
+            <div class="subs">
+              <div class="sub" onclick="toggleSub(this)">
+                <div class="sub-cb"></div>
+                <span class="sub-txt">Word problems on quadratic equations</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleDay(hdr){
+  const arrow=hdr.querySelector('.day-arrow');
+  const body=hdr.parentElement.querySelector('.day-body');
+  if(!body)return;
+  const isOpen=arrow.classList.contains('open');
+  if(isOpen){arrow.classList.remove('open');body.style.display='none';}
+  else{arrow.classList.add('open');body.style.display='block';}
+}
+function toggleSess(cb){
+  cb.classList.toggle('done');
+  if(cb.classList.contains('done')){
+    cb.innerHTML='<svg width="9" height="9" viewBox="0 0 9 9"><polyline points="1.5,4.5 3.5,6.5 7.5,2.5" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  } else { cb.innerHTML=''; }
+}
+function toggleSub(row){
+  const cb=row.querySelector('.sub-cb');
+  const txt=row.querySelector('.sub-txt');
+  cb.classList.toggle('done');
+  txt.classList.toggle('done');
+  if(cb.classList.contains('done')){
+    cb.innerHTML='<svg width="7" height="7" viewBox="0 0 7 7"><polyline points="1,3.5 2.8,5.5 6,1.5" fill="none" stroke="#085041" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  } else { cb.innerHTML=''; }
+}
+</script>

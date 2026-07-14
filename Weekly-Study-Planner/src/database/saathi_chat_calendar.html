@@ -1,0 +1,288 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.wrap{display:grid;grid-template-columns:1fr 320px;height:620px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;background:var(--color-background-tertiary);gap:1px}
+
+.chat{background:var(--color-background-primary);display:flex;flex-direction:column;overflow:hidden}
+.chat-hdr{padding:14px 16px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;gap:10px}
+.ai-dot{width:32px;height:32px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.hdr-info{}
+.hdr-name{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.hdr-status{font-size:11px;color:#1D9E75;margin-top:1px}
+.hdr-right{margin-left:auto;display:flex;gap:6px}
+.hdr-btn{font-size:11px;padding:5px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;font-family:var(--font-sans)}
+.hdr-btn:hover{background:var(--color-background-secondary)}
+
+.msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.msg{display:flex;gap:9px;align-items:flex-start}
+.msg.u{flex-direction:row-reverse}
+.av{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500}
+.av.ai{background:#E1F5EE;color:#085041}
+.av.u{background:#EEEDFE;color:#3C3489}
+.bub-wrap{display:flex;flex-direction:column;gap:4px;max-width:78%}
+.msg.u .bub-wrap{align-items:flex-end}
+.bub{padding:9px 13px;border-radius:14px;font-size:12px;line-height:1.55;color:var(--color-text-primary)}
+.bub.ai{background:var(--color-background-secondary);border-bottom-left-radius:3px}
+.bub.u{background:#E1F5EE;color:#085041;border-bottom-right-radius:3px}
+.bub-time{font-size:10px;color:var(--color-text-tertiary)}
+
+.plan-preview{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:11px 13px;margin-top:2px}
+.pp-hdr{font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px}
+.pp-day{font-size:11px;font-weight:500;color:var(--color-text-primary);margin:6px 0 4px}
+.pp-sess{display:flex;align-items:center;gap:6px;padding:4px 0;border-top:0.5px solid var(--color-border-tertiary)}
+.pp-time{font-size:11px;color:var(--color-text-tertiary);width:90px;flex-shrink:0}
+.pp-topic{font-size:11px;color:var(--color-text-primary);flex:1}
+.pp-h{font-size:11px;color:#0F6E56;font-weight:500}
+.opts{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.opt{font-size:11px;padding:5px 11px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);cursor:pointer;font-family:var(--font-sans)}
+.opt:hover{background:#E1F5EE;border-color:#1D9E75;color:#085041}
+
+.typing{display:flex;align-items:center;gap:4px;padding:8px 12px}
+.dot-pulse{width:6px;height:6px;border-radius:50%;background:var(--color-text-tertiary);animation:pulse 1.2s infinite}
+.dot-pulse:nth-child(2){animation-delay:0.2s}
+.dot-pulse:nth-child(3){animation-delay:0.4s}
+@keyframes pulse{0%,80%,100%{opacity:0.3}40%{opacity:1}}
+
+.chat-input-area{padding:12px 16px;border-top:0.5px solid var(--color-border-tertiary)}
+.quick-btns{display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;padding-bottom:2px}
+.qbtn{font-size:11px;padding:4px 10px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-secondary);cursor:pointer;white-space:nowrap;font-family:var(--font-sans)}
+.qbtn:hover{border-color:#1D9E75;color:#085041;background:#E1F5EE}
+.input-row{display:flex;gap:8px;align-items:center}
+.cinput{flex:1;padding:9px 13px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);font-size:12px;color:var(--color-text-primary);outline:none;font-family:var(--font-sans)}
+.cinput:focus{border-color:#1D9E75}
+.sbtn{width:32px;height:32px;border-radius:var(--border-radius-md);background:#1D9E75;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+.right{background:var(--color-background-primary);display:flex;flex-direction:column;overflow:hidden}
+.r-hdr{padding:14px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.r-title{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.r-sub{font-size:11px;color:var(--color-text-tertiary);margin-top:2px}
+
+.cal{padding:14px}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-month{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.cal-nav-btn{width:24px;height:24px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:transparent;cursor:pointer;font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;justify-content:center}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-day-lbl{font-size:10px;color:var(--color-text-tertiary);text-align:center;padding:4px 0}
+.cal-d{height:34px;border-radius:var(--border-radius-md);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;color:var(--color-text-secondary);cursor:pointer;position:relative}
+.cal-d:hover{background:var(--color-background-secondary)}
+.cal-d.past{color:var(--color-text-tertiary)}
+.cal-d.today{background:#1D9E75;color:white;font-weight:500}
+.cal-d.today:hover{background:#0F6E56}
+.cal-d.session{background:#E1F5EE;color:#085041;font-weight:500}
+.cal-d.exam{background:#FAECE7;color:#993C1D;font-weight:500}
+.cal-d.empty-day{color:var(--color-text-tertiary)}
+.cal-dot{width:4px;height:4px;border-radius:50%;background:#1D9E75;position:absolute;bottom:4px}
+.cal-d.today .cal-dot{background:white}
+
+.selected-day{padding:14px;border-top:0.5px solid var(--color-border-tertiary)}
+.sd-title{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:8px}
+.sd-sess{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:9px 11px;margin-bottom:6px}
+.sd-topic{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.sd-time{font-size:11px;color:var(--color-text-tertiary);margin-top:2px}
+.sd-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;margin-top:5px;background:#E1F5EE;color:#0F6E56;font-weight:500}
+.sd-badge.done{background:#9FE1CB;color:#085041}
+.sd-empty{font-size:12px;color:var(--color-text-tertiary);font-style:italic}
+
+.exam-card{margin:0 14px 14px;padding:11px 13px;border-radius:var(--border-radius-md);background:#FAECE7;border:0.5px solid #F0997B}
+.ec-top{display:flex;align-items:center;justify-content:space-between}
+.ec-title{font-size:12px;font-weight:500;color:#993C1D}
+.ec-days{font-size:20px;font-weight:500;color:#D85A30}
+.ec-sub{font-size:11px;color:#993C1D;margin-top:2px;opacity:0.8}
+</style>
+
+<div class="wrap">
+  <div class="chat">
+    <div class="chat-hdr">
+      <div class="ai-dot">🎯</div>
+      <div class="hdr-info">
+        <div class="hdr-name">saathi</div>
+        <div class="hdr-status">online — ready to help</div>
+      </div>
+      <div class="hdr-right">
+        <button class="hdr-btn">view plan</button>
+        <button class="hdr-btn">dashboard</button>
+      </div>
+    </div>
+
+    <div class="msgs" id="msgs">
+      <div class="msg">
+        <div class="av ai">S</div>
+        <div class="bub-wrap">
+          <div class="bub ai">hey! i've set up your maths plan for this week. you have polynomials and quadratic equations to cover — 6h total before your exam on april 29. today's session starts at 6 PM. all good?</div>
+          <div class="bub-time">9:00 AM</div>
+        </div>
+      </div>
+
+      <div class="msg u">
+        <div class="av u">R</div>
+        <div class="bub-wrap">
+          <div class="bub u">yeah looks good. can you show me the plan?</div>
+          <div class="bub-time">9:02 AM</div>
+        </div>
+      </div>
+
+      <div class="msg">
+        <div class="av ai">S</div>
+        <div class="bub-wrap">
+          <div class="bub ai">here's what the week looks like:</div>
+          <div class="plan-preview">
+            <div class="pp-hdr">April 22 Plan · 6h · LOW risk</div>
+            <div class="pp-day">Wednesday, 22 April — today</div>
+            <div class="pp-sess"><span class="pp-time">18:00 – 19:00</span><span class="pp-topic">Polynomials</span><span class="pp-h">1h</span></div>
+            <div class="pp-day">Thursday, 23 April</div>
+            <div class="pp-sess"><span class="pp-time">18:00 – 19:00</span><span class="pp-topic">Polynomials</span><span class="pp-h">1h</span></div>
+            <div class="pp-day">Friday, 24 April</div>
+            <div class="pp-sess"><span class="pp-time">18:00 – 19:00</span><span class="pp-topic">Quadratic Equations</span><span class="pp-h">1h</span></div>
+          </div>
+          <div class="bub ai" style="margin-top:6px">does this work for you?</div>
+          <div class="opts">
+            <button class="opt" onclick="sendQuick('yes looks good!')">yes looks good</button>
+            <button class="opt" onclick="sendQuick('can you reschedule thursday?')">reschedule thursday</button>
+            <button class="opt" onclick="sendQuick('i want to change my hours per day')">change hours/day</button>
+          </div>
+          <div class="bub-time">9:03 AM</div>
+        </div>
+      </div>
+
+      <div class="msg u" id="userReply" style="display:none">
+        <div class="av u">R</div>
+        <div class="bub-wrap">
+          <div class="bub u" id="userReplyText"></div>
+        </div>
+      </div>
+
+      <div class="msg" id="aiReply" style="display:none">
+        <div class="av ai">S</div>
+        <div class="bub-wrap">
+          <div class="bub ai" id="aiReplyText"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input-area">
+      <div class="quick-btns">
+        <button class="qbtn" onclick="sendQuick('i missed my session today')">missed session</button>
+        <button class="qbtn" onclick="sendQuick('reschedule tomorrow')">reschedule</button>
+        <button class="qbtn" onclick="sendQuick('add a new topic')">add topic</button>
+        <button class="qbtn" onclick="sendQuick('how am i doing?')">my progress</button>
+        <button class="qbtn" onclick="sendQuick('i am feeling overwhelmed')">feeling overwhelmed</button>
+      </div>
+      <div class="input-row">
+        <input class="cinput" id="cinput" placeholder="ask saathi — reschedule, progress, add topic..." onkeydown="if(event.key==='Enter')sendMsg()"/>
+        <button class="sbtn" onclick="sendMsg()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2l5 5-5 5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="r-hdr">
+      <div class="r-title">calendar</div>
+      <div class="r-sub">click a day to see sessions</div>
+    </div>
+
+    <div class="cal">
+      <div class="cal-nav">
+        <button class="cal-nav-btn">‹</button>
+        <div class="cal-month">April 2026</div>
+        <button class="cal-nav-btn">›</button>
+      </div>
+      <div class="cal-grid">
+        <div class="cal-day-lbl">M</div><div class="cal-day-lbl">T</div><div class="cal-day-lbl">W</div><div class="cal-day-lbl">T</div><div class="cal-day-lbl">F</div><div class="cal-day-lbl">S</div><div class="cal-day-lbl">S</div>
+        <div class="cal-d past">1</div><div class="cal-d past">2</div><div class="cal-d past">3</div><div class="cal-d past">4</div><div class="cal-d past">5</div><div class="cal-d past">6</div><div class="cal-d past">7</div>
+        <div class="cal-d past">8</div><div class="cal-d past">9</div><div class="cal-d past">10</div><div class="cal-d past">11</div><div class="cal-d past">12</div><div class="cal-d past">13</div><div class="cal-d past">14</div>
+        <div class="cal-d past">15</div><div class="cal-d past">16</div><div class="cal-d past">17</div><div class="cal-d past">18</div><div class="cal-d past">19</div><div class="cal-d past">20</div><div class="cal-d past">21</div>
+        <div class="cal-d today" onclick="selectDay(this,'Wednesday, 22 April','today')">22<div class="cal-dot"></div></div>
+        <div class="cal-d session" onclick="selectDay(this,'Thursday, 23 April','session')">23<div class="cal-dot"></div></div>
+        <div class="cal-d session" onclick="selectDay(this,'Friday, 24 April','session')">24<div class="cal-dot"></div></div>
+        <div class="cal-d empty-day" onclick="selectDay(this,'Saturday, 25 April','empty')">25</div>
+        <div class="cal-d session" onclick="selectDay(this,'Sunday, 26 April','session')">26<div class="cal-dot"></div></div>
+        <div class="cal-d session" onclick="selectDay(this,'Monday, 27 April','session')">27<div class="cal-dot"></div></div>
+        <div class="cal-d session" onclick="selectDay(this,'Tuesday, 28 April','session')">28<div class="cal-dot"></div></div>
+        <div class="cal-d exam" onclick="selectDay(this,'Wednesday, 29 April','exam')">29</div>
+        <div class="cal-d">30</div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--color-text-tertiary)"><div style="width:8px;height:8px;border-radius:2px;background:#1D9E75"></div>today</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--color-text-tertiary)"><div style="width:8px;height:8px;border-radius:2px;background:#E1F5EE"></div>session</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--color-text-tertiary)"><div style="width:8px;height:8px;border-radius:2px;background:#FAECE7"></div>exam</div>
+      </div>
+    </div>
+
+    <div class="selected-day" id="selectedDay">
+      <div class="sd-title" id="sdTitle">Wednesday, 22 April — today</div>
+      <div class="sd-sess">
+        <div class="sd-topic">Polynomials</div>
+        <div class="sd-time">18:00 – 19:00 · 1h</div>
+        <div class="sd-badge done">completed</div>
+      </div>
+    </div>
+
+    <div class="exam-card">
+      <div class="ec-top">
+        <div>
+          <div class="ec-title">exam day</div>
+          <div class="ec-sub">Mathematics · April 29</div>
+        </div>
+        <div class="ec-days">7d</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const replies={
+  'yes looks good!':'awesome! plan is locked in. your first session is today at 6 PM — polynomials. all the best 🙏',
+  'can you reschedule thursday?':'sure! thursday has a 1h polynomials session at 6 PM. where do you want to move it — friday or the weekend?',
+  'i want to change my hours per day':'got it. what would you like to change it to? currently set to 1h/day.',
+  'i missed my session today':'hope you\'re okay! your today\'s session is still marked pending. want me to slide it to tomorrow?',
+  'reschedule tomorrow':'thursday has polynomials at 6 PM. want to move it to friday or saturday?',
+  'add a new topic':'sure — what topic do you want to add? i\'ll check if it\'s in your syllabus.',
+  'how am i doing?':'you\'ve done 2/6h so far — 33% through. polynomials day 1 is complete. on track for the exam 💪',
+  'feeling overwhelmed':'hey, that\'s okay. you only have 4h left across 5 days — that\'s less than 1h a day. very manageable. want me to spread it even lighter?'
+};
+function sendQuick(txt){
+  document.getElementById('cinput').value=txt;
+  sendMsg();
+}
+function sendMsg(){
+  const inp=document.getElementById('cinput');
+  const txt=inp.value.trim();
+  if(!txt)return;
+  inp.value='';
+  const ur=document.getElementById('userReply');
+  const urt=document.getElementById('userReplyText');
+  ur.style.display='flex';
+  urt.textContent=txt;
+  const ar=document.getElementById('aiReply');
+  const art=document.getElementById('aiReplyText');
+  ar.style.display='none';
+  setTimeout(()=>{
+    const reply=replies[txt]||'got it! give me a sec to think about that...';
+    ar.style.display='flex';
+    art.textContent=reply;
+    const msgs=document.getElementById('msgs');
+    msgs.scrollTop=msgs.scrollHeight;
+  },600);
+  const msgs=document.getElementById('msgs');
+  msgs.scrollTop=msgs.scrollHeight;
+}
+const dayData={
+  'today':{topic:'Polynomials',time:'18:00 – 19:00 · 1h',status:'completed',statusClass:'done'},
+  'session':{topic:'Polynomials / Quadratic Equations',time:'18:00 – 19:00 · 1h',status:'pending',statusClass:''},
+  'empty':{topic:null},
+  'exam':{topic:'Mathematics Exam',time:'All day',status:'exam',statusClass:''}
+};
+function selectDay(el,label,type){
+  document.getElementById('sdTitle').textContent=label;
+  const sd=document.getElementById('selectedDay');
+  const d=dayData[type]||dayData['session'];
+  if(!d.topic){
+    sd.innerHTML=`<div class="sd-title">${label}</div><div class="sd-empty">no sessions scheduled</div>`;
+    return;
+  }
+  sd.innerHTML=`<div class="sd-title">${label}</div><div class="sd-sess"><div class="sd-topic">${d.topic}</div><div class="sd-time">${d.time}</div><div class="sd-badge ${d.statusClass}">${d.status}</div></div>`;
+}
+</script>

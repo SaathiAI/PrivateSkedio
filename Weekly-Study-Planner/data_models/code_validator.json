@@ -1,0 +1,44 @@
+{
+  "valid": true,
+  "message": "The candidate plan passed all hard validation checks.",
+
+  "checked_plan_id": "plan_tmp_001",
+
+  "computed_totals": {
+    "plan_total_hours": 4.5,
+    "day_totals": [
+      {
+        "date": "2026-05-26",
+        "declared_total_hours": 1.5,
+        "computed_total_hours": 1.5,
+        "capacity_hours": 2,
+        "status": "valid"
+      }
+    ],
+    "allocation_totals": [
+      {
+        "subject": "Biology",
+        "chapter": "Chapter 3: Cell Structure",
+        "estimated_hours": 2.5,
+        "planned_hours": 2.5,
+        "status": "target_met"
+      },
+      {
+        "subject": "Math",
+        "chapter": "Algebra",
+        "estimated_hours": 2,
+        "planned_hours": 2,
+        "status": "target_met"
+      }
+    ]
+  },
+
+  "errors": [],
+
+  "warnings": [],
+
+  "routing_hint": {
+    "next_step": "verifier_agent",
+    "reason": "Hard validation passed; the plan can now be reviewed for quality."
+  }
+}

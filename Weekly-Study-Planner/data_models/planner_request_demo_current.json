@@ -1,0 +1,541 @@
+{
+  "user_id": "demo-user",
+  "intake": {
+    "status": "approved",
+    "message": "The study contract is locked for planner handoff. Use the 25 June to 30 June window, keep the 30 June 11:00 PM cutoff hard, and preserve the time blocks and subject priorities shown below.",
+    "goal": {
+      "title": "Late-week revision sprint before 30 June wrap-up",
+      "subjects": [
+        "Mathematics",
+        "Science",
+        "Social Science"
+      ],
+      "start_date": "2026-06-25",
+      "end_date": "2026-06-30",
+      "deadline_datetime": "2026-06-30T23:00:00+05:30",
+      "study_scope": [
+        {
+          "subject": "Mathematics",
+          "chapter": "Surface Areas and Volumes",
+          "intent": "Repair formula recall and mixed-problem execution before the window closes."
+        },
+        {
+          "subject": "Mathematics",
+          "chapter": "Arithmetic Progressions",
+          "intent": "Finish direct-question practice and one short pass of word-problem translation."
+        },
+        {
+          "subject": "Science",
+          "chapter": "Control and Coordination",
+          "intent": "Repair recall gaps in neuron flow, reflex arc, and hormones with concept-plus-diagram work."
+        },
+        {
+          "subject": "Science",
+          "chapter": "Light - Reflection and Refraction",
+          "intent": "Fix sign-convention confusion, ray diagrams, and core numericals."
+        },
+        {
+          "subject": "Social Science",
+          "chapter": "Nationalism in India",
+          "intent": "Keep one light but real recall track alive through timeline, source, and map-linked revision."
+        },
+        {
+          "subject": "Social Science",
+          "chapter": "Resources and Development",
+          "intent": "Selective breadth-only revision so the chapter is not left fully untouched."
+        }
+      ]
+    },
+    "availability": {
+      "timezone": "Asia/Kolkata",
+      "daily_study_hours": {
+        "2026-06-25": 3.5,
+        "2026-06-26": 3.0,
+        "2026-06-27": 4.0,
+        "2026-06-28": 3.0,
+        "2026-06-29": 2.5,
+        "2026-06-30": 1.0
+      },
+      "time_blocks": {
+        "2026-06-25": [
+          {
+            "title": "Protected sleep window",
+            "start": "23:15",
+            "end": "06:30",
+            "source": "user_rest_window"
+          },
+          {
+            "title": "Social Science coaching",
+            "start": "18:00",
+            "end": "19:15",
+            "source": "user_commitment"
+          },
+          {
+            "title": "Family dinner cleanup",
+            "start": "21:15",
+            "end": "21:45",
+            "source": "user_commitment"
+          }
+        ],
+        "2026-06-26": [
+          {
+            "title": "Protected sleep window",
+            "start": "23:15",
+            "end": "06:30",
+            "source": "user_rest_window"
+          },
+          {
+            "title": "Dentist visit and travel",
+            "start": "09:00",
+            "end": "10:00",
+            "source": "user_commitment"
+          },
+          {
+            "title": "Family prayer visit",
+            "start": "18:30",
+            "end": "19:30",
+            "source": "user_commitment"
+          }
+        ],
+        "2026-06-27": [
+          {
+            "title": "Protected sleep window",
+            "start": "23:00",
+            "end": "06:30",
+            "source": "user_rest_window"
+          },
+          {
+            "title": "Cousin visit",
+            "start": "10:30",
+            "end": "12:00",
+            "source": "user_commitment"
+          },
+          {
+            "title": "Short market errand",
+            "start": "18:00",
+            "end": "18:45",
+            "source": "user_commitment"
+          }
+        ],
+        "2026-06-28": [
+          {
+            "title": "Protected sleep window",
+            "start": "23:00",
+            "end": "06:45",
+            "source": "user_rest_window"
+          },
+          {
+            "title": "Weekly room cleanup",
+            "start": "16:00",
+            "end": "17:00",
+            "source": "user_commitment"
+          }
+        ],
+        "2026-06-29": [
+          {
+            "title": "Protected sleep window",
+            "start": "23:15",
+            "end": "06:30",
+            "source": "user_rest_window"
+          },
+          {
+            "title": "Parent-teacher call",
+            "start": "18:15",
+            "end": "19:00",
+            "source": "user_commitment"
+          },
+          {
+            "title": "Phone-off family dinner",
+            "start": "20:30",
+            "end": "21:15",
+            "source": "user_commitment"
+          }
+        ],
+        "2026-06-30": [
+          {
+            "title": "Protected sleep window",
+            "start": "23:00",
+            "end": "06:30",
+            "source": "user_rest_window"
+          },
+          {
+            "title": "Exam material organization",
+            "start": "18:30",
+            "end": "19:00",
+            "source": "user_commitment"
+          }
+        ]
+      },
+      "planning_notes": [
+        "This intake is intentionally current-date and planner-ready.",
+        "Respect the hard deadline on 30 June at 11:00 PM local time.",
+        "The planner must not overlap user commitments or fresh calendar blockers.",
+        "Calendar-owned midday blockers dominate 25, 26, 29, and 30 June, so prefer morning and post-7 PM study windows on those days.",
+        "Treat daily_study_hours as already negotiated realistic study capacity, not as raw free time.",
+        "Use Mathematics and Science earlier in the window while the student is fresher; keep lighter Social Science recap later.",
+        "Use remaining_subtopics aggressively for sequencing because they reflect actual weak or pending work.",
+        "Avoid stacking two heavy numerical or formula-dense blocks back-to-back without a recall or concept buffer.",
+        "Keep the final day light and confidence-preserving.",
+        "If feasibility tightens, reduce Resources and Development depth before cutting core Mathematics or Science work."
+      ]
+    },
+    "study_items": [
+      {
+        "scope_reference_key": "mathematics|surface_areas_and_volumes",
+        "subject": "Mathematics",
+        "chapter": "Surface Areas and Volumes",
+        "estimated_hours": 4.0,
+        "reason": "Primary Maths repair item because formula recall is still shaky and mixed application questions are leaking marks.",
+        "planning_notes": [
+          "Do this early in the window.",
+          "Mix formula recall with cone-cylinder-frustum application sets.",
+          "End with mixed word problems rather than only direct formula substitution."
+        ],
+        "remaining_subtopics": [
+          "mathematics_surface_area_formula_recall",
+          "mathematics_surface_area_cylinder_cone_mixed_questions",
+          "mathematics_surface_area_frustum_word_problems",
+          "mathematics_volume_conversion_units_errors"
+        ]
+      },
+      {
+        "scope_reference_key": "mathematics|arithmetic_progressions",
+        "subject": "Mathematics",
+        "chapter": "Arithmetic Progressions",
+        "estimated_hours": 3.0,
+        "reason": "Secondary Maths item with manageable backlog, mainly nth-term interpretation, sums, and one short word-problem pass.",
+        "planning_notes": [
+          "Keep this practice-first.",
+          "Use quick solved examples, then shift to independent questions.",
+          "Good candidate for a medium-energy slot."
+        ],
+        "remaining_subtopics": [
+          "mathematics_ap_nth_term_direct_questions",
+          "mathematics_ap_sum_of_n_terms_practice",
+          "mathematics_ap_word_problem_translation"
+        ]
+      },
+      {
+        "scope_reference_key": "science|control_and_coordination",
+        "subject": "Science",
+        "chapter": "Control and Coordination",
+        "estimated_hours": 3.5,
+        "reason": "Concept-heavy Science repair item with recall gaps in neuron flow, reflex arc, and endocrine mapping.",
+        "planning_notes": [
+          "Use labelled-diagram recall and oral self-explanation.",
+          "Break the chapter into nervous system, plant movement, and hormones.",
+          "Do not keep this too late at night because retention quality drops."
+        ],
+        "remaining_subtopics": [
+          "science_control_coordination_reflex_arc_diagram",
+          "science_control_coordination_neuron_signal_path",
+          "science_control_coordination_hormones_table_recall",
+          "science_control_coordination_plant_tropism_examples"
+        ]
+      },
+      {
+        "scope_reference_key": "science|light_reflection_and_refraction",
+        "subject": "Science",
+        "chapter": "Light - Reflection and Refraction",
+        "estimated_hours": 3.0,
+        "reason": "Needs targeted numerical correction and ray-diagram accuracy rather than full relearning.",
+        "planning_notes": [
+          "Pair numericals with sign-convention correction.",
+          "Use one short formula sheet refresh before problem sets.",
+          "Place before the final day so numericals are not rushed."
+        ],
+        "remaining_subtopics": [
+          "science_light_mirror_formula_sign_convention",
+          "science_light_lens_formula_numericals",
+          "science_light_ray_diagram_image_formation",
+          "science_light_magnification_direct_questions"
+        ]
+      },
+      {
+        "scope_reference_key": "social_science|nationalism_in_india",
+        "subject": "Social Science",
+        "chapter": "Nationalism in India",
+        "estimated_hours": 2.0,
+        "reason": "Important theory chapter, but the learner mainly needs timeline, source, and map-linked recall rather than long reading.",
+        "planning_notes": [
+          "Keep it recap-heavy and writing-light.",
+          "Use one timeline pass and one source recall pass.",
+          "Best suited to lower-energy evening or post-Maths recovery slots."
+        ],
+        "remaining_subtopics": [
+          "sst_nationalism_timeline_gandhi_movements",
+          "sst_nationalism_congress_sessions_recall",
+          "sst_nationalism_visual_symbols_and_sources",
+          "sst_nationalism_map_linked_locations"
+        ]
+      },
+      {
+        "scope_reference_key": "social_science|resources_and_development",
+        "subject": "Social Science",
+        "chapter": "Resources and Development",
+        "estimated_hours": 1.5,
+        "reason": "Lower-priority selective breadth item included so the chapter is not fully untouched.",
+        "planning_notes": [
+          "Keep this shortest and easiest to cut if time pressure rises.",
+          "Focus on soil types, resource classification, and one map pass.",
+          "Do not over-read the textbook here."
+        ],
+        "remaining_subtopics": [
+          "sst_resources_soil_types_recall",
+          "sst_resources_resource_classification_table",
+          "sst_resources_conservation_keywords",
+          "sst_resources_map_single_revision_cycle"
+        ]
+      }
+    ]
+  },
+  "scheduling_context": {
+    "timezone": "Asia/Kolkata",
+    "daily_study_hours": {
+      "2026-06-25": 3.5,
+      "2026-06-26": 3.0,
+      "2026-06-27": 4.0,
+      "2026-06-28": 3.0,
+      "2026-06-29": 2.5,
+      "2026-06-30": 1.0
+    },
+    "time_blocks": {
+      "2026-06-25": [
+        {
+          "title": "Protected sleep window",
+          "start": "23:15",
+          "end": "06:30",
+          "source": "user_rest_window"
+        },
+        {
+          "title": "Social Science coaching",
+          "start": "18:00",
+          "end": "19:15",
+          "source": "user_commitment"
+        },
+        {
+          "title": "Family dinner cleanup",
+          "start": "21:15",
+          "end": "21:45",
+          "source": "user_commitment"
+        }
+      ],
+      "2026-06-26": [
+        {
+          "title": "Protected sleep window",
+          "start": "23:15",
+          "end": "06:30",
+          "source": "user_rest_window"
+        },
+        {
+          "title": "Dentist visit and travel",
+          "start": "09:00",
+          "end": "10:00",
+          "source": "user_commitment"
+        },
+        {
+          "title": "Family prayer visit",
+          "start": "18:30",
+          "end": "19:30",
+          "source": "user_commitment"
+        }
+      ],
+      "2026-06-27": [
+        {
+          "title": "Protected sleep window",
+          "start": "23:00",
+          "end": "06:30",
+          "source": "user_rest_window"
+        },
+        {
+          "title": "Cousin visit",
+          "start": "10:30",
+          "end": "12:00",
+          "source": "user_commitment"
+        },
+        {
+          "title": "Short market errand",
+          "start": "18:00",
+          "end": "18:45",
+          "source": "user_commitment"
+        }
+      ],
+      "2026-06-28": [
+        {
+          "title": "Protected sleep window",
+          "start": "23:00",
+          "end": "06:45",
+          "source": "user_rest_window"
+        },
+        {
+          "title": "Weekly room cleanup",
+          "start": "16:00",
+          "end": "17:00",
+          "source": "user_commitment"
+        }
+      ],
+      "2026-06-29": [
+        {
+          "title": "Protected sleep window",
+          "start": "23:15",
+          "end": "06:30",
+          "source": "user_rest_window"
+        },
+        {
+          "title": "Parent-teacher call",
+          "start": "18:15",
+          "end": "19:00",
+          "source": "user_commitment"
+        },
+        {
+          "title": "Phone-off family dinner",
+          "start": "20:30",
+          "end": "21:15",
+          "source": "user_commitment"
+        }
+      ],
+      "2026-06-30": [
+        {
+          "title": "Protected sleep window",
+          "start": "23:00",
+          "end": "06:30",
+          "source": "user_rest_window"
+        },
+        {
+          "title": "Exam material organization",
+          "start": "18:30",
+          "end": "19:00",
+          "source": "user_commitment"
+        }
+      ]
+    },
+    "calendar_blocks": [
+      {
+        "date": "2026-06-25",
+        "start_time": "11:30",
+        "end_time": "12:15",
+        "title": "Lunch",
+        "source": "google_calendar"
+      },
+      {
+        "date": "2026-06-25",
+        "start_time": "12:30",
+        "end_time": "13:00",
+        "title": "Daily Standup",
+        "source": "google_calendar"
+      },
+      {
+        "date": "2026-06-25",
+        "start_time": "13:00",
+        "end_time": "13:15",
+        "title": "Decompress",
+        "source": "google_calendar"
+      },
+      {
+        "date": "2026-06-25",
+        "start_time": "13:15",
+        "end_time": "17:15",
+        "title": "Focus time",
+        "source": "google_calendar"
+      },
+      {
+        "date": "2026-06-26",
+        "start_time": "11:30",
+        "end_time": "12:15",
+        "title": "Lunch",
+        "source": "google_calendar"
+      },
+      {
+        "date": "2026-06-26",
+        "start_time": "12:30",
+        "end_time": "13:00",
+        "title": "Daily Standup",
+        "source": "google_calendar"
+      },
+      {
+        "date": "2026-06-26",
+        "start_time": "13:00",
+        "end_time": "13:15",
+        "title": "Decompress",
+        "source": "google_calendar"
+      },
+      {
+        "date": "2026-06-26",
+        "start_time": "13:15",
+        "end_time": "17:15",
+        "title": "Focus time",
+        "source": "google_calendar"
+      },
+      {
+        "date": "2026-06-29",
+        "start_time": "11:30",
+        "end_time": "12:15",
+        "title": "Lunch",
+        "source": "google_calendar"
+      },
+      {
+        "date": "2026-06-29",
+        "start_time": "12:30",
+        "end_time": "13:00",
+        "title": "Daily Standup",
+        "source": "google_calendar"
+      },
+      {
+        "date": "2026-06-29",
+        "start_time": "13:00",
+        "end_time": "13:15",
+        "title": "Decompress",
+        "source": "google_calendar"
+      },
+      {
+        "date": "2026-06-29",
+        "start_time": "13:15",
+        "end_time": "17:15",
+        "title": "Focus time",
+        "source": "google_calendar"
+      },
+      {
+        "date": "2026-06-30",
+        "start_time": "08:00",
+        "end_time": "11:00",
+        "title": "Focus time",
+        "source": "google_calendar"
+      },
+      {
+        "date": "2026-06-30",
+        "start_time": "11:30",
+        "end_time": "12:15",
+        "title": "Lunch",
+        "source": "google_calendar"
+      },
+      {
+        "date": "2026-06-30",
+        "start_time": "12:30",
+        "end_time": "13:00",
+        "title": "Daily Standup",
+        "source": "google_calendar"
+      },
+      {
+        "date": "2026-06-30",
+        "start_time": "13:00",
+        "end_time": "13:15",
+        "title": "Decompress",
+        "source": "google_calendar"
+      },
+      {
+        "date": "2026-06-30",
+        "start_time": "13:15",
+        "end_time": "17:00",
+        "title": "Focus time",
+        "source": "google_calendar"
+      },
+      {
+        "date": "2026-06-30",
+        "start_time": "17:00",
+        "end_time": "18:00",
+        "title": "Live commit threaded backlog test",
+        "source": "google_calendar"
+      }
+    ]
+  }
+}

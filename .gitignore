@@ -1,0 +1,28 @@
+# Keep the GitHub delivery focused on the three intended top-level items:
+# - README.md
+# - skedio-landing/
+# - Weekly-Study-Planner/
+
+# Local agent / tool state
+.agents/
+.codex/
+.impeccable/
+.opencode/
+.pytest_cache/
+.ruff_cache/
+.vscode/
+
+# Local-only design context
+PRODUCT.md
+DESIGN.md
+
+# Local notes / scratch / archives
+archive/
+study-planner/
+tmp/
+
+# Landing-page internal brief, not part of public delivery
+skedio-landing/LANDING_PAGE_BRIEF.md
+
+# Nested repo backup should stay local only
+Weekly-Study-Planner/.git_backup_nested/

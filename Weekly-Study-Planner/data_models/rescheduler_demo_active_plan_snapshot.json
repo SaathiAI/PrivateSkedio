@@ -1,0 +1,1132 @@
+{
+  "has_plan": true,
+  "plan_details": {
+    "plan_id": "demo_plan_20260624_current_week",
+    "plan_name": "Current-week demo plan with live blockers",
+    "status": "ACTIVE",
+    "total_hours": 19.5,
+    "start_date": "2026-06-24",
+    "end_date": "2026-06-30",
+    "intake_snapshot": {
+      "status": "approved",
+      "message": "The study contract is locked for planner handoff. Use the 24 June to 30 June window, keep the 30 June 11:00 PM cutoff hard, and preserve the commitments and calendar blockers already reflected below.",
+      "goal": {
+        "title": "Current-week revision block ending 30 June",
+        "subjects": [
+          "Mathematics",
+          "Science",
+          "Social Science"
+        ],
+        "start_date": "2026-06-24",
+        "end_date": "2026-06-30",
+        "deadline_datetime": "2026-06-30T23:00:00+05:30",
+        "study_scope": [
+          {
+            "subject": "Mathematics",
+            "chapter": "Surface Areas and Volumes",
+            "intent": "Clean up formula retention and application mistakes before the week closes."
+          },
+          {
+            "subject": "Mathematics",
+            "chapter": "Arithmetic Progressions",
+            "intent": "Finish direct-question practice and word-problem translation."
+          },
+          {
+            "subject": "Science",
+            "chapter": "Control and Coordination",
+            "intent": "Repair concept gaps and diagram recall while energy is still decent."
+          },
+          {
+            "subject": "Science",
+            "chapter": "Light - Reflection and Refraction",
+            "intent": "Fix numericals and sign-convention confusion."
+          },
+          {
+            "subject": "Social Science",
+            "chapter": "Nationalism in India",
+            "intent": "Retain the timeline and source-map material with light review passes."
+          },
+          {
+            "subject": "Social Science",
+            "chapter": "Resources and Development",
+            "intent": "Keep one selective revision track alive without letting it consume the whole week."
+          }
+        ]
+      },
+      "availability": {
+        "timezone": "Asia/Kolkata",
+        "daily_study_hours": {
+          "2026-06-24": 4.0,
+          "2026-06-25": 3.5,
+          "2026-06-26": 3.5,
+          "2026-06-27": 3.5,
+          "2026-06-28": 3.0,
+          "2026-06-29": 2.5,
+          "2026-06-30": 0.5
+        },
+        "time_blocks": {
+          "2026-06-24": [
+            {
+              "title": "Protected sleep window",
+              "start": "23:30",
+              "end": "06:30",
+              "source": "user_rest_window"
+            }
+          ],
+          "2026-06-25": [
+            {
+              "title": "Protected sleep window",
+              "start": "23:30",
+              "end": "06:30",
+              "source": "user_rest_window"
+            },
+            {
+              "title": "Doctor follow-up",
+              "start": "18:30",
+              "end": "19:30",
+              "source": "user_commitment"
+            }
+          ],
+          "2026-06-26": [
+            {
+              "title": "Protected sleep window",
+              "start": "23:30",
+              "end": "06:30",
+              "source": "user_rest_window"
+            },
+            {
+              "title": "Family prayer visit",
+              "start": "19:00",
+              "end": "20:00",
+              "source": "user_commitment"
+            }
+          ],
+          "2026-06-27": [
+            {
+              "title": "Protected sleep window",
+              "start": "23:30",
+              "end": "06:30",
+              "source": "user_rest_window"
+            },
+            {
+              "title": "Cousin visit",
+              "start": "10:30",
+              "end": "12:00",
+              "source": "user_commitment"
+            }
+          ],
+          "2026-06-28": [
+            {
+              "title": "Protected sleep window",
+              "start": "23:30",
+              "end": "06:30",
+              "source": "user_rest_window"
+            },
+            {
+              "title": "Weekly room cleanup",
+              "start": "16:00",
+              "end": "17:00",
+              "source": "user_commitment"
+            }
+          ],
+          "2026-06-29": [
+            {
+              "title": "Protected sleep window",
+              "start": "23:30",
+              "end": "06:30",
+              "source": "user_rest_window"
+            },
+            {
+              "title": "Phone-off family dinner",
+              "start": "20:00",
+              "end": "21:00",
+              "source": "user_commitment"
+            }
+          ],
+          "2026-06-30": [
+            {
+              "title": "Protected sleep window",
+              "start": "23:30",
+              "end": "06:30",
+              "source": "user_rest_window"
+            }
+          ]
+        },
+        "planning_notes": [
+          "Calendar-owned midday blockers are already heavy on 24, 25, 26, 29, and 30.",
+          "The student can do better in morning or late-evening windows than in fragmented noon windows.",
+          "30 June should stay as a very light landing day.",
+          "Do not treat focus-time calendar blocks as free study windows.",
+          "Visible calendar blocks should win over any optimistic scheduling instinct."
+        ]
+      },
+      "study_items": [
+        {
+          "scope_reference_key": "mathematics|surface_areas_and_volumes",
+          "subject": "Mathematics",
+          "chapter": "Surface Areas and Volumes",
+          "estimated_hours": 4.0,
+          "reason": "Still leaking marks on formula recall and mixed shape application.",
+          "planning_notes": [
+            "Use this in clear-headed slots.",
+            "Keep formula recall close to practice, not isolated."
+          ],
+          "remaining_subtopics": [
+            "mathematics_surface_area_formula_recall",
+            "mathematics_surface_area_cylinder_cone_mixed_questions",
+            "mathematics_surface_area_frustum_word_problems",
+            "mathematics_volume_conversion_units_errors"
+          ]
+        },
+        {
+          "scope_reference_key": "mathematics|arithmetic_progressions",
+          "subject": "Mathematics",
+          "chapter": "Arithmetic Progressions",
+          "estimated_hours": 3.5,
+          "reason": "Needs one more cycle of direct questions plus short word-problem translation work.",
+          "planning_notes": [
+            "Keep AP practice compact and finishable."
+          ],
+          "remaining_subtopics": [
+            "mathematics_ap_nth_term_direct_questions",
+            "mathematics_ap_sum_of_n_terms_practice",
+            "mathematics_ap_word_problem_translation"
+          ]
+        },
+        {
+          "scope_reference_key": "science|control_and_coordination",
+          "subject": "Science",
+          "chapter": "Control and Coordination",
+          "estimated_hours": 4.0,
+          "reason": "This chapter still has unstable recall and diagram confidence.",
+          "planning_notes": [
+            "Prefer concept-plus-diagram pairings."
+          ],
+          "remaining_subtopics": [
+            "science_control_coordination_reflex_arc_diagram",
+            "science_control_coordination_neuron_signal_path",
+            "science_control_coordination_hormones_table_recall",
+            "science_control_coordination_plant_tropism_examples"
+          ]
+        },
+        {
+          "scope_reference_key": "science|light_reflection_and_refraction",
+          "subject": "Science",
+          "chapter": "Light - Reflection and Refraction",
+          "estimated_hours": 3.5,
+          "reason": "Still needs numerical confidence and cleaner ray-diagram accuracy.",
+          "planning_notes": [
+            "Do this where uninterrupted concentration is available."
+          ],
+          "remaining_subtopics": [
+            "science_light_mirror_formula_sign_convention",
+            "science_light_lens_formula_numericals",
+            "science_light_ray_diagram_image_formation",
+            "science_light_magnification_direct_questions"
+          ]
+        },
+        {
+          "scope_reference_key": "social_science|nationalism_in_india",
+          "subject": "Social Science",
+          "chapter": "Nationalism in India",
+          "estimated_hours": 2.5,
+          "reason": "Works best as short review passes without stealing too much math/science time.",
+          "planning_notes": [
+            "Use short recap slots, not giant reading blocks."
+          ],
+          "remaining_subtopics": [
+            "sst_nationalism_timeline_gandhi_movements",
+            "sst_nationalism_congress_sessions_recall",
+            "sst_nationalism_visual_symbols_and_sources",
+            "sst_nationalism_map_linked_locations"
+          ]
+        },
+        {
+          "scope_reference_key": "social_science|resources_and_development",
+          "subject": "Social Science",
+          "chapter": "Resources and Development",
+          "estimated_hours": 2.0,
+          "reason": "Selective coverage only, but still worth keeping alive for breadth.",
+          "planning_notes": [
+            "This is the most cuttable item if a squeeze happens."
+          ],
+          "remaining_subtopics": [
+            "sst_resources_soil_types_recall",
+            "sst_resources_resource_classification_table",
+            "sst_resources_conservation_keywords",
+            "sst_resources_map_single_revision_cycle"
+          ]
+        }
+      ]
+    },
+    "days": [
+      {
+        "day_num": 1,
+        "date": "2026-06-24",
+        "capacity_hours": 4.0,
+        "total_hours": 4.0,
+        "sessions": [
+          {
+            "session_id": "sess_20260624_01",
+            "title": "Surface Areas formula and recall cleanup",
+            "session_type": "focused_chapter",
+            "estimated_hours": 1.5,
+            "start_time": "06:45",
+            "end_time": "08:15",
+            "allocated_hours": [
+              {
+                "subject": "Mathematics",
+                "chapter": "Surface Areas and Volumes",
+                "hours": 1.5
+              }
+            ],
+            "contents": [
+              {
+                "name": "Surface area formula recall",
+                "match_key": "mathematics_surface_area_formula_recall",
+                "subjects": [
+                  "Mathematics"
+                ],
+                "chapters": [
+                  "Surface Areas and Volumes"
+                ],
+                "type": "revision",
+                "status": "done",
+                "time_spent": 1.0
+              },
+              {
+                "name": "Cylinder and cone mixed questions",
+                "match_key": "mathematics_surface_area_cylinder_cone_mixed_questions",
+                "subjects": [
+                  "Mathematics"
+                ],
+                "chapters": [
+                  "Surface Areas and Volumes"
+                ],
+                "type": "practice",
+                "status": "pending",
+                "time_spent": 0.0
+              }
+            ],
+            "actual_time": 1.0,
+            "status": "partial"
+          },
+          {
+            "session_id": "sess_20260624_02",
+            "title": "Control and Coordination concept repair",
+            "session_type": "focused_chapter",
+            "estimated_hours": 1.5,
+            "start_time": "17:45",
+            "end_time": "19:15",
+            "allocated_hours": [
+              {
+                "subject": "Science",
+                "chapter": "Control and Coordination",
+                "hours": 1.5
+              }
+            ],
+            "contents": [
+              {
+                "name": "Neuron signal path",
+                "match_key": "science_control_coordination_neuron_signal_path",
+                "subjects": [
+                  "Science"
+                ],
+                "chapters": [
+                  "Control and Coordination"
+                ],
+                "type": "subtopic",
+                "status": "partial",
+                "time_spent": 0.75
+              },
+              {
+                "name": "Reflex arc diagram",
+                "match_key": "science_control_coordination_reflex_arc_diagram",
+                "subjects": [
+                  "Science"
+                ],
+                "chapters": [
+                  "Control and Coordination"
+                ],
+                "type": "subtopic",
+                "status": "pending",
+                "time_spent": 0.0
+              }
+            ],
+            "actual_time": 0.75,
+            "status": "partial"
+          },
+          {
+            "session_id": "sess_20260624_03",
+            "title": "Nationalism short confidence pass",
+            "session_type": "review",
+            "estimated_hours": 1.0,
+            "start_time": "20:00",
+            "end_time": "21:00",
+            "allocated_hours": [
+              {
+                "subject": "Social Science",
+                "chapter": "Nationalism in India",
+                "hours": 1.0
+              }
+            ],
+            "contents": [
+              {
+                "name": "Gandhi movement timeline",
+                "match_key": "sst_nationalism_timeline_gandhi_movements",
+                "subjects": [
+                  "Social Science"
+                ],
+                "chapters": [
+                  "Nationalism in India"
+                ],
+                "type": "revision",
+                "status": "pending",
+                "time_spent": 0.0
+              }
+            ],
+            "actual_time": 0.0,
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "day_num": 2,
+        "date": "2026-06-25",
+        "capacity_hours": 3.5,
+        "total_hours": 3.0,
+        "sessions": [
+          {
+            "session_id": "sess_20260625_01",
+            "title": "Light sign convention and core numericals",
+            "session_type": "practice",
+            "estimated_hours": 1.5,
+            "start_time": "07:00",
+            "end_time": "08:30",
+            "allocated_hours": [
+              {
+                "subject": "Science",
+                "chapter": "Light - Reflection and Refraction",
+                "hours": 1.5
+              }
+            ],
+            "contents": [
+              {
+                "name": "Mirror formula sign convention",
+                "match_key": "science_light_mirror_formula_sign_convention",
+                "subjects": [
+                  "Science"
+                ],
+                "chapters": [
+                  "Light - Reflection and Refraction"
+                ],
+                "type": "subtopic",
+                "status": "pending",
+                "time_spent": 0.0
+              },
+              {
+                "name": "Lens formula numericals",
+                "match_key": "science_light_lens_formula_numericals",
+                "subjects": [
+                  "Science"
+                ],
+                "chapters": [
+                  "Light - Reflection and Refraction"
+                ],
+                "type": "practice",
+                "status": "pending",
+                "time_spent": 0.0
+              }
+            ],
+            "actual_time": 0.0,
+            "status": "pending"
+          },
+          {
+            "session_id": "sess_20260625_02",
+            "title": "Arithmetic Progressions direct practice",
+            "session_type": "practice",
+            "estimated_hours": 1.5,
+            "start_time": "20:00",
+            "end_time": "21:30",
+            "allocated_hours": [
+              {
+                "subject": "Mathematics",
+                "chapter": "Arithmetic Progressions",
+                "hours": 1.5
+              }
+            ],
+            "contents": [
+              {
+                "name": "AP nth term direct questions",
+                "match_key": "mathematics_ap_nth_term_direct_questions",
+                "subjects": [
+                  "Mathematics"
+                ],
+                "chapters": [
+                  "Arithmetic Progressions"
+                ],
+                "type": "practice",
+                "status": "pending",
+                "time_spent": 0.0
+              },
+              {
+                "name": "AP sum of n terms practice",
+                "match_key": "mathematics_ap_sum_of_n_terms_practice",
+                "subjects": [
+                  "Mathematics"
+                ],
+                "chapters": [
+                  "Arithmetic Progressions"
+                ],
+                "type": "practice",
+                "status": "pending",
+                "time_spent": 0.0
+              }
+            ],
+            "actual_time": 0.0,
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "day_num": 3,
+        "date": "2026-06-26",
+        "capacity_hours": 3.5,
+        "total_hours": 3.0,
+        "sessions": [
+          {
+            "session_id": "sess_20260626_01",
+            "title": "Surface Areas frustum drill",
+            "session_type": "practice",
+            "estimated_hours": 1.0,
+            "start_time": "07:00",
+            "end_time": "08:00",
+            "allocated_hours": [
+              {
+                "subject": "Mathematics",
+                "chapter": "Surface Areas and Volumes",
+                "hours": 1.0
+              }
+            ],
+            "contents": [
+              {
+                "name": "Frustum word problems",
+                "match_key": "mathematics_surface_area_frustum_word_problems",
+                "subjects": [
+                  "Mathematics"
+                ],
+                "chapters": [
+                  "Surface Areas and Volumes"
+                ],
+                "type": "practice",
+                "status": "pending",
+                "time_spent": 0.0
+              }
+            ],
+            "actual_time": 0.0,
+            "status": "pending"
+          },
+          {
+            "session_id": "sess_20260626_02",
+            "title": "Control and Coordination hormone repair",
+            "session_type": "focused_chapter",
+            "estimated_hours": 1.0,
+            "start_time": "08:30",
+            "end_time": "09:30",
+            "allocated_hours": [
+              {
+                "subject": "Science",
+                "chapter": "Control and Coordination",
+                "hours": 1.0
+              }
+            ],
+            "contents": [
+              {
+                "name": "Hormones table recall",
+                "match_key": "science_control_coordination_hormones_table_recall",
+                "subjects": [
+                  "Science"
+                ],
+                "chapters": [
+                  "Control and Coordination"
+                ],
+                "type": "subtopic",
+                "status": "pending",
+                "time_spent": 0.0
+              }
+            ],
+            "actual_time": 0.0,
+            "status": "pending"
+          },
+          {
+            "session_id": "sess_20260626_03",
+            "title": "Resources selective recap",
+            "session_type": "review",
+            "estimated_hours": 1.0,
+            "start_time": "20:30",
+            "end_time": "21:30",
+            "allocated_hours": [
+              {
+                "subject": "Social Science",
+                "chapter": "Resources and Development",
+                "hours": 1.0
+              }
+            ],
+            "contents": [
+              {
+                "name": "Soil types recall",
+                "match_key": "sst_resources_soil_types_recall",
+                "subjects": [
+                  "Social Science"
+                ],
+                "chapters": [
+                  "Resources and Development"
+                ],
+                "type": "revision",
+                "status": "pending",
+                "time_spent": 0.0
+              },
+              {
+                "name": "Resource classification table",
+                "match_key": "sst_resources_resource_classification_table",
+                "subjects": [
+                  "Social Science"
+                ],
+                "chapters": [
+                  "Resources and Development"
+                ],
+                "type": "revision",
+                "status": "pending",
+                "time_spent": 0.0
+              }
+            ],
+            "actual_time": 0.0,
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "day_num": 4,
+        "date": "2026-06-27",
+        "capacity_hours": 3.5,
+        "total_hours": 3.5,
+        "sessions": [
+          {
+            "session_id": "sess_20260627_01",
+            "title": "Light ray diagrams and application",
+            "session_type": "practice",
+            "estimated_hours": 2.0,
+            "start_time": "07:00",
+            "end_time": "09:00",
+            "allocated_hours": [
+              {
+                "subject": "Science",
+                "chapter": "Light - Reflection and Refraction",
+                "hours": 2.0
+              }
+            ],
+            "contents": [
+              {
+                "name": "Ray diagram image formation",
+                "match_key": "science_light_ray_diagram_image_formation",
+                "subjects": [
+                  "Science"
+                ],
+                "chapters": [
+                  "Light - Reflection and Refraction"
+                ],
+                "type": "subtopic",
+                "status": "pending",
+                "time_spent": 0.0
+              },
+              {
+                "name": "Magnification direct questions",
+                "match_key": "science_light_magnification_direct_questions",
+                "subjects": [
+                  "Science"
+                ],
+                "chapters": [
+                  "Light - Reflection and Refraction"
+                ],
+                "type": "practice",
+                "status": "pending",
+                "time_spent": 0.0
+              }
+            ],
+            "actual_time": 0.0,
+            "status": "pending"
+          },
+          {
+            "session_id": "sess_20260627_02",
+            "title": "Arithmetic Progressions short follow-up",
+            "session_type": "practice",
+            "estimated_hours": 1.0,
+            "start_time": "12:30",
+            "end_time": "13:30",
+            "allocated_hours": [
+              {
+                "subject": "Mathematics",
+                "chapter": "Arithmetic Progressions",
+                "hours": 1.0
+              }
+            ],
+            "contents": [
+              {
+                "name": "AP word problem translation",
+                "match_key": "mathematics_ap_word_problem_translation",
+                "subjects": [
+                  "Mathematics"
+                ],
+                "chapters": [
+                  "Arithmetic Progressions"
+                ],
+                "type": "practice",
+                "status": "pending",
+                "time_spent": 0.0
+              }
+            ],
+            "actual_time": 0.0,
+            "status": "pending"
+          },
+          {
+            "session_id": "sess_20260627_03",
+            "title": "Nationalism source recap",
+            "session_type": "review",
+            "estimated_hours": 0.5,
+            "start_time": "18:30",
+            "end_time": "19:00",
+            "allocated_hours": [
+              {
+                "subject": "Social Science",
+                "chapter": "Nationalism in India",
+                "hours": 0.5
+              }
+            ],
+            "contents": [
+              {
+                "name": "Visual symbols and sources",
+                "match_key": "sst_nationalism_visual_symbols_and_sources",
+                "subjects": [
+                  "Social Science"
+                ],
+                "chapters": [
+                  "Nationalism in India"
+                ],
+                "type": "revision",
+                "status": "pending",
+                "time_spent": 0.0
+              }
+            ],
+            "actual_time": 0.0,
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "day_num": 5,
+        "date": "2026-06-28",
+        "capacity_hours": 3.0,
+        "total_hours": 3.0,
+        "sessions": [
+          {
+            "session_id": "sess_20260628_01",
+            "title": "Surface Areas final mixed corrections",
+            "session_type": "practice",
+            "estimated_hours": 1.5,
+            "start_time": "07:00",
+            "end_time": "08:30",
+            "allocated_hours": [
+              {
+                "subject": "Mathematics",
+                "chapter": "Surface Areas and Volumes",
+                "hours": 1.5
+              }
+            ],
+            "contents": [
+              {
+                "name": "Volume conversion unit errors",
+                "match_key": "mathematics_volume_conversion_units_errors",
+                "subjects": [
+                  "Mathematics"
+                ],
+                "chapters": [
+                  "Surface Areas and Volumes"
+                ],
+                "type": "practice",
+                "status": "pending",
+                "time_spent": 0.0
+              }
+            ],
+            "actual_time": 0.0,
+            "status": "pending"
+          },
+          {
+            "session_id": "sess_20260628_02",
+            "title": "Resources plus short nationalism pass",
+            "session_type": "mixed",
+            "estimated_hours": 1.5,
+            "start_time": "17:30",
+            "end_time": "19:00",
+            "allocated_hours": [
+              {
+                "subject": "Social Science",
+                "chapter": "Resources and Development",
+                "hours": 1.0
+              },
+              {
+                "subject": "Social Science",
+                "chapter": "Nationalism in India",
+                "hours": 0.5
+              }
+            ],
+            "contents": [
+              {
+                "name": "Conservation keywords",
+                "match_key": "sst_resources_conservation_keywords",
+                "subjects": [
+                  "Social Science"
+                ],
+                "chapters": [
+                  "Resources and Development"
+                ],
+                "type": "revision",
+                "status": "pending",
+                "time_spent": 0.0
+              },
+              {
+                "name": "Map single revision cycle",
+                "match_key": "sst_resources_map_single_revision_cycle",
+                "subjects": [
+                  "Social Science"
+                ],
+                "chapters": [
+                  "Resources and Development"
+                ],
+                "type": "revision",
+                "status": "pending",
+                "time_spent": 0.0
+              },
+              {
+                "name": "Map-linked locations",
+                "match_key": "sst_nationalism_map_linked_locations",
+                "subjects": [
+                  "Social Science"
+                ],
+                "chapters": [
+                  "Nationalism in India"
+                ],
+                "type": "revision",
+                "status": "pending",
+                "time_spent": 0.0
+              }
+            ],
+            "actual_time": 0.0,
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "day_num": 6,
+        "date": "2026-06-29",
+        "capacity_hours": 2.5,
+        "total_hours": 2.5,
+        "sessions": [
+          {
+            "session_id": "sess_20260629_01",
+            "title": "Control and Coordination final recap",
+            "session_type": "review",
+            "estimated_hours": 1.5,
+            "start_time": "06:45",
+            "end_time": "08:15",
+            "allocated_hours": [
+              {
+                "subject": "Science",
+                "chapter": "Control and Coordination",
+                "hours": 1.5
+              }
+            ],
+            "contents": [
+              {
+                "name": "Plant tropism examples",
+                "match_key": "science_control_coordination_plant_tropism_examples",
+                "subjects": [
+                  "Science"
+                ],
+                "chapters": [
+                  "Control and Coordination"
+                ],
+                "type": "revision",
+                "status": "pending",
+                "time_spent": 0.0
+              }
+            ],
+            "actual_time": 0.0,
+            "status": "pending"
+          },
+          {
+            "session_id": "sess_20260629_02",
+            "title": "Arithmetic Progressions confidence pass",
+            "session_type": "review",
+            "estimated_hours": 1.0,
+            "start_time": "17:45",
+            "end_time": "18:45",
+            "allocated_hours": [
+              {
+                "subject": "Mathematics",
+                "chapter": "Arithmetic Progressions",
+                "hours": 1.0
+              }
+            ],
+            "contents": [
+              {
+                "name": "AP final confidence pass",
+                "match_key": "mathematics_ap_sum_of_n_terms_practice",
+                "subjects": [
+                  "Mathematics"
+                ],
+                "chapters": [
+                  "Arithmetic Progressions"
+                ],
+                "type": "revision",
+                "status": "pending",
+                "time_spent": 0.0
+              }
+            ],
+            "actual_time": 0.0,
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "day_num": 7,
+        "date": "2026-06-30",
+        "capacity_hours": 0.5,
+        "total_hours": 0.5,
+        "sessions": [
+          {
+            "session_id": "sess_20260630_01",
+            "title": "Nationalism final recall tap",
+            "session_type": "review",
+            "estimated_hours": 0.5,
+            "start_time": "18:30",
+            "end_time": "19:00",
+            "allocated_hours": [
+              {
+                "subject": "Social Science",
+                "chapter": "Nationalism in India",
+                "hours": 0.5
+              }
+            ],
+            "contents": [
+              {
+                "name": "Congress sessions recall",
+                "match_key": "sst_nationalism_congress_sessions_recall",
+                "subjects": [
+                  "Social Science"
+                ],
+                "chapters": [
+                  "Nationalism in India"
+                ],
+                "type": "revision",
+                "status": "pending",
+                "time_spent": 0.0
+              }
+            ],
+            "actual_time": 0.0,
+            "status": "pending"
+          }
+        ]
+      }
+    ],
+    "progress": {
+      "work_item_budget": {
+        "mathematics|surface_areas_and_volumes": {
+          "subject": "Mathematics",
+          "chapter": "Surface Areas and Volumes",
+          "total": 4.0,
+          "spent": 1.0,
+          "remaining": 3.0,
+          "completed_subtopics": [
+            "Surface area formula recall"
+          ],
+          "pending_subtopics": [
+            "Cylinder and cone mixed questions",
+            "Frustum word problems",
+            "Volume conversion unit errors"
+          ],
+          "completed_match_keys": [
+            "mathematics_surface_area_formula_recall"
+          ],
+          "pending_match_keys": [
+            "mathematics_surface_area_cylinder_cone_mixed_questions",
+            "mathematics_surface_area_frustum_word_problems",
+            "mathematics_volume_conversion_units_errors"
+          ],
+          "reason": "Still leaking marks on formula recall and mixed shape application.",
+          "planning_notes": [
+            "Use this in clear-headed slots.",
+            "Keep formula recall close to practice, not isolated."
+          ],
+          "remaining_subtopics": [
+            "mathematics_surface_area_formula_recall",
+            "mathematics_surface_area_cylinder_cone_mixed_questions",
+            "mathematics_surface_area_frustum_word_problems",
+            "mathematics_volume_conversion_units_errors"
+          ]
+        },
+        "mathematics|arithmetic_progressions": {
+          "subject": "Mathematics",
+          "chapter": "Arithmetic Progressions",
+          "total": 3.5,
+          "spent": 0.0,
+          "remaining": 3.5,
+          "completed_subtopics": [],
+          "pending_subtopics": [
+            "AP nth term direct questions",
+            "AP sum of n terms practice",
+            "AP word problem translation"
+          ],
+          "completed_match_keys": [],
+          "pending_match_keys": [
+            "mathematics_ap_nth_term_direct_questions",
+            "mathematics_ap_sum_of_n_terms_practice",
+            "mathematics_ap_word_problem_translation"
+          ],
+          "reason": "Needs one more cycle of direct questions plus short word-problem translation work.",
+          "planning_notes": [
+            "Keep AP practice compact and finishable."
+          ],
+          "remaining_subtopics": [
+            "mathematics_ap_nth_term_direct_questions",
+            "mathematics_ap_sum_of_n_terms_practice",
+            "mathematics_ap_word_problem_translation"
+          ]
+        },
+        "science|control_and_coordination": {
+          "subject": "Science",
+          "chapter": "Control and Coordination",
+          "total": 4.0,
+          "spent": 0.75,
+          "remaining": 3.25,
+          "completed_subtopics": [],
+          "pending_subtopics": [
+            "Reflex arc diagram",
+            "Neuron signal path",
+            "Hormones table recall",
+            "Plant tropism examples"
+          ],
+          "completed_match_keys": [],
+          "pending_match_keys": [
+            "science_control_coordination_reflex_arc_diagram",
+            "science_control_coordination_neuron_signal_path",
+            "science_control_coordination_hormones_table_recall",
+            "science_control_coordination_plant_tropism_examples"
+          ],
+          "reason": "This chapter still has unstable recall and diagram confidence.",
+          "planning_notes": [
+            "Prefer concept-plus-diagram pairings."
+          ],
+          "remaining_subtopics": [
+            "science_control_coordination_reflex_arc_diagram",
+            "science_control_coordination_neuron_signal_path",
+            "science_control_coordination_hormones_table_recall",
+            "science_control_coordination_plant_tropism_examples"
+          ]
+        },
+        "science|light_reflection_and_refraction": {
+          "subject": "Science",
+          "chapter": "Light - Reflection and Refraction",
+          "total": 3.5,
+          "spent": 0.0,
+          "remaining": 3.5,
+          "completed_subtopics": [],
+          "pending_subtopics": [
+            "Mirror formula sign convention",
+            "Lens formula numericals",
+            "Ray diagram image formation",
+            "Magnification direct questions"
+          ],
+          "completed_match_keys": [],
+          "pending_match_keys": [
+            "science_light_mirror_formula_sign_convention",
+            "science_light_lens_formula_numericals",
+            "science_light_ray_diagram_image_formation",
+            "science_light_magnification_direct_questions"
+          ],
+          "reason": "Still needs numerical confidence and cleaner ray-diagram accuracy.",
+          "planning_notes": [
+            "Do this where uninterrupted concentration is available."
+          ],
+          "remaining_subtopics": [
+            "science_light_mirror_formula_sign_convention",
+            "science_light_lens_formula_numericals",
+            "science_light_ray_diagram_image_formation",
+            "science_light_magnification_direct_questions"
+          ]
+        },
+        "social_science|nationalism_in_india": {
+          "subject": "Social Science",
+          "chapter": "Nationalism in India",
+          "total": 2.5,
+          "spent": 0.0,
+          "remaining": 2.5,
+          "completed_subtopics": [],
+          "pending_subtopics": [
+            "Gandhi movement timeline",
+            "Congress sessions recall",
+            "Visual symbols and sources",
+            "Map-linked locations"
+          ],
+          "completed_match_keys": [],
+          "pending_match_keys": [
+            "sst_nationalism_timeline_gandhi_movements",
+            "sst_nationalism_congress_sessions_recall",
+            "sst_nationalism_visual_symbols_and_sources",
+            "sst_nationalism_map_linked_locations"
+          ],
+          "reason": "Works best as short review passes without stealing too much math/science time.",
+          "planning_notes": [
+            "Use short recap slots, not giant reading blocks."
+          ],
+          "remaining_subtopics": [
+            "sst_nationalism_timeline_gandhi_movements",
+            "sst_nationalism_congress_sessions_recall",
+            "sst_nationalism_visual_symbols_and_sources",
+            "sst_nationalism_map_linked_locations"
+          ]
+        },
+        "social_science|resources_and_development": {
+          "subject": "Social Science",
+          "chapter": "Resources and Development",
+          "total": 2.0,
+          "spent": 0.0,
+          "remaining": 2.0,
+          "completed_subtopics": [],
+          "pending_subtopics": [
+            "Soil types recall",
+            "Resource classification table",
+            "Conservation keywords",
+            "Map single revision cycle"
+          ],
+          "completed_match_keys": [],
+          "pending_match_keys": [
+            "sst_resources_soil_types_recall",
+            "sst_resources_resource_classification_table",
+            "sst_resources_conservation_keywords",
+            "sst_resources_map_single_revision_cycle"
+          ],
+          "reason": "Selective coverage only, but still worth keeping alive for breadth.",
+          "planning_notes": [
+            "This is the most cuttable item if a squeeze happens."
+          ],
+          "remaining_subtopics": [
+            "sst_resources_soil_types_recall",
+            "sst_resources_resource_classification_table",
+            "sst_resources_conservation_keywords",
+            "sst_resources_map_single_revision_cycle"
+          ]
+        }
+      }
+    }
+  }
+}

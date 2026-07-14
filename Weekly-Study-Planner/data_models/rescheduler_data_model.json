@@ -1,0 +1,102 @@
+{
+  "status": "replanned",
+  "message": "I rebuilt the remaining plan around your new availability.",
+  "previous_plan_id": "plan_003",
+  "new_plan_id": "plan_tmp_004",
+
+  "replan_reason": {
+    "type": "calendar_conflict",
+    "summary": "A new calendar event overlapped an existing study session.",
+    "affected_session_ids": ["sess_014"]
+  },
+
+  "replan_scope": {
+    "mode": "future_only",
+    "from": "2026-05-26T16:30:00+05:30",
+    "to": "2026-05-30T20:00:00+05:30",
+    "timezone": "Asia/Calcutta"
+  },
+
+  "total_hours": 4.5,
+
+  "days": [
+    {
+      "day_num": 1,
+      "date": "2026-05-26",
+      "total_hours": 1,
+      "capacity_hours": 1.5,
+      "sessions": [
+        {
+          "session_id": "sess_tmp_101",
+          "title": "Biology Chapter 3 Repair",
+          "session_type": "catch_up",
+          "start_time": "20:00",
+          "end_time": "21:00",
+
+          "allocated_hours": [
+            {
+              "subject": "Biology",
+              "chapter": "Chapter 3: Cell Structure",
+              "hours": 1
+            }
+          ],
+
+          "contents": [
+            {
+              "name": "Cell membrane structure",
+              "match_key": "bio.ch3.membrane.structure",
+              "subject": "Biology",
+              "chapter": "Chapter 3: Cell Structure",
+              "type": "subtopic"
+            }
+          ],
+
+          "reason": "This recovers the Biology time affected by the calendar conflict."
+        }
+      ]
+    }
+  ],
+
+  "allocation_summary": [
+    {
+      "subject": "Biology",
+      "chapter": "Chapter 3: Cell Structure",
+      "estimated_hours": 2.5,
+      "completed_hours": 0.75,
+      "future_planned_hours": 1.75,
+      "projected_total_hours": 2.5,
+      "status": "target_met"
+    },
+    {
+      "subject": "Math",
+      "chapter": "Algebra",
+      "estimated_hours": 2,
+      "completed_hours": 0.5,
+      "future_planned_hours": 1.5,
+      "projected_total_hours": 2,
+      "status": "target_met"
+    }
+  ],
+
+  "changes_summary": [
+    "Replaced the affected session with a Biology catch-up session tonight.",
+    "Kept completed and past sessions unchanged.",
+    "The remaining target hours still fit within available time."
+  ],
+
+  "goal_risk": "low",
+  "warnings": [],
+  "requires_user_input": false,
+
+  "source_context": {
+    "intake_output_id": "intake_run_001",
+    "feasibility_result_id": "feasibility_001",
+    "change_event_id": "change_017",
+    "previous_plan_id": "plan_003"
+  },
+
+  "routing_hint": {
+    "next_step": "code_validator",
+    "reason": "Replanner created a candidate remaining plan; hard validation should run next."
+  }
+}
