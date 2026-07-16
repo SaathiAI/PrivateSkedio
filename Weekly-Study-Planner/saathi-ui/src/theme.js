@@ -1,82 +1,82 @@
 export const tokens = {
-  // Core surfaces — refined dark palette with subtle depth
-  bg: "#0a0a0b",
-  bgCard: "#111113",
-  bgElevated: "#18181b",
-  bgHover: "#1f1f23",
-  bgActive: "#27272a",
+  // Core surfaces - warm light product workspace
+  bg: "#f7f7f3",
+  bgCard: "#fffefa",
+  bgElevated: "#f1f0ea",
+  bgHover: "#efede6",
+  bgActive: "#e9e6dd",
 
-  // Borders — subtle hierarchy
-  border: "#27272a",
-  borderSubtle: "#1f1f23",
-  borderFaint: "rgba(255, 255, 255, 0.04)",
-  borderLight: "rgba(255, 255, 255, 0.06)",
-  borderHover: "#3f3f46",
+  // Borders - quiet warm structure
+  border: "#ded9ce",
+  borderSubtle: "#e8e4da",
+  borderFaint: "rgba(45, 43, 38, 0.08)",
+  borderLight: "rgba(45, 43, 38, 0.12)",
+  borderHover: "#c8c1b4",
 
-  // Text — refined contrast
-  text: "#fafafa",
-  textSecondary: "#a1a1aa",
-  textMuted: "#71717a",
-  textDim: "#52525b",
+  // Text — crisp contrast on light surfaces
+  text: "#24221e",
+  textSecondary: "#555148",
+  textMuted: "#767166",
+  textDim: "#9b9589",
 
-  // Accent — indigo with refined shades
-  accent: "#818cf8",
-  accentHover: "#6366f1",
-  accentMuted: "rgba(129, 140, 248, 0.12)",
-  accentBorder: "rgba(129, 140, 248, 0.25)",
+  // Accent — Skedio lavender-blue
+  accent: "#8c99ec",
+  accentHover: "#6f7ee4",
+  accentMuted: "rgba(140, 153, 236, 0.14)",
+  accentBorder: "rgba(140, 153, 236, 0.34)",
 
   // Semantic colors
-  green: "#34d399",
-  greenBg: "rgba(52, 211, 153, 0.08)",
-  greenBorder: "rgba(52, 211, 153, 0.2)",
-  greenText: "#6ee7b7",
+  green: "#21b892",
+  greenBg: "rgba(33, 184, 146, 0.1)",
+  greenBorder: "rgba(33, 184, 146, 0.24)",
+  greenText: "#147a63",
 
-  red: "#fb7185",
-  redBg: "rgba(251, 113, 133, 0.08)",
-  redBorder: "rgba(251, 113, 133, 0.25)",
-  redText: "#fda4af",
+  red: "#e85d7a",
+  redBg: "rgba(232, 93, 122, 0.1)",
+  redBorder: "rgba(232, 93, 122, 0.25)",
+  redText: "#a6324d",
 
-  yellow: "#fbbf24",
-  yellowBg: "rgba(251, 191, 36, 0.08)",
-  yellowBorder: "rgba(251, 191, 36, 0.2)",
-  yellowText: "#fde68a",
+  yellow: "#d99021",
+  yellowBg: "rgba(217, 144, 33, 0.11)",
+  yellowBorder: "rgba(217, 144, 33, 0.25)",
+  yellowText: "#8a5a10",
 
-  indigo: "#818cf8",
-  indigoBg: "rgba(129, 140, 248, 0.08)",
-  indigoBorder: "rgba(129, 140, 248, 0.2)",
+  indigo: "#8c99ec",
+  indigoBg: "rgba(140, 153, 236, 0.1)",
+  indigoBorder: "rgba(140, 153, 236, 0.24)",
 
-  // Overlay / glass — refined blur
-  glassBg: "rgba(10, 10, 11, 0.88)",
-  glassBorder: "rgba(255, 255, 255, 0.05)",
+  // Overlay / glass — light blur
+  glassBg: "rgba(255, 255, 255, 0.82)",
+  glassBorder: "rgba(140, 153, 236, 0.18)",
 
   // Session states
-  skipBg: "rgba(251, 113, 133, 0.06)",
-  skipBorder: "rgba(251, 113, 133, 0.18)",
-  doneBg: "rgba(34, 197, 94, 0.06)",
-  doneBorder: "rgba(34, 197, 94, 0.2)",
-  draftBg: "rgba(251, 113, 133, 0.12)",
-  draftBorder: "rgba(251, 113, 133, 0.3)",
+  skipBg: "rgba(232, 93, 122, 0.08)",
+  skipBorder: "rgba(232, 93, 122, 0.22)",
+  doneBg: "rgba(33, 184, 146, 0.1)",
+  doneBorder: "rgba(33, 184, 146, 0.24)",
+  draftBg: "rgba(232, 93, 122, 0.12)",
+  draftBorder: "rgba(232, 93, 122, 0.28)",
 
   // Blocker
-  blockerBg: "rgba(161, 161, 170, 0.06)",
-  blockerBorder: "rgba(255, 255, 255, 0.04)",
-  blockerBorderLeft: "#52525b",
+  blockerBg: "rgba(88, 97, 116, 0.08)",
+  blockerBorder: "rgba(88, 97, 116, 0.14)",
+  blockerBorderLeft: "#8a94a8",
 
   // Shadows — refined depth system
-  shadowSm: "0 1px 2px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.15)",
-  shadowMd: "0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -1px rgba(0,0,0,0.2)",
-  shadowLg: "0 10px 15px -3px rgba(0,0,0,0.4), 0 4px 6px -2px rgba(0,0,0,0.2)",
-  shadowXl: "0 20px 25px -5px rgba(0,0,0,0.5), 0 10px 10px -5px rgba(0,0,0,0.3)",
+  shadowSm: "0 1px 2px rgba(21, 24, 39, 0.06)",
+  shadowMd: "0 8px 18px rgba(76, 88, 132, 0.08)",
+  shadowLg: "0 18px 38px rgba(76, 88, 132, 0.11)",
+  shadowXl: "0 24px 60px rgba(76, 88, 132, 0.14)",
 
   // Card shadows — subtle inset highlight + soft outer
-  shadowCard: "inset 0 1px 0 rgba(255,255,255,0.03), 0 2px 8px rgba(0,0,0,0.25)",
-  shadowCardHover: "inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 16px rgba(0,0,0,0.35)",
-  shadowDone: "inset 0 1px 0 rgba(34, 197, 94, 0.06), 0 2px 6px rgba(0,0,0,0.2)",
-  shadowDoneHover: "0 8px 16px rgba(0,0,0,0.25), 0 0 0 1px rgba(34, 197, 94, 0.2)",
+  shadowCard: "inset 0 1px 0 rgba(255,255,255,0.8), 0 8px 22px rgba(76, 88, 132, 0.08)",
+  shadowCardHover: "inset 0 1px 0 rgba(255,255,255,0.9), 0 14px 32px rgba(76, 88, 132, 0.13)",
+  shadowDone: "inset 0 1px 0 rgba(33, 184, 146, 0.08), 0 6px 18px rgba(33, 184, 146, 0.09)",
+  shadowDoneHover: "0 12px 28px rgba(33, 184, 146, 0.14), 0 0 0 1px rgba(33, 184, 146, 0.18)",
 
   // Sidebar
-  sidebarBg: "#0f0f11",
-  sidebarBorder: "#1f1f23",
+  sidebarBg: "#fbfaf5",
+  sidebarBorder: "#ded9ce",
 
   // Spacing scale (4px base)
   space1: "4px",
@@ -107,6 +107,7 @@ export const tokens = {
   zIndexDrawer: 50,
   zIndexModal: 100,
   zIndexToast: 200,
+  zIndexTooltip: 250,
 };
 
 const PALETTE_POOL = [

@@ -10,7 +10,7 @@ import os
 import threading
 import time
 
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException, Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from supabase import create_client
 from dotenv import load_dotenv
@@ -20,6 +20,12 @@ load_dotenv()
 supabase_url = os.getenv("SUPABASE_URL")
 supabase_anon_key = os.getenv("SUPABASE_ANON_KEY")
 AUTH_CACHE_TTL_SECONDS = int(os.getenv("AUTH_CACHE_TTL_SECONDS", "120"))
+DEV_AUTH_BYPASS_ENABLED = os.getenv("SAATHI_DEV_AUTH_BYPASS", "").lower() in {"1", "true", "yes", "on"}
+DEV_AUTH_ALLOWED_USERS = {
+    user.strip()
+    for user in os.getenv("SAATHI_DEV_AUTH_USERS", "dev-admin").split(",")
+    if user.strip()
+}
 
 security = HTTPBearer(auto_error=False)
 logger = logging.getLogger("skedioai.perf.auth")
@@ -53,6 +59,7 @@ def _store_cached_user_id(token: str, user_id: str) -> None:
 
 
 async def get_current_user(
+    request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> str:
     """
@@ -63,6 +70,14 @@ async def get_current_user(
         raise HTTPException(status_code=401, detail="Missing authorization header")
 
     token = credentials.credentials
+    if DEV_AUTH_BYPASS_ENABLED and token.startswith("dev:"):
+        requested_user = request.headers.get("x-skedio-dev-user") or token.removeprefix("dev:")
+        requested_user = requested_user.strip() or "dev-admin"
+        if requested_user not in DEV_AUTH_ALLOWED_USERS:
+            raise HTTPException(status_code=403, detail="Dev auth user is not allowed")
+        logger.warning("stage=auth_validate mode=dev_bypass user_id=%s", requested_user)
+        return requested_user
+
     cached_user_id = _get_cached_user_id(token)
     if cached_user_id:
         logger.info(

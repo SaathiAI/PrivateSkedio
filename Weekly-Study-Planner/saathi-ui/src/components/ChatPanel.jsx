@@ -21,6 +21,7 @@ export function ChatPanel({
   drawerWidth = 380,
   onDrawerWidthChange,
   isEmbedded = false,
+  queuedPrompt = null,
 }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -29,6 +30,7 @@ export function ChatPanel({
   const [resetting, setResetting] = useState(false);
   const endRef = useRef(null);
   const lastEmailReviewNonceRef = useRef(null);
+  const lastQueuedPromptNonceRef = useRef(null);
 
   useEffect(() => {
     if (!threadId) {
@@ -68,7 +70,7 @@ export function ChatPanel({
         if (action === "request_changes") {
           setChangeMode(true);
         }
-      } catch (error) {
+      } catch {
         if (cancelled) return;
         persistMessages([
           {
@@ -190,10 +192,8 @@ export function ChatPanel({
     }
   };
 
-  const send = async (e) => {
-    e.preventDefault();
-    if (!input.trim() || loading) return;
-    const userMsg = input.trim(); setInput("");
+  const sendPromptText = async (userMsg) => {
+    if (!userMsg.trim() || loading) return;
     const assistantIndex = messages.length + 1;
     const newMsgs = [
       ...messages,
@@ -243,6 +243,24 @@ export function ChatPanel({
       ];
       persistMessages(errored);
     } finally { setLoading(false); }
+  };
+
+  useEffect(() => {
+    if (!queuedPrompt?.nonce || !threadId) return;
+    if (lastQueuedPromptNonceRef.current === queuedPrompt.nonce) return;
+    if (loading) return;
+
+    lastQueuedPromptNonceRef.current = queuedPrompt.nonce;
+    void sendPromptText(queuedPrompt.text);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queuedPrompt, threadId, loading]);
+
+  const send = async (e) => {
+    e.preventDefault();
+    if (!input.trim() || loading) return;
+    const userMsg = input.trim();
+    setInput("");
+    await sendPromptText(userMsg);
   };
 
   const handleAction = async (messageIndex, actionId) => {
@@ -329,6 +347,7 @@ export function ChatPanel({
   return (
     <div style={isEmbedded ? {
       height: "100%",
+      minHeight: 0,
       background: tokens.bgCard,
       border: `1px solid ${tokens.border}`,
       borderRadius: 20,
@@ -348,6 +367,7 @@ export function ChatPanel({
         borderBottom: `1px solid ${tokens.borderSubtle}`,
         display: "flex", alignItems: "center", justifyContent: "space-between",
         background: isEmbedded ? "rgba(17,17,19,0.92)" : "transparent",
+        flexShrink: 0,
       }}>
         <div>
           <div style={{
@@ -451,7 +471,7 @@ export function ChatPanel({
       </div>
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: "auto", padding: isEmbedded ? "20px 22px 0" : `${tokens.space5} ${tokens.space5} 0` }}>
+      <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: isEmbedded ? "20px 22px 0" : `${tokens.space5} ${tokens.space5} 0` }}>
         {messages.length === 0 && (
           <div style={{ textAlign: "center", padding: isEmbedded ? "84px 0" : "60px 0" }}>
             <div style={{
@@ -714,6 +734,7 @@ export function ChatPanel({
         padding: isEmbedded ? "18px 22px 22px" : `${tokens.space4} ${tokens.space5}`,
         borderTop: `1px solid ${tokens.borderSubtle}`,
         display: "flex", gap: tokens.space2,
+        flexShrink: 0,
       }}>
         <input
           type="text" value={input} onChange={e => setInput(e.target.value)}

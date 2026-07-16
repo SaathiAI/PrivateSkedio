@@ -16,6 +16,10 @@ import { tokens } from '../theme.js';
 // Initialize Supabase client
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const DEV_ADMIN_AUTH_KEY = 'skedio_dev_admin_auth';
+const DEV_ADMIN_USER_ID = 'dev-admin';
+const allowDevAdminAuth = import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEV_ADMIN === '1';
+const frontendOnlyDevAuth = import.meta.env.DEV && import.meta.env.VITE_USE_REAL_BACKEND !== '1';
 
 // Create client - will show error if env vars not set
 let supabase = null;
@@ -70,16 +74,59 @@ const authNoticeStyles = {
   },
 };
 
+const buildDevAdminSession = () => ({
+  access_token: `dev:${DEV_ADMIN_USER_ID}`,
+  user: {
+    id: DEV_ADMIN_USER_ID,
+    email: 'admin@skedio.local',
+    user_metadata: {
+      name: 'Skedio Admin',
+      role: 'admin',
+    },
+    app_metadata: {
+      role: 'admin',
+    },
+  },
+});
+
+const readDevAdminSession = () => {
+  if (!allowDevAdminAuth) return null;
+  try {
+    return localStorage.getItem(DEV_ADMIN_AUTH_KEY) === '1' ? buildDevAdminSession() : null;
+  } catch {
+    return null;
+  }
+};
+
+const setDevAdminSession = () => {
+  if (!allowDevAdminAuth) return null;
+  localStorage.setItem(DEV_ADMIN_AUTH_KEY, '1');
+  return buildDevAdminSession();
+};
+
+const clearDevAdminSession = () => {
+  try {
+    localStorage.removeItem(DEV_ADMIN_AUTH_KEY);
+  } catch {
+    // localStorage may be unavailable in restricted browsers.
+  }
+};
+
 // ─── Auth Context ───
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(null);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(!!supabase);
+  const initialDevSession = frontendOnlyDevAuth ? buildDevAdminSession() : readDevAdminSession();
+  const [session, setSession] = useState(initialDevSession);
+  const [user, setUser] = useState(initialDevSession?.user ?? null);
+  const [loading, setLoading] = useState(!initialDevSession && !!supabase);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (initialDevSession) {
+      return;
+    }
+
     if (!supabase) {
       console.warn('Supabase not initialized - checking .env file');
       return;
@@ -122,6 +169,21 @@ export function AuthProvider({ children }) {
     error,
     supabase,
     isAuthenticated: !!session,
+    isDevAdmin: session?.access_token?.startsWith('dev:') || false,
+    signInAsDevAdmin: () => {
+      const nextSession = setDevAdminSession();
+      if (!nextSession) return false;
+      setSession(nextSession);
+      setUser(nextSession.user);
+      setLoading(false);
+      setError(null);
+      return true;
+    },
+    signOutDevAdmin: () => {
+      clearDevAdminSession();
+      setSession(null);
+      setUser(null);
+    },
   };
 
   return (
@@ -145,16 +207,20 @@ export function getSupabase() {
 }
 
 export function getAccessToken() {
+  const devSession = readDevAdminSession();
+  if (devSession) return Promise.resolve(devSession.access_token);
   return supabase?.auth.getSession().then(({ data }) => data.session?.access_token);
 }
 
 // ─── API Helper with Auth ───
 export async function authFetch(url, options = {}) {
-  if (!supabase) {
+  const devSession = readDevAdminSession();
+
+  if (!supabase && !devSession) {
     throw new Error('Supabase not configured');
   }
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const session = devSession || (await supabase.auth.getSession()).data.session;
   
   const headers = {
     'Content-Type': 'application/json',
@@ -163,6 +229,9 @@ export async function authFetch(url, options = {}) {
 
   if (session?.access_token) {
     headers['Authorization'] = `Bearer ${session.access_token}`;
+    if (session.access_token.startsWith('dev:')) {
+      headers['X-Skedio-Dev-User'] = session.user?.id || DEV_ADMIN_USER_ID;
+    }
   }
 
   const response = await fetch(url, {
@@ -171,6 +240,9 @@ export async function authFetch(url, options = {}) {
   });
 
   if (response.status === 401) {
+    if (session?.access_token?.startsWith('dev:')) {
+      return response;
+    }
     const { data } = await supabase.auth.refreshSession();
     const retryToken = data?.session?.access_token;
     if (retryToken && retryToken !== session?.access_token) {
@@ -418,9 +490,14 @@ export function SignUp({ onSuccess }) {
 }
 
 export function SignOut() {
-  const { user } = useAuth();
+  const { user, isDevAdmin, signOutDevAdmin } = useAuth();
 
   const handleSignOut = async () => {
+    if (isDevAdmin) {
+      signOutDevAdmin?.();
+      window.location.reload();
+      return;
+    }
     if (!supabase) return;
     try {
       clearClientUserState(localStorage, user?.id);
@@ -520,6 +597,11 @@ export function AuthGate({ children, fallback }) {
 
 export function DefaultLoginScreen() {
   const [mode, setMode] = useState('signin');
+  const { signInAsDevAdmin } = useAuth();
+
+  const handleDevAdmin = () => {
+    signInAsDevAdmin?.();
+  };
 
   return (
     <div style={{ flex: 1, display: 'flex', minHeight: '100vh', background: tokens.bg, color: tokens.text }}>
@@ -611,6 +693,39 @@ export function DefaultLoginScreen() {
           </div>
 
           <GoogleSignIn />
+
+          {allowDevAdminAuth && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', margin: `${tokens.space5} 0`, color: tokens.textDim, fontSize: 10, letterSpacing: '0.1em' }}>
+                <div style={{ flex: 1, height: 1, background: tokens.borderSubtle }} />
+                <span style={{ padding: `0 ${tokens.space4}` }}>DEV</span>
+                <div style={{ flex: 1, height: 1, background: tokens.borderSubtle }} />
+              </div>
+
+              <button
+                type="button"
+                onClick={handleDevAdmin}
+                style={{
+                  width: '100%',
+                  padding: '13px',
+                  background: tokens.accentMuted,
+                  color: tokens.text,
+                  border: `1px solid ${tokens.accentBorder}`,
+                  borderRadius: 12,
+                  fontSize: 14,
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  boxShadow: '0 10px 24px rgba(140,153,236,0.16)',
+                }}
+              >
+                Continue as sample admin
+              </button>
+              <p style={{ marginTop: 10, color: tokens.textMuted, fontSize: 12, lineHeight: 1.5 }}>
+                Local shortcut. Backend APIs require <code>SAATHI_DEV_AUTH_BYPASS=1</code>.
+              </p>
+            </>
+          )}
 
           {!supabaseUrl && (
             <div style={{

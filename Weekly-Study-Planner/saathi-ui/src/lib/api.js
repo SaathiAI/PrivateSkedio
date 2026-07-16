@@ -4,8 +4,8 @@ export { authFetch };
 
 export const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-const REQUEST_TIMEOUT_MS = 15000;
-const BACKEND_WAKE_TIMEOUT_MS = 65000;
+const REQUEST_TIMEOUT_MS = import.meta.env.DEV ? 3000 : 15000;
+const BACKEND_WAKE_TIMEOUT_MS = import.meta.env.DEV ? 0 : 65000;
 const BACKEND_WAKE_RETRY_MS = 2500;
 
 const sleep = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -35,6 +35,9 @@ export const requestWithTimeout = async (
       error instanceof TypeError;
 
     if (shouldWarmRetry) {
+      if (import.meta.env.DEV) {
+        throw error;
+      }
       await waitForBackendReady();
       return runAttempt();
     }

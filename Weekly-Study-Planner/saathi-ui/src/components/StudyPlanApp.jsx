@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AuthGate, DefaultLoginScreen, useAuth } from "./Auth.jsx";
 import { CalendarGrid } from "./CalendarGrid.jsx";
 import { ChatPanel } from "./ChatPanel.jsx";
@@ -7,7 +7,6 @@ import { ViewErrorBoundary } from "./ErrorBoundary.jsx";
 import { GlobalStyles } from "./GlobalStyles.jsx";
 import { KnowledgeGraphModal } from "./KnowledgeGraph.jsx";
 import { PlanHistoryView } from "./PlanHistoryView.jsx";
-import { ProfileDashboardModal } from "./ProfileDashboardModal.jsx";
 import { SettingsView } from "./SettingsView.jsx";
 import { startTimer } from "../lib/perf.js";
 import { SessionChecklistModal } from "./SessionChecklistModal.jsx";
@@ -23,12 +22,84 @@ import { tokens } from "../theme.js";
 const generateThreadId = () => `thread_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
 const NAV_ITEMS = [
-  { key: "overview", label: "Overview", icon: GridIcon },
   { key: "planner", label: "Planner", icon: CalendarIcon },
-  { key: "progress", label: "Progress", icon: FocusIcon },
-  { key: "archive", label: "Plan archive", icon: ArchiveIcon },
-  { key: "connections", label: "Connections", icon: LinkIcon },
+  { key: "overview", label: "Dashboard", icon: GridIcon },
+  { key: "knowledge", label: "Knowledge graph", icon: KnowledgeIcon },
 ];
+
+const DEV_FRONTEND_ONLY = import.meta.env.DEV && import.meta.env.VITE_USE_REAL_BACKEND !== "1";
+
+const buildDevWorkspace = (today) => {
+  const start = new Date(`${today}T12:00:00`);
+  const days = Array.from({ length: 5 }, (_, index) => {
+    const date = new Date(start);
+    date.setDate(start.getDate() + index);
+    const dateValue = date.toISOString().split("T")[0];
+    return {
+      date: dateValue,
+      capacity_hours: 5,
+      total_hours: index === 2 ? 3 : 4,
+      sessions: [
+        {
+          session_id: `dev-${index}-math`,
+          title: index === 0 ? "Algebra revision" : "Focused study block",
+          subject: index % 2 === 0 ? "Mathematics" : "Science",
+          topic: index % 2 === 0 ? "Quadratic equations" : "Light and electricity",
+          start_time: "09:30",
+          end_time: "11:00",
+          status: index === 0 ? "done" : "pending",
+          completed: index === 0,
+          contents: [
+            {
+              name: index % 2 === 0 ? "Formula practice" : "Concept notes",
+              status: index === 0 ? "done" : "pending",
+              subjects: [index % 2 === 0 ? "Mathematics" : "Science"],
+              match_key: `dev-content-${index}-a`,
+            },
+          ],
+        },
+        {
+          session_id: `dev-${index}-review`,
+          title: "Review and recall",
+          subject: index % 2 === 0 ? "English" : "Social Science",
+          topic: index % 2 === 0 ? "Writing practice" : "History notes",
+          start_time: "14:00",
+          end_time: "15:15",
+          status: "pending",
+          completed: false,
+          contents: [
+            {
+              name: "Active recall",
+              status: "pending",
+              subjects: [index % 2 === 0 ? "English" : "Social Science"],
+              match_key: `dev-content-${index}-b`,
+            },
+          ],
+        },
+      ],
+    };
+  });
+
+  return {
+    plan: normalizePlan({
+      plan_id: "dev-front-end-plan",
+      status: "active",
+      days,
+    }),
+    progress: {
+      by_subject: {
+        Mathematics: [{ status: "done" }, { status: "pending" }, { status: "pending" }],
+        Science: [{ status: "pending" }, { status: "pending" }],
+        English: [{ status: "pending" }],
+      },
+    },
+    stats: {
+      hours_studied: 6.5,
+      total_sessions: 10,
+      days_until_exam: 28,
+    },
+  };
+};
 
 function formatDisplayDate(dateValue) {
   return new Date(`${dateValue}T12:00:00`).toLocaleDateString("en-US", {
@@ -176,30 +247,94 @@ function MetricTile({ label, value, detail, accent = tokens.accent }) {
 }
 
 function SidebarNavButton({ label, active, onClick, icon: Icon }) {
+  const iconNode = Icon();
   return (
     <button
       type="button"
       onClick={onClick}
+      aria-current={active ? "page" : undefined}
+      className="sk-sidebar-item"
       style={{
-        width: "100%",
         display: "flex",
         alignItems: "center",
-        gap: 12,
-        border: "none",
-        background: active ? tokens.bgHover : "transparent",
+        justifyContent: "center",
+        gap: 0,
+        border: `1px solid ${active ? tokens.accentBorder : "transparent"}`,
+        background: active ? tokens.accentMuted : "transparent",
         color: active ? tokens.text : tokens.textMuted,
-        borderRadius: tokens.radiusLg,
-        padding: "12px 14px",
+        borderRadius: 12,
+        width: "100%",
+        height: 42,
+        padding: 0,
         cursor: "pointer",
         fontFamily: "inherit",
         fontSize: 14,
         fontWeight: active ? 600 : 500,
         textAlign: "left",
+        position: "relative",
       }}
+      title={label}
     >
-      <Icon />
-      <span>{label}</span>
+      <span className="sk-sidebar-icon" aria-hidden="true">{iconNode}</span>
+      <span className="sk-sidebar-label">{label}</span>
     </button>
+  );
+}
+
+function YggdrasilLogo({ size = 42, awake = false }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 64 64"
+      fill="none"
+      aria-hidden="true"
+      className={`sk-logo-mark ${awake ? "is-awake" : ""}`}
+    >
+      <g className="sk-logo-wood">
+        <path
+          d="M32 28 20 16M32 28l12-12M32 28v17"
+          stroke="#151827"
+          strokeWidth="5.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M32 45c-4 4-8 5-13 5M32 45c4 4 8 5 13 5M32 45c-1 5-3 8-7 11M32 45c1 5 3 8 7 11"
+          stroke="#151827"
+          strokeWidth="2.8"
+          strokeLinecap="round"
+        />
+      </g>
+      <path
+        className="sk-logo-root-core"
+        d="M32 57c-2.2-2.8-2.2-4.9 0-7.4 2.2 2.5 2.2 4.6 0 7.4Z"
+        fill="#8C99EC"
+        stroke="#151827"
+        strokeWidth="1.6"
+      />
+      <g className="sk-logo-leaf sk-logo-leaf-top">
+        <path d="M32 5c5 5.2 5 10.3 0 15.5C27 15.3 27 10.2 32 5Z" fill="#9EAD78" />
+      </g>
+      <g className="sk-logo-leaf sk-logo-leaf-left">
+        <path d="M16 17c5.5.8 8.5 3.8 9.2 9.2C19.8 25.5 16.8 22.5 16 17Z" fill="#8D9F68" />
+      </g>
+      <g className="sk-logo-leaf sk-logo-leaf-right">
+        <path d="M48 17c-.8 5.5-3.8 8.5-9.2 9.2C39.5 20.8 42.5 17.8 48 17Z" fill="#8D9F68" />
+      </g>
+      <g className="sk-logo-leaf sk-logo-leaf-outer-left">
+        <path d="M11 30c4.4-.7 7.4.9 9.1 4.8C15.8 35.4 12.8 33.8 11 30Z" fill="#BCC2F4" />
+      </g>
+      <g className="sk-logo-leaf sk-logo-leaf-outer-right">
+        <path d="M53 30c-1.8 3.8-4.8 5.4-9.1 4.8C45.6 30.9 48.6 29.3 53 30Z" fill="#BCC2F4" />
+      </g>
+      <g className="sk-logo-leaf sk-logo-leaf-inner-left">
+        <path d="M24 30c3.1.6 4.8 2.4 5.2 5.5C26.1 34.9 24.4 33.1 24 30Z" fill="#9EAD78" />
+      </g>
+      <g className="sk-logo-leaf sk-logo-leaf-inner-right">
+        <path d="M40 30c-.4 3.1-2.1 4.9-5.2 5.5C35.2 32.4 36.9 30.6 40 30Z" fill="#9EAD78" />
+      </g>
+    </svg>
   );
 }
 
@@ -705,7 +840,8 @@ function StatusPill({ text, tone = "default" }) {
 }
 
 export function StudyPlanApp() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, supabase, isDevAdmin, signOutDevAdmin } = useAuth();
+  const sidebarRef = useRef(null);
   const userId = user?.id || null;
   const [toast, setToast] = useState(null);
   const [plans, setPlans] = useState([]);
@@ -719,10 +855,16 @@ export function StudyPlanApp() {
     error: "",
     checkedAt: null,
   });
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("planner");
   const [showAI, setShowAI] = useState(false);
+  const [assistantWidth, setAssistantWidth] = useState(520);
   const [focusMode, setFocusMode] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
+  const [logoAwake, setLogoAwake] = useState(false);
+  const [assistantLauncherInput, setAssistantLauncherInput] = useState("");
+  const [queuedAssistantPrompt, setQueuedAssistantPrompt] = useState(null);
+  const [launcherCenterX, setLauncherCenterX] = useState(null);
+  const [settingsSection, setSettingsSection] = useState("profile");
+  const [sidebarSettingsOpen, setSidebarSettingsOpen] = useState(false);
   const [showGraph, setShowGraph] = useState(false);
   const [selectedSessionOverlay, setSelectedSessionOverlay] = useState(null);
   const [threadId, setThreadId] = useState(null);
@@ -756,20 +898,14 @@ export function StudyPlanApp() {
   const profileLabel = getProfileLabel(user);
   const profileInitials = getProfileInitials(user);
 
-  const progressTopicCount = useMemo(() => Object.values(progress?.by_subject || {}).reduce(
-    (count, items) => count + (Array.isArray(items) ? items.length : 0),
-    0,
-  ), [progress]);
-
-  const progressDoneCount = useMemo(() => Object.values(progress?.by_subject || {}).reduce(
-    (count, items) => count + (Array.isArray(items) ? items.filter(item => item?.status === "done").length : 0),
-    0,
-  ), [progress]);
-
   const visiblePlan = draftPlan || plan;
   const nextSession = getUpcomingSession(visiblePlan);
 
   const fetchAllPlans = async () => {
+    if (DEV_FRONTEND_ONLY) {
+      setPlans([buildDevWorkspace(today).plan]);
+      return;
+    }
     try {
       setPlans(await planApi.listAll());
     } catch {
@@ -778,6 +914,10 @@ export function StudyPlanApp() {
   };
 
   const fetchProgress = async () => {
+    if (DEV_FRONTEND_ONLY) {
+      setProgress(buildDevWorkspace(today).progress);
+      return;
+    }
     try {
       setProgress(await planApi.getProgress());
     } catch {
@@ -786,6 +926,10 @@ export function StudyPlanApp() {
   };
 
   const fetchStats = async () => {
+    if (DEV_FRONTEND_ONLY) {
+      setStats(buildDevWorkspace(today).stats);
+      return;
+    }
     try {
       setStats(await statsApi.dashboard());
     } catch {
@@ -794,6 +938,19 @@ export function StudyPlanApp() {
   };
 
   const fetchExternalEvents = async () => {
+    if (DEV_FRONTEND_ONLY) {
+      setExternalEvents([
+        {
+          id: "dev-blocker-1",
+          date: today,
+          title: "School assembly",
+          start_time: "12:00",
+          end_time: "12:45",
+        },
+      ]);
+      setCalendarSync({ loading: false, error: "", checkedAt: new Date() });
+      return;
+    }
     setCalendarSync(prev => ({ ...prev, loading: true, error: "" }));
     try {
       const start = new Date();
@@ -818,6 +975,13 @@ export function StudyPlanApp() {
   };
 
   const fetchWorkspaceBootstrap = async () => {
+    if (DEV_FRONTEND_ONLY) {
+      const data = buildDevWorkspace(today);
+      setPlan(data.plan);
+      setProgress(data.progress);
+      setStats(data.stats);
+      return;
+    }
     const stop = startTimer("workspace:bootstrap");
     const data = await planApi.bootstrap();
     stop();
@@ -828,6 +992,25 @@ export function StudyPlanApp() {
 
   const hydrateCoreWorkspace = async () => {
     setLoading(true);
+    if (DEV_FRONTEND_ONLY) {
+      setBootMessage("Loading frontend preview...");
+      const data = buildDevWorkspace(today);
+      setPlan(data.plan);
+      setProgress(data.progress);
+      setStats(data.stats);
+      setExternalEvents([
+        {
+          id: "dev-blocker-1",
+          date: today,
+          title: "School assembly",
+          start_time: "12:00",
+          end_time: "12:45",
+        },
+      ]);
+      setCalendarSync({ loading: false, error: "", checkedAt: new Date() });
+      setLoading(false);
+      return;
+    }
     setBootMessage("Waking up SkedioAI...");
     try {
       setBootMessage("Loading your study plan...");
@@ -866,7 +1049,8 @@ export function StudyPlanApp() {
     const reviewAction = params.get("review_action");
     if (calendarStatus) {
       window.history.replaceState({}, "", "/");
-      setActiveTab("connections");
+      setActiveTab("settings");
+      setSettingsSection("integrations");
       if (calendarStatus === "connected") {
         setToast("Calendar connected! ✓");
         fetchExternalEvents();
@@ -888,6 +1072,30 @@ export function StudyPlanApp() {
       window.history.replaceState({}, "", "/");
     }
   }, [threadId, userId]);
+
+  useEffect(() => {
+    const node = sidebarRef.current;
+    if (!node) return undefined;
+
+    const updateLauncherCenter = () => {
+      const rect = node.getBoundingClientRect();
+      const dockEdge = rect.right;
+      setLauncherCenterX(dockEdge + ((window.innerWidth - dockEdge) / 2));
+    };
+
+    updateLauncherCenter();
+
+    const observer = new ResizeObserver(() => {
+      updateLauncherCenter();
+    });
+    observer.observe(node);
+    window.addEventListener("resize", updateLauncherCenter);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateLauncherCenter);
+    };
+  }, []);
 
   const handleSessionToggle = useCallback((session, apiData, newSubtopicsCompleted, newCompleted) => {
     setPlan(prev => {
@@ -953,12 +1161,72 @@ export function StudyPlanApp() {
   }, []);
 
   const openAssistant = useCallback(() => {
+    setQueuedAssistantPrompt(null);
     setShowAI(true);
   }, []);
+
+  const closeAssistant = useCallback(() => {
+    setQueuedAssistantPrompt(null);
+    setShowAI(false);
+  }, []);
+
+  const handleAssistantLauncherSubmit = useCallback((event) => {
+    event.preventDefault();
+    const prompt = assistantLauncherInput.trim();
+    if (!prompt) {
+      setShowAI(true);
+      return;
+    }
+    setQueuedAssistantPrompt({
+      text: prompt,
+      nonce: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    });
+    setAssistantLauncherInput("");
+    setLogoAwake(true);
+    setShowAI(true);
+  }, [assistantLauncherInput]);
 
   const openPlanner = useCallback(() => {
     setActiveTab("planner");
   }, []);
+
+  const openSettings = useCallback((section = "profile") => {
+    setSidebarSettingsOpen(true);
+    setSettingsSection(section);
+    setActiveTab("settings");
+  }, []);
+
+  const handleSidebarLogout = useCallback(async () => {
+    try {
+      if (isDevAdmin) {
+        signOutDevAdmin?.();
+        return;
+      }
+      if (supabase) {
+        await supabase.auth.signOut({ scope: "local" });
+      }
+    } catch (error) {
+      setToast(error?.message || "Could not log out");
+      setTimeout(() => setToast(null), 5000);
+    }
+  }, [isDevAdmin, signOutDevAdmin, supabase]);
+
+  const beginAssistantResize = useCallback((event) => {
+    event.preventDefault();
+    const startX = event.clientX;
+    const startWidth = assistantWidth;
+    const onMove = (moveEvent) => {
+      const delta = startX - moveEvent.clientX;
+      const nextWidth = Math.min(760, Math.max(380, startWidth + delta));
+      setAssistantWidth(nextWidth);
+    };
+    const onUp = () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  }, [assistantWidth]);
 
   if (authLoading || (loading && plans.length === 0)) {
     return (
@@ -987,154 +1255,153 @@ export function StudyPlanApp() {
     <AuthGate fallback={<DefaultLoginScreen />}>
       <GlobalStyles />
       <div style={{ display: "flex", minHeight: "100vh", background: tokens.bg, color: tokens.text }}>
-        <aside style={{
-          width: 248,
-          borderRight: `1px solid ${tokens.sidebarBorder}`,
-          background: tokens.sidebarBg,
-          display: "flex",
-          flexDirection: "column",
-          padding: "18px 16px 16px",
-          flexShrink: 0,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 26 }}>
-            <div style={{
-              width: 36,
-              height: 36,
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, #ddd3ff 0%, #b9afff 100%)",
-              color: tokens.bg,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}>
-              <CapIcon />
-            </div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-              <span style={{
-                fontSize: 22,
-                fontFamily: "'Playfair Display', serif",
-                fontWeight: 600,
-                color: tokens.text,
-              }}>
-                skedio
-              </span>
-              <span style={{ fontSize: 12, color: tokens.textDim, letterSpacing: "0.12em", textTransform: "uppercase" }}>
-                AI
-              </span>
-            </div>
-          </div>
+        <aside ref={sidebarRef} className="sk-app-sidebar">
+          <button
+            type="button"
+            onClick={() => {
+              setLogoAwake(prev => !prev);
+              setActiveTab("planner");
+            }}
+            className="sk-sidebar-brand"
+            aria-pressed={logoAwake}
+            aria-label="Open planner"
+          >
+            <span className="sk-sidebar-logo">
+              <YggdrasilLogo size={38} awake={logoAwake} />
+            </span>
+            <span className="sk-sidebar-brand-copy">
+              <span className="sk-sidebar-brand-title">SkedioAI</span>
+              <span className="sk-sidebar-brand-subtitle">study planner</span>
+            </span>
+          </button>
 
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            borderRadius: tokens.radiusXl,
-            border: `1px solid ${tokens.border}`,
-            padding: "12px 14px",
-            color: tokens.textMuted,
-            marginBottom: 22,
-          }}>
-            <SearchIcon />
-            <span style={{ flex: 1 }}>Search</span>
-            <span style={{ fontSize: 11, color: tokens.textDim }}>⌘ K</span>
-          </div>
-
-          <div style={{ fontSize: 11, color: tokens.textDim, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 12 }}>
-            Workspace
-          </div>
-          <nav style={{ display: "grid", gap: 6 }}>
+          <nav aria-label="Primary" className="sk-sidebar-nav">
             {NAV_ITEMS.map(item => (
               <SidebarNavButton
                 key={item.key}
                 label={item.label}
                 icon={item.icon}
-                active={activeTab === item.key}
+                active={
+                  activeTab === item.key
+                  || (item.key === "knowledge" && showGraph)
+                }
                 onClick={() => setActiveTab(item.key)}
               />
             ))}
-            <SidebarNavButton
-              label="Knowledge map"
-              icon={KnowledgeIcon}
-              active={showGraph}
-              onClick={() => setShowGraph(true)}
-            />
-          </nav>
-
-          <div style={{ marginTop: 24, borderTop: `1px solid ${tokens.borderSubtle}`, paddingTop: 24 }}>
-            <div style={{ fontSize: 11, color: tokens.textDim, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 12 }}>
-              Assistant
-            </div>
-            <ActionButton onClick={openAssistant} style={{ width: "100%", justifyContent: "center" }}>
-              <ChatIcon />
-              Open planner tray
-            </ActionButton>
-          </div>
-
-          <div style={{ marginTop: "auto", paddingTop: 20 }}>
-            <div style={{
-              borderTop: `1px solid ${tokens.borderSubtle}`,
-              paddingTop: 14,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 12,
-            }}>
+            <div className={`sk-sidebar-settings-group ${sidebarSettingsOpen ? "is-open" : ""}`}>
               <button
                 type="button"
-                onClick={() => setShowProfile(true)}
+                onClick={() => {
+                  setSidebarSettingsOpen(prev => {
+                    const nextOpen = !prev;
+                    if (nextOpen) {
+                      setActiveTab("settings");
+                      setSettingsSection(currentSection => currentSection || "profile");
+                    }
+                    return nextOpen;
+                  });
+                }}
+                className="sk-sidebar-item sk-sidebar-settings-trigger"
+                aria-expanded={sidebarSettingsOpen}
+                aria-current={activeTab === "settings" ? "page" : undefined}
+                title="Settings"
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 12,
-                  background: "transparent",
-                  border: "none",
+                  justifyContent: "center",
+                  gap: 0,
+                  border: `1px solid ${activeTab === "settings" ? tokens.accentBorder : "transparent"}`,
+                  background: activeTab === "settings" ? tokens.accentMuted : "transparent",
+                  color: activeTab === "settings" ? tokens.text : tokens.textMuted,
+                  borderRadius: 12,
+                  width: "100%",
+                  height: 42,
                   padding: 0,
                   cursor: "pointer",
-                  minWidth: 0,
+                  fontFamily: "inherit",
+                  fontSize: 14,
+                  fontWeight: activeTab === "settings" ? 600 : 500,
                   textAlign: "left",
-                  color: "inherit",
+                  position: "relative",
+                }}
+              >
+                <span className="sk-sidebar-icon" aria-hidden="true"><SettingsIcon /></span>
+                <span className="sk-sidebar-label">Settings</span>
+                <span className="sk-sidebar-expand-mark" aria-hidden="true">
+                  {sidebarSettingsOpen ? "-" : "+"}
+                </span>
+              </button>
+              <div className="sk-sidebar-settings-children">
+                {[
+                  ["profile", "Profile"],
+                  ["security", "Security"],
+                  ["integrations", "Integrations"],
+                  ["billing", "Billing"],
+                  ["archive", "Past plans"],
+                  ["logout", "Log out"],
+                ].map(([section, label]) => {
+                  const activeChild =
+                    (section === "archive" && activeTab === "archive")
+                    || (section !== "archive" && section !== "logout" && activeTab === "settings" && settingsSection === section);
+                  return (
+                    <button
+                      key={`${section}-${label}`}
+                      type="button"
+                      onClick={() => {
+                        if (section === "archive") {
+                          setSidebarSettingsOpen(true);
+                          setActiveTab("archive");
+                          fetchAllPlans();
+                          return;
+                        }
+                        if (section === "logout") {
+                          handleSidebarLogout();
+                          return;
+                        }
+                        openSettings(section);
+                      }}
+                      aria-current={activeChild ? "page" : undefined}
+                      className="sk-sidebar-settings-child"
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </nav>
+
+          <div className="sk-sidebar-bottom">
+              <button
+                type="button"
+                onClick={() => openSettings("profile")}
+                className="sk-sidebar-profile"
+                style={{
+                  background: activeTab === "settings" && settingsSection === "profile" ? tokens.accentMuted : tokens.bgElevated,
+                  border: `1px solid ${activeTab === "settings" && settingsSection === "profile" ? tokens.accentBorder : tokens.border}`,
                 }}
                 title={profileLabel}
               >
                 <div style={{
-                  width: 34,
-                  height: 34,
+                  width: 32,
+                  height: 32,
                   borderRadius: "50%",
-                  background: "#d8c6a9",
-                  color: tokens.bg,
+                  background: "#e887ad",
+                  color: "#fffefa",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  fontSize: 14,
                   fontWeight: 700,
                   flexShrink: 0,
                 }}>
                   {profileInitials}
                 </div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ color: tokens.text, fontSize: 14, fontWeight: 600 }}>Maya Chen</div>
-                  <div style={{ color: tokens.textDim, fontSize: 11 }}>Exams · {stats?.days_until_exam ?? 28} days</div>
-                </div>
+                <span className="sk-sidebar-user-copy">
+                  <span className="sk-sidebar-user-name">{profileLabel}</span>
+                  <span className="sk-sidebar-user-meta">Profile</span>
+                </span>
               </button>
-              <button
-                type="button"
-                onClick={() => setFocusMode(prev => !prev)}
-                style={{
-                  border: `1px solid ${tokens.border}`,
-                  background: "transparent",
-                  color: focusMode ? tokens.text : tokens.textMuted,
-                  borderRadius: tokens.radiusFull,
-                  width: 36,
-                  height: 36,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                }}
-                title="Focus mode"
-              >
-                <FocusIcon />
-              </button>
-            </div>
           </div>
         </aside>
 
@@ -1244,6 +1511,28 @@ export function StudyPlanApp() {
                 />
               )}
 
+              {activeTab === "knowledge" && (
+                <SurfaceCard style={{ padding: 36, minHeight: "calc(100vh - 170px)" }}>
+                  <Eyebrow color={tokens.greenText}>Knowledge graph</Eyebrow>
+                  <div style={{
+                    fontSize: 54,
+                    lineHeight: 1,
+                    color: tokens.text,
+                    marginBottom: 16,
+                    fontWeight: 700,
+                  }}>
+                    Your learning map stays rooted here.
+                  </div>
+                  <p style={{ fontSize: 18, color: tokens.textSecondary, lineHeight: 1.65, maxWidth: 760, marginBottom: 24 }}>
+                    Open the graph view to inspect subjects, chapters, subtopics, and progress relationships without turning the planner into a noisy dashboard.
+                  </p>
+                  <ActionButton onClick={() => setShowGraph(true)}>
+                    <KnowledgeIcon />
+                    Open graph surface
+                  </ActionButton>
+                </SurfaceCard>
+              )}
+
               {activeTab === "archive" && (
                 <div style={{ paddingTop: 4 }}>
                   <PlanHistoryView
@@ -1256,41 +1545,134 @@ export function StudyPlanApp() {
                 </div>
               )}
 
-              {activeTab === "connections" && (
-                <div style={{ paddingTop: 6 }}>
-                  <SettingsView onBack={() => setActiveTab("overview")} />
+              {activeTab === "settings" && (
+                <div style={{ paddingTop: 6, animation: "settingsSlideIn 0.24s cubic-bezier(0.16, 1, 0.3, 1)" }}>
+                  <SettingsView
+                    onBack={() => setActiveTab("planner")}
+                    initialSection={settingsSection}
+                    onSectionChange={setSettingsSection}
+                    onOpenPastPlans={() => {
+                      setActiveTab("archive");
+                      fetchAllPlans();
+                    }}
+                  />
                 </div>
               )}
             </ViewErrorBoundary>
           </div>
 
+          {!showAI && (
+            <form
+              onSubmit={handleAssistantLauncherSubmit}
+              className="sk-ai-launcher"
+              style={{
+                position: "fixed",
+                left: launcherCenterX ?? window.innerWidth / 2,
+                bottom: 24,
+                transform: "translateX(-50%)",
+                width: "min(680px, calc(100% - 72px))",
+                height: 70,
+                borderRadius: 24,
+                border: `1px solid ${tokens.accentBorder}`,
+                background: "rgba(255, 255, 250, 0.94)",
+                backdropFilter: "blur(18px)",
+                WebkitBackdropFilter: "blur(18px)",
+                boxShadow: "0 20px 52px rgba(76, 88, 132, 0.18)",
+                zIndex: tokens.zIndexSticky,
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+                padding: "10px 12px 10px 18px",
+              }}
+            >
+              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 42, height: 42, flexShrink: 0 }}>
+                <YggdrasilLogo size={36} awake={logoAwake} />
+              </div>
+              <input
+                type="text"
+                value={assistantLauncherInput}
+                onChange={event => setAssistantLauncherInput(event.target.value)}
+                onFocus={() => setLogoAwake(true)}
+                placeholder="Ask SkedioAI about your plan, blockers, or next study move..."
+                aria-label="Ask SkedioAI"
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  border: "none",
+                  outline: "none",
+                  background: "transparent",
+                  color: tokens.text,
+                  fontSize: 15,
+                  fontFamily: "inherit",
+                }}
+              />
+              <button
+                type="submit"
+                aria-label={assistantLauncherInput.trim() ? "Send message to SkedioAI" : "Open SkedioAI assistant"}
+                style={{
+                  width: 46,
+                  height: 46,
+                  borderRadius: 16,
+                  border: `1px solid ${assistantLauncherInput.trim() ? tokens.accentBorder : tokens.border}`,
+                  background: assistantLauncherInput.trim() ? tokens.accentMuted : tokens.bgCard,
+                  color: assistantLauncherInput.trim() ? tokens.accentHover : tokens.textMuted,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  cursor: "pointer",
+                }}
+              >
+                <ArrowUpRightIcon />
+              </button>
+            </form>
+          )}
+
           {showAI && (
             <div
               style={{
-                position: "absolute",
-                inset: 0,
-                background: "rgba(6,6,8,0.58)",
-                backdropFilter: "blur(8px)",
-                WebkitBackdropFilter: "blur(8px)",
+                position: "fixed",
+                top: 14,
+                right: 14,
+                bottom: 14,
+                width: assistantWidth,
+                maxWidth: "calc(100vw - 108px)",
+                minWidth: 380,
+                background: tokens.bgCard,
                 zIndex: tokens.zIndexDrawer,
                 display: "flex",
-                justifyContent: "center",
-                alignItems: "flex-start",
-                padding: "20px 20px 32px",
+                boxShadow: "-24px 0 54px rgba(76, 88, 132, 0.18)",
+                border: `1px solid ${tokens.border}`,
+                borderRadius: 24,
+                animation: "assistantPanelIn 0.26s cubic-bezier(0.16, 1, 0.3, 1)",
               }}
-              onClick={() => setShowAI(false)}
             >
+              <button
+                type="button"
+                aria-label="Resize assistant panel"
+                onMouseDown={beginAssistantResize}
+                style={{
+                  position: "absolute",
+                  left: -6,
+                  top: 0,
+                  bottom: 0,
+                  width: 12,
+                  border: "none",
+                  background: "transparent",
+                  cursor: "col-resize",
+                  zIndex: 2,
+                }}
+              />
               <div
                 style={{
-                  width: "min(1040px, 100%)",
-                  height: "min(78vh, 860px)",
-                  animation: "modalScaleUp 0.24s cubic-bezier(0.16, 1, 0.3, 1)",
+                  width: "100%",
+                  height: "100%",
+                  padding: 14,
                 }}
-                onClick={event => event.stopPropagation()}
               >
                 <ChatPanel
                   threadId={threadId}
-                  onClose={() => setShowAI(false)}
+                  onClose={closeAssistant}
                   onPlanCommitted={handleRefreshAll}
                   onDraftStateChange={handleDraftStateChange}
                   devToolsEnabled={devToolsEnabled}
@@ -1300,15 +1682,14 @@ export function StudyPlanApp() {
                   devReviewPreviewPayload={devReviewPreviewPayload}
                   emailReviewRequest={emailReviewRequest}
                   isEmbedded={true}
+                  drawerWidth={assistantWidth}
+                  onDrawerWidthChange={setAssistantWidth}
+                  queuedPrompt={queuedAssistantPrompt}
                 />
               </div>
             </div>
           )}
         </main>
-
-        {showProfile && (
-          <ProfileDashboardModal stats={stats} onClose={() => setShowProfile(false)} userId={userId} />
-        )}
 
         {showGraph && (
           <ViewErrorBoundary
@@ -1365,22 +1746,18 @@ function FocusIcon() {
   );
 }
 
-function ArchiveIcon() {
+function SettingsIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 8h16" />
-      <rect x="3" y="4" width="18" height="4" rx="1.5" />
-      <path d="M6 8v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8" />
-      <path d="M10 12h4" />
-    </svg>
-  );
-}
-
-function LinkIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11 4.93" />
-      <path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07L13 19.07" />
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 2.75v2.1" />
+      <path d="M12 19.15v2.1" />
+      <path d="M2.75 12h2.1" />
+      <path d="M19.15 12h2.1" />
+      <path d="m5.46 5.46 1.48 1.48" />
+      <path d="m17.06 17.06 1.48 1.48" />
+      <path d="m18.54 5.46-1.48 1.48" />
+      <path d="m6.94 17.06-1.48 1.48" />
     </svg>
   );
 }
@@ -1397,19 +1774,19 @@ function KnowledgeIcon() {
   );
 }
 
-function ChatIcon() {
+function ArrowUpRightIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M7 17 17 7" />
+      <path d="M8 7h9v9" />
     </svg>
   );
 }
 
-function SearchIcon() {
+function ChatIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="7" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
     </svg>
   );
 }
@@ -1421,15 +1798,6 @@ function RefreshIcon() {
       <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
       <path d="M3 22v-6h6" />
       <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
-    </svg>
-  );
-}
-
-function CapIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m2 9 10-5 10 5-10 5Z" />
-      <path d="M6 11.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5" />
     </svg>
   );
 }
