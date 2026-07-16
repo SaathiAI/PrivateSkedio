@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { tokens, getSubjectPalette } from "../theme.js";
+import { tokens } from "../theme.js";
 
 function timeToPixels(timeStr, baseHour = 7, pixelsPerHour = 60) {
   if (!timeStr) return 0;
@@ -17,6 +17,23 @@ function CheckIcon({ size = 12 }) {
   );
 }
 
+function getCalendarPalette(subject = "") {
+  const key = subject.toLowerCase();
+  if (key.includes("math")) {
+    return { bg: "rgba(33, 184, 146, 0.12)", border: "rgba(33, 184, 146, 0.42)", text: "#147a63" };
+  }
+  if (key.includes("science")) {
+    return { bg: "rgba(217, 144, 33, 0.13)", border: "rgba(217, 144, 33, 0.36)", text: "#8a5a10" };
+  }
+  if (key.includes("english")) {
+    return { bg: "rgba(140, 153, 236, 0.16)", border: "rgba(140, 153, 236, 0.42)", text: "#5f69c8" };
+  }
+  if (key.includes("social")) {
+    return { bg: "rgba(86, 173, 196, 0.14)", border: "rgba(86, 173, 196, 0.38)", text: "#2f7890" };
+  }
+  return { bg: tokens.bgElevated, border: tokens.borderHover, text: tokens.textSecondary };
+}
+
 export function CalendarGrid({
   allDays,
   today,
@@ -25,9 +42,9 @@ export function CalendarGrid({
   externalEvents = [],
   draftMode = false,
 }) {
-  const baseHour = 6;
-  const endHour = 23;
-  const pixelsPerHour = 80;
+  const baseHour = 8;
+  const endHour = 19;
+  const pixelsPerHour = 72;
   const hours = Array.from({ length: endHour - baseHour + 1 }, (_, i) => baseHour + i);
 
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -108,19 +125,79 @@ export function CalendarGrid({
   const currentMinute = currentTime.getMinutes();
   const currentTotalHours = currentHour + (currentMinute / 60);
   const currentTimePixels = (currentTotalHours - baseHour) * pixelsPerHour;
+  const calendarHeight = (endHour - baseHour + 1) * pixelsPerHour;
+  const currentTimeBeforeRange = currentTimePixels < 0;
+  const currentTimeAfterRange = currentTimePixels > calendarHeight;
+  const currentTimeMarkerPixels = currentTimeBeforeRange
+    ? 0
+    : currentTimeAfterRange
+      ? calendarHeight
+      : currentTimePixels;
+  const markerNearBottom = currentTimeMarkerPixels > calendarHeight - 22;
+  const todayColumnIndex = displayDays.findIndex(day => day.date === today);
+  const monthLabel = new Date(`${displayDays[0].date}T12:00:00`).toLocaleDateString("en-US", {
+    month: "long",
+  });
 
   return (
     <div style={{
-      background: tokens.bg, display: "flex", flexDirection: "column",
-      height: "100%", width: "100%", flex: 1, overflow: "auto",
+      background: tokens.bgCard,
+      display: "flex",
+      flexDirection: "column",
+      height: "100%",
+      width: "100%",
+      flex: 1,
+      overflow: "hidden",
     }}>
-      {/* Header axis -> Days */}
       <div style={{
-        display: "flex", borderBottom: `1px solid ${tokens.borderSubtle}`,
-        position: "sticky", top: 0, background: tokens.glassBg,
-        backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", zIndex: 20
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 16,
+        padding: "18px 20px 14px",
+        borderBottom: `1px solid ${tokens.borderSubtle}`,
+        background: tokens.bgCard,
+        flexShrink: 0,
       }}>
-        <div style={{ width: 56, flexShrink: 0, borderRight: `1px solid ${tokens.borderSubtle}` }} />
+        <div style={{
+          fontSize: 26,
+          lineHeight: 1,
+          fontWeight: 800,
+          color: tokens.text,
+          letterSpacing: "-0.01em",
+        }}>
+          {monthLabel}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{
+            width: 74,
+            height: 20,
+            borderRadius: 5,
+            background: tokens.bgElevated,
+            border: `1px solid ${tokens.borderSubtle}`,
+          }} />
+          {[0, 1, 2].map(index => (
+            <div
+              key={index}
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: 6,
+                background: tokens.bgElevated,
+                border: `1px solid ${tokens.borderSubtle}`,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div style={{
+        display: "flex",
+        borderBottom: `1px solid ${tokens.borderSubtle}`,
+        background: tokens.bgCard,
+        flexShrink: 0,
+      }}>
+        <div style={{ width: 64, flexShrink: 0, borderRight: `1px solid ${tokens.borderSubtle}` }} />
         {displayDays.map(day => {
           const isToday = day.date === today;
           const d = new Date(day.date + "T12:00:00");
@@ -128,68 +205,81 @@ export function CalendarGrid({
           const dateNum = d.getDate();
           return (
             <div key={day.date} style={{
-              flex: 1, minWidth: 120, padding: `${tokens.space4} 0`, textAlign: "center",
+              flex: 1, minWidth: 128, padding: "13px 0 12px", textAlign: "center",
               borderRight: `1px solid ${tokens.borderFaint}`,
-              background: isToday
-                ? `linear-gradient(180deg, ${tokens.accentMuted} 0%, transparent 100%)`
-                : "transparent",
+              background: "transparent",
               position: "relative",
             }}>
-              {isToday && (
-                <div style={{
-                  position: "absolute", bottom: 0, left: "25%", right: "25%", height: 2,
-                  background: `linear-gradient(90deg, transparent, ${tokens.accent}, transparent)`,
-                  borderRadius: 1,
-                }} />
-              )}
               <div style={{
-                fontSize: 10, fontWeight: 600, letterSpacing: "0.08em",
-                color: isToday ? tokens.accent : tokens.textDim,
-                textTransform: "uppercase",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 14,
+                fontWeight: 700,
+                color: isToday ? tokens.text : tokens.textSecondary,
               }}>
-                {weekday}
-              </div>
-              <div style={{
-                fontSize: 20, fontWeight: 600, color: isToday ? tokens.text : tokens.textMuted,
-                marginTop: 2,
-              }}>
+                <span>{weekday}</span>
                 {isToday ? (
                   <span style={{
-                    background: tokens.accent, color: tokens.bg, borderRadius: "50%",
-                    width: 32, height: 32, display: "inline-flex", alignItems: "center", justifyContent: "center",
-                    boxShadow: `0 0 16px ${tokens.accentBorder}`,
+                    background: tokens.red,
+                    color: tokens.bgCard,
+                    borderRadius: "50%",
+                    width: 26,
+                    height: 26,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: `0 0 0 3px ${tokens.redBg}`,
                   }}>
                     {dateNum}
                   </span>
-                ) : dateNum}
+                ) : <span>{dateNum}</span>}
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Grid container */}
-      <div style={{ flex: 1, position: "relative" }}>
-        <div style={{ display: "flex", position: "relative", height: (endHour - baseHour + 1) * pixelsPerHour }}>
+      <div style={{ flex: 1, position: "relative", overflow: "auto" }}>
+        <div style={{ display: "flex", position: "relative", height: calendarHeight }}>
           
           {/* Y-axis Hours */}
           <div style={{
-            width: 56, flexShrink: 0, borderRight: `1px solid ${tokens.borderSubtle}`,
-            position: "sticky", left: 0, background: tokens.bg, zIndex: 15
+            width: 64, flexShrink: 0, borderRight: `1px solid ${tokens.borderSubtle}`,
+            position: "sticky", left: 0, background: tokens.bgCard, zIndex: 15
           }}>
-            {hours.map(hour => (
-              <div key={hour} style={{
-                height: pixelsPerHour, paddingRight: 10, textAlign: "right",
-                fontSize: 10, fontWeight: 500, color: tokens.textDim,
-                transform: "translateY(-6px)"
-              }}>
-                {hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
+            {hours.map((hour, index) => (
+              <div
+                key={hour}
+                style={{
+                  height: pixelsPerHour,
+                  paddingRight: 10,
+                  textAlign: "right",
+                  position: "relative",
+                  overflow: "visible",
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    right: 10,
+                    top: index === 0 ? 2 : -6,
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: tokens.textDim,
+                    lineHeight: 1,
+                    background: tokens.bgCard,
+                    paddingInline: 2,
+                  }}
+                >
+                  {hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
+                </div>
               </div>
             ))}
           </div>
 
           {/* Horizontal Grid lines */}
-          <div style={{ position: "absolute", top: 0, left: 56, right: 0, bottom: 0, pointerEvents: "none", zIndex: 1 }}>
+          <div style={{ position: "absolute", top: 0, left: 64, right: 0, bottom: 0, pointerEvents: "none", zIndex: 1 }}>
             {hours.map(hour => (
               <div key={hour} style={{
                 position: "absolute", top: (hour - baseHour) * pixelsPerHour, left: 0, right: 0,
@@ -199,34 +289,84 @@ export function CalendarGrid({
           </div>
 
           {/* Current Time Line */}
-          {currentTimePixels >= 0 && currentTimePixels <= (endHour - baseHour + 1) * pixelsPerHour && (
-             <div style={{
-               position: "absolute", top: currentTimePixels, left: 56, right: 0,
-               height: 2, zIndex: 12, pointerEvents: "none",
-             }}>
-               <div style={{
-                 position: "absolute", top: 0, left: 0, right: 0, height: 2,
-                 background: tokens.red,
-                 boxShadow: `0 0 8px ${tokens.red}88`,
-               }} />
-               <div style={{
-                 position: "absolute", left: -5, top: -4, width: 10, height: 10,
-                 borderRadius: "50%", background: tokens.red,
-                 boxShadow: `0 0 10px ${tokens.red}88`,
-               }} />
-             </div>
-          )}
+          <div style={{
+            position: "absolute",
+            top: currentTimeMarkerPixels,
+            left: 0,
+            right: 0,
+            height: 24,
+            zIndex: 30,
+            pointerEvents: "none",
+            opacity: currentTimeBeforeRange || currentTimeAfterRange ? 0.92 : 1,
+          }}>
+            <div style={{
+              position: "absolute",
+              top: markerNearBottom ? 9 : 11,
+              left: 64,
+              right: 0,
+              display: "flex",
+              alignItems: "center",
+              height: 2,
+            }}>
+              {displayDays.map((day, index) => {
+                const isTodayColumn = day.date === today || (todayColumnIndex === -1 && index === 0);
+                return (
+                  <div
+                    key={`${day.date}-time-line`}
+                    style={{
+                      flex: 1,
+                      height: 2,
+                      background: isTodayColumn ? "rgba(232, 93, 122, 0.94)" : "rgba(232, 93, 122, 0.28)",
+                      boxShadow: isTodayColumn ? "0 0 10px rgba(232, 93, 122, 0.24)" : "none",
+                    }}
+                  />
+                );
+              })}
+            </div>
+            <div style={{
+              position: "absolute",
+              top: markerNearBottom ? 6 : 8,
+              left: 64,
+              right: 0,
+              display: "flex",
+              alignItems: "center",
+              height: 8,
+              filter: "blur(4px)",
+            }}>
+              {displayDays.map((day, index) => {
+                const isTodayColumn = day.date === today || (todayColumnIndex === -1 && index === 0);
+                return (
+                  <div
+                    key={`${day.date}-time-glow`}
+                    style={{
+                      flex: 1,
+                      height: 8,
+                      background: isTodayColumn ? "rgba(232, 93, 122, 0.16)" : "rgba(232, 93, 122, 0.05)",
+                    }}
+                  />
+                );
+              })}
+            </div>
+            <div style={{
+              position: "absolute",
+              left: 59,
+              top: markerNearBottom ? 3 : 5,
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              background: tokens.red,
+              boxShadow: `0 0 0 4px ${tokens.redBg}, 0 0 14px rgba(232, 93, 122, 0.5)`,
+            }} />
+          </div>
 
           {/* Day Columns */}
           {displayDays.map(day => {
             const isToday = day.date === today;
             return (
               <div key={day.date} style={{
-                flex: 1, minWidth: 120, borderRight: `1px solid ${tokens.borderFaint}`,
+                flex: 1, minWidth: 128, borderRight: `1px solid ${tokens.borderFaint}`,
                 position: "relative", zIndex: 5,
-                background: isToday
-                  ? `linear-gradient(180deg, ${tokens.accentMuted}40 0%, transparent 40%)`
-                  : "transparent",
+                background: isToday ? "rgba(140, 153, 236, 0.045)" : "transparent",
               }}>
                 {/* Empty time slot indicators for today */}
                 {isToday && hours.filter(h => {
@@ -257,7 +397,7 @@ export function CalendarGrid({
                   const height = Math.max(bottom - top, 28);
                   
                   const derivedSubject = (s.contents && s.contents[0] && s.contents[0].subjects && s.contents[0].subjects[0]) || "General";
-                  const palette = getSubjectPalette(derivedSubject);
+                  const palette = getCalendarPalette(derivedSubject);
                   const isDone = s.status === 'done';
                   const isSkipped = s.status === 'skipped';
                   const titleToUse = String(s.title || s.topic || "Calendar event");
@@ -265,30 +405,26 @@ export function CalendarGrid({
                   
                   const boxStyles = s.isBlocker ? {
                     position: "absolute", top: top + 1, height: height - 2, left: 5, right: 5,
-                    borderRadius: tokens.radiusMd, padding: `${tokens.space2} ${tokens.space3}`,
+                    borderRadius: 6, padding: "7px 9px",
                     background: titleToUse.includes("Lunch") ? tokens.yellowBg : tokens.blockerBg,
-                    border: `1px solid ${tokens.blockerBorder}`,
-                    borderLeft: `3px solid ${titleToUse.includes("Lunch") ? tokens.yellow : tokens.blockerBorderLeft}`,
+                    border: `1px solid ${titleToUse.includes("Lunch") ? tokens.yellowBorder : tokens.blockerBorder}`,
                     color: tokens.text, display: "flex", flexDirection: "column", overflow: "hidden",
                     cursor: "default", zIndex: 2
                   } : {
                     position: "absolute",
                     top: top + 1, height: height - 2,
                     left: 5, right: 5,
-                    borderRadius: tokens.radiusMd,
-                    padding: `${tokens.space2} ${tokens.space3}`,
+                    borderRadius: 6,
+                    padding: "7px 9px",
                     background: isDone
                       ? tokens.doneBg
                       : (isSkipped ? tokens.skipBg : palette.bg),
                     border: `1px solid ${isDraftSession ? tokens.draftBorder : (isDone ? tokens.doneBorder : (isSkipped ? tokens.skipBorder : palette.border))}`,
-                    borderLeft: `3px solid ${isDraftSession ? tokens.red : (isDone ? tokens.green : (isSkipped ? tokens.red : palette.dot))}`,
                     opacity: isSkipped ? 0.6 : (isDone ? 0.8 : 1),
                     display: "flex", flexDirection: "column",
                     overflow: "hidden", cursor: "pointer",
                     transition: `all ${tokens.transitionNormal}`,
-                    boxShadow: isDraftSession
-                      ? `0 0 0 1px ${tokens.draftBorder}, 0 4px 12px rgba(0,0,0,0.2)`
-                      : isDone ? tokens.shadowDone : tokens.shadowCard,
+                    boxShadow: isDraftSession ? `0 0 0 1px ${tokens.draftBorder}` : "none",
                     zIndex: 3
                   };
 
@@ -300,8 +436,8 @@ export function CalendarGrid({
                            if(!s.isBlocker) {
                              e.currentTarget.style.transform = "translateY(-1px)"; 
                              e.currentTarget.style.boxShadow = isDraftSession
-                               ? `0 8px 20px rgba(0,0,0,0.25), 0 0 0 1px ${tokens.draftBorder}`
-                               : isDone ? tokens.shadowDoneHover : tokens.shadowCardHover;
+                               ? `0 0 0 1px ${tokens.draftBorder}, 0 8px 18px rgba(76, 88, 132, 0.12)`
+                               : "0 8px 18px rgba(76, 88, 132, 0.12)";
                              e.currentTarget.style.zIndex = 25; 
                            }
                          }}
@@ -309,16 +445,16 @@ export function CalendarGrid({
                            if(!s.isBlocker) {
                              e.currentTarget.style.transform = "none"; 
                              e.currentTarget.style.boxShadow = isDraftSession
-                               ? `0 0 0 1px ${tokens.draftBorder}, 0 4px 12px rgba(0,0,0,0.2)`
-                               : isDone ? tokens.shadowDone : tokens.shadowCard;
+                               ? `0 0 0 1px ${tokens.draftBorder}`
+                               : "none";
                              e.currentTarget.style.zIndex = 3; 
                            }
                          }}
                     >
                        <div style={{
-                         fontSize: 10, fontWeight: 600,
+                         fontSize: 10, fontWeight: 750,
                          color: s.isBlocker ? tokens.textMuted : (isDone ? tokens.green : palette.text),
-                         marginBottom: 2, letterSpacing: "0.05em", textTransform: "uppercase",
+                         marginBottom: 4, letterSpacing: "0.04em", textTransform: "uppercase",
                          display: "flex", alignItems: "center", gap: 4,
                        }}>
                          {isDone && <CheckIcon />}
@@ -352,7 +488,7 @@ export function CalendarGrid({
                        )}
 
                        <div style={{
-                         fontSize: 12, lineHeight: 1.3, fontWeight: s.isBlocker ? 500 : 500,
+                         fontSize: 13, lineHeight: 1.25, fontWeight: 750,
                          color: s.isBlocker ? tokens.textMuted : (isDone ? tokens.textDim : tokens.text),
                          textDecoration: isDone ? "line-through" : "none",
                        }}>
@@ -361,7 +497,7 @@ export function CalendarGrid({
 
                        {!s.isBlocker && (
                          <div style={{
-                           fontSize: 10, marginTop: "auto", fontWeight: 500,
+                           fontSize: 11, marginTop: "auto", fontWeight: 600,
                            color: isDone ? tokens.greenText : tokens.textDim,
                          }}>
                             {s.start_time} - {s.end_time}

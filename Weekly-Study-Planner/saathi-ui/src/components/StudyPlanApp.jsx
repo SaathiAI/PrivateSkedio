@@ -101,22 +101,6 @@ const buildDevWorkspace = (today) => {
   };
 };
 
-function formatDisplayDate(dateValue) {
-  return new Date(`${dateValue}T12:00:00`).toLocaleDateString("en-US", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
-}
-
-function formatShortDate(dateValue) {
-  return new Date(`${dateValue}T12:00:00`).toLocaleDateString("en-US", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
-}
-
 function flattenSessions(plan) {
   return (plan?.days || [])
     .flatMap(day => (day.sessions || []).map(session => ({
@@ -132,14 +116,6 @@ function getUpcomingSession(plan) {
     const endAt = new Date(`${session.date}T${session.end_time || session.start_time || "00:00"}:00`);
     return endAt >= now;
   }) || null;
-}
-
-function getPlanWindowLabel(plan) {
-  const days = plan?.days || [];
-  if (days.length === 0) return "No active schedule";
-  const start = formatShortDate(days[0].date);
-  const end = formatShortDate(days[days.length - 1].date);
-  return `${start} - ${end}`;
 }
 
 function getGreeting() {
@@ -580,101 +556,18 @@ function PlannerTab({
   draftPlan,
   today,
   externalEvents,
-  calendarSync,
   onSessionClick,
-  onSyncCalendar,
-  onOpenAssistant,
 }) {
-  const nextSession = getUpcomingSession(visiblePlan);
-  const blockersLabel = calendarSync.loading
-    ? "Syncing blockers..."
-    : calendarSync.error
-      ? calendarSync.error
-      : `${externalEvents.length} blockers in view`;
-
   return (
-    <div style={{ display: "grid", gap: 20, minHeight: 0 }}>
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "minmax(0, 1.5fr) repeat(3, minmax(0, 0.8fr))",
-        gap: 16,
-      }}>
-        <SurfaceCard style={{ padding: 22 }}>
-          <Eyebrow>Planner</Eyebrow>
-          <div style={{
-            fontSize: 34,
-            lineHeight: 1.05,
-            fontFamily: "'Playfair Display', serif",
-            color: tokens.text,
-            marginBottom: 10,
-          }}>
-            {getPlanWindowLabel(visiblePlan)}
-          </div>
-          <div style={{ fontSize: 14, color: tokens.textSecondary, lineHeight: 1.6, marginBottom: 18 }}>
-            {draftPlan
-              ? "You are viewing a reviewable draft. Nothing commits until you accept it."
-              : "This is the live scheduling canvas. External blockers stay muted and study sessions stay readable."}
-          </div>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <ActionButton onClick={onOpenAssistant}>
-              <ChatIcon />
-              Open planner assistant
-            </ActionButton>
-            <ActionButton quiet onClick={onSyncCalendar} disabled={calendarSync.loading}>
-              <RefreshIcon />
-              {calendarSync.loading ? "Syncing..." : "Refresh blockers"}
-            </ActionButton>
-          </div>
-        </SurfaceCard>
-        <MetricTile
-          label="Review state"
-          value={draftPlan ? "Draft" : "Live"}
-          detail={draftPlan ? "Approve or recommend changes from the assistant tray." : "Calendar reflects the current committed schedule."}
-          accent={draftPlan ? tokens.red : tokens.accent}
-        />
-        <MetricTile
-          label="Calendar reality"
-          value={externalEvents.length}
-          detail={blockersLabel}
-          accent={tokens.yellow}
-        />
-        <MetricTile
-          label="Next study block"
-          value={nextSession ? nextSession.start_time : "--"}
-          detail={nextSession ? `${nextSession.subject || "Study"} · ${nextSession.topic || ""}` : "No upcoming session placed yet."}
-          accent={tokens.green}
-        />
-      </div>
-
+    <div style={{ minHeight: "calc(100dvh - 150px)" }}>
       <SurfaceCard style={{
         padding: 0,
         overflow: "hidden",
-        minHeight: 720,
+        minHeight: "calc(100dvh - 166px)",
         display: "flex",
         flexDirection: "column",
+        borderRadius: 14,
       }}>
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 16,
-          padding: "18px 22px",
-          borderBottom: `1px solid ${tokens.border}`,
-          background: tokens.glassBg,
-        }}>
-          <div>
-            <div style={{ fontSize: 12, color: tokens.textMuted, marginBottom: 4 }}>
-              Week view
-            </div>
-            <div style={{ fontSize: 16, color: tokens.text, fontWeight: 600 }}>
-              Schedule preview with blockers and study sessions
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <StatusPill text={draftPlan ? "Draft only" : "Committed plan"} tone={draftPlan ? "warning" : "success"} />
-            <StatusPill text={calendarSync.error ? "Sync issue" : "Calendar aware"} tone={calendarSync.error ? "danger" : "default"} />
-          </div>
-        </div>
         <div style={{ flex: 1, minHeight: 0 }}>
           <CalendarGrid
             allDays={visiblePlan?.days || []}
@@ -858,7 +751,6 @@ export function StudyPlanApp() {
   const [activeTab, setActiveTab] = useState("planner");
   const [showAI, setShowAI] = useState(false);
   const [assistantWidth, setAssistantWidth] = useState(520);
-  const [focusMode, setFocusMode] = useState(false);
   const [logoAwake, setLogoAwake] = useState(false);
   const [assistantLauncherInput, setAssistantLauncherInput] = useState("");
   const [queuedAssistantPrompt, setQueuedAssistantPrompt] = useState(null);
@@ -899,7 +791,6 @@ export function StudyPlanApp() {
   const profileInitials = getProfileInitials(user);
 
   const visiblePlan = draftPlan || plan;
-  const nextSession = getUpcomingSession(visiblePlan);
 
   const fetchAllPlans = async () => {
     if (DEV_FRONTEND_ONLY) {
@@ -1406,77 +1297,22 @@ export function StudyPlanApp() {
         </aside>
 
         <main style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", position: "relative" }}>
-          <header style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            gap: 20,
-            padding: "18px 26px",
-            borderBottom: `1px solid ${tokens.borderSubtle}`,
-          }}>
-            <div>
-              <div style={{ fontSize: 11, color: tokens.textDim, letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 8 }}>
-                {formatDisplayDate(today)}
-              </div>
-              <div style={{ fontSize: 16, color: tokens.textSecondary }}>
-                {visiblePlan?.days?.length
-                  ? `${getPlanWindowLabel(visiblePlan)} · ${nextSession ? `next session at ${nextSession.start_time}` : "schedule loaded"}`
-                  : "Your workspace is waiting for the next draft."}
-              </div>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-              <button
-                type="button"
-                onClick={openAssistant}
-                style={{
-                  border: `1px solid ${tokens.border}`,
-                  background: "transparent",
-                  color: tokens.textMuted,
-                  borderRadius: tokens.radiusMd,
-                  padding: "10px 14px",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  cursor: "pointer",
-                  fontFamily: "inherit",
-                  fontWeight: 600,
-                }}
-              >
-                <ChatIcon />
-                Planner assistant
-              </button>
-              <button
-                type="button"
-                onClick={() => setFocusMode(prev => !prev)}
-                style={{
-                  border: `1px solid ${focusMode ? tokens.accentBorder : tokens.border}`,
-                  background: focusMode ? tokens.accentMuted : "transparent",
-                  color: tokens.text,
-                  borderRadius: tokens.radiusMd,
-                  padding: "10px 14px",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  cursor: "pointer",
-                  fontFamily: "inherit",
-                  fontWeight: 600,
-                }}
-              >
-                <FocusIcon />
-                Focus mode
-              </button>
-            </div>
-          </header>
-
           <div style={{
             flex: 1,
             minHeight: 0,
-            overflowY: "auto",
-            padding: focusMode ? "18px 18px 28px" : "26px",
+            display: "flex",
             background: tokens.bg,
+            position: "relative",
           }}>
-            <ViewErrorBoundary resetKey={activeTab}>
+            <div style={{
+              flex: "1 1 auto",
+              minWidth: 0,
+              minHeight: 0,
+              overflowY: "auto",
+              padding: showAI ? "26px 10px 26px 10px" : "26px 16px 26px 10px",
+              background: tokens.bg,
+            }}>
+              <ViewErrorBoundary resetKey={activeTab}>
               {activeTab === "overview" && (
                 <OverviewTab
                   visiblePlan={visiblePlan}
@@ -1558,7 +1394,9 @@ export function StudyPlanApp() {
                   />
                 </div>
               )}
-            </ViewErrorBoundary>
+              </ViewErrorBoundary>
+            </div>
+
           </div>
 
           {!showAI && (
@@ -1570,9 +1408,9 @@ export function StudyPlanApp() {
                 left: launcherCenterX ?? window.innerWidth / 2,
                 bottom: 24,
                 transform: "translateX(-50%)",
-                width: "min(680px, calc(100% - 72px))",
-                height: 70,
-                borderRadius: 24,
+                width: "min(560px, calc(100% - 96px))",
+                height: 58,
+                borderRadius: 20,
                 border: `1px solid ${tokens.accentBorder}`,
                 background: "rgba(255, 255, 250, 0.94)",
                 backdropFilter: "blur(18px)",
@@ -1581,12 +1419,12 @@ export function StudyPlanApp() {
                 zIndex: tokens.zIndexSticky,
                 display: "flex",
                 alignItems: "center",
-                gap: 14,
-                padding: "10px 12px 10px 18px",
+                gap: 10,
+                padding: "8px 10px 8px 14px",
               }}
             >
-              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 42, height: 42, flexShrink: 0 }}>
-                <YggdrasilLogo size={36} awake={logoAwake} />
+              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, flexShrink: 0 }}>
+                <YggdrasilLogo size={30} awake={logoAwake} />
               </div>
               <input
                 type="text"
@@ -1602,7 +1440,7 @@ export function StudyPlanApp() {
                   outline: "none",
                   background: "transparent",
                   color: tokens.text,
-                  fontSize: 15,
+                  fontSize: 13,
                   fontFamily: "inherit",
                 }}
               />
@@ -1610,9 +1448,9 @@ export function StudyPlanApp() {
                 type="submit"
                 aria-label={assistantLauncherInput.trim() ? "Send message to SkedioAI" : "Open SkedioAI assistant"}
                 style={{
-                  width: 46,
-                  height: 46,
-                  borderRadius: 16,
+                  width: 40,
+                  height: 40,
+                  borderRadius: 14,
                   border: `1px solid ${assistantLauncherInput.trim() ? tokens.accentBorder : tokens.border}`,
                   background: assistantLauncherInput.trim() ? tokens.accentMuted : tokens.bgCard,
                   color: assistantLauncherInput.trim() ? tokens.accentHover : tokens.textMuted,
@@ -1628,68 +1466,74 @@ export function StudyPlanApp() {
             </form>
           )}
 
-          {showAI && (
-            <div
+        </main>
+
+        {showAI && (
+          <aside
+            style={{
+              width: assistantWidth,
+              minWidth: 380,
+              maxWidth: "min(760px, calc(100vw - 220px))",
+              height: "calc(100dvh - 28px)",
+              margin: "14px 14px 14px 0",
+              flex: "0 0 auto",
+              position: "sticky",
+              top: 14,
+              zIndex: 4,
+              display: "flex",
+              background: "transparent",
+              animation: "assistantPanelIn 0.26s cubic-bezier(0.16, 1, 0.3, 1)",
+            }}
+          >
+            <button
+              type="button"
+              aria-label="Resize assistant panel"
+              onMouseDown={beginAssistantResize}
               style={{
-                position: "fixed",
-                top: 14,
-                right: 14,
-                bottom: 14,
-                width: assistantWidth,
-                maxWidth: "calc(100vw - 108px)",
-                minWidth: 380,
-                background: tokens.bgCard,
-                zIndex: tokens.zIndexDrawer,
+                position: "absolute",
+                left: -4,
+                top: 32,
+                bottom: 32,
+                width: 10,
+                border: "none",
+                background: "transparent",
+                cursor: "col-resize",
+                zIndex: 3,
                 display: "flex",
-                boxShadow: "-24px 0 54px rgba(76, 88, 132, 0.18)",
-                border: `1px solid ${tokens.border}`,
-                borderRadius: 24,
-                animation: "assistantPanelIn 0.26s cubic-bezier(0.16, 1, 0.3, 1)",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              <button
-                type="button"
-                aria-label="Resize assistant panel"
-                onMouseDown={beginAssistantResize}
+              <span
+                aria-hidden="true"
                 style={{
-                  position: "absolute",
-                  left: -6,
-                  top: 0,
-                  bottom: 0,
-                  width: 12,
-                  border: "none",
-                  background: "transparent",
-                  cursor: "col-resize",
-                  zIndex: 2,
+                  width: 4,
+                  height: 52,
+                  borderRadius: 999,
+                  background: tokens.borderHover,
+                  boxShadow: "0 0 0 2px rgba(255, 254, 250, 0.72)",
+                  opacity: 0.7,
                 }}
               />
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  padding: 14,
-                }}
-              >
-                <ChatPanel
-                  threadId={threadId}
-                  onClose={closeAssistant}
-                  onPlanCommitted={handleRefreshAll}
-                  onDraftStateChange={handleDraftStateChange}
-                  devToolsEnabled={devToolsEnabled}
-                  onLoadDevDraftPreview={handleLoadDevDraftPreview}
-                  onClearDevDraftPreview={handleClearDevDraftPreview}
-                  devPreviewNonce={devPreviewNonce}
-                  devReviewPreviewPayload={devReviewPreviewPayload}
-                  emailReviewRequest={emailReviewRequest}
-                  isEmbedded={true}
-                  drawerWidth={assistantWidth}
-                  onDrawerWidthChange={setAssistantWidth}
-                  queuedPrompt={queuedAssistantPrompt}
-                />
-              </div>
-            </div>
-          )}
-        </main>
+            </button>
+            <ChatPanel
+              threadId={threadId}
+              onClose={closeAssistant}
+              onPlanCommitted={handleRefreshAll}
+              onDraftStateChange={handleDraftStateChange}
+              devToolsEnabled={devToolsEnabled}
+              onLoadDevDraftPreview={handleLoadDevDraftPreview}
+              onClearDevDraftPreview={handleClearDevDraftPreview}
+              devPreviewNonce={devPreviewNonce}
+              devReviewPreviewPayload={devReviewPreviewPayload}
+              emailReviewRequest={emailReviewRequest}
+              isEmbedded={true}
+              drawerWidth={assistantWidth}
+              onDrawerWidthChange={setAssistantWidth}
+              queuedPrompt={queuedAssistantPrompt}
+            />
+          </aside>
+        )}
 
         {showGraph && (
           <ViewErrorBoundary
@@ -1737,15 +1581,6 @@ function CalendarIcon() {
   );
 }
 
-function FocusIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="7" />
-      <circle cx="12" cy="12" r="2.5" />
-    </svg>
-  );
-}
-
 function SettingsIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -1787,17 +1622,6 @@ function ChatIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-    </svg>
-  );
-}
-
-function RefreshIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 2v6h-6" />
-      <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
-      <path d="M3 22v-6h6" />
-      <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
     </svg>
   );
 }

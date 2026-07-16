@@ -560,7 +560,14 @@ export const GlobalStyles = () => (
       animation: none;
       transform: translateX(-50%) translateY(-4px);
       box-shadow: 0 26px 58px rgba(140, 153, 236, 0.24) !important;
-      border-color: ${tokens.accent} !important;
+      border-color: ${tokens.border} !important;
+    }
+
+    .sk-ai-launcher input:focus,
+    .sk-ai-launcher input:focus-visible {
+      border-color: transparent !important;
+      box-shadow: none !important;
+      outline: none !important;
     }
 
     @keyframes aiLauncherFloat {

@@ -7,6 +7,12 @@ import {
   loadPersistedMessages,
 } from "../lib/clientState.js";
 
+const SUGGESTED_PROMPTS = [
+  "Plan my next block",
+  "What should I fix today?",
+  "Reschedule around blockers",
+];
+
 export function ChatPanel({
   onClose,
   threadId,
@@ -344,6 +350,11 @@ export function ChatPanel({
     }
   };
 
+  const handleSuggestionClick = (prompt) => {
+    if (loading || !threadId) return;
+    void sendPromptText(prompt);
+  };
+
   return (
     <div style={isEmbedded ? {
       height: "100%",
@@ -354,7 +365,7 @@ export function ChatPanel({
       display: "flex",
       flexDirection: "column",
       overflow: "hidden",
-      boxShadow: "0 24px 60px rgba(0,0,0,0.38)",
+      boxShadow: "0 24px 60px rgba(76, 88, 132, 0.18)",
     } : {
       position: "fixed", top: 0, right: 0, bottom: 0, width: 420,
       background: tokens.bgCard, borderLeft: `1px solid ${tokens.borderSubtle}`,
@@ -363,21 +374,34 @@ export function ChatPanel({
     }}>
       {/* Header */}
       <div style={{
-        padding: isEmbedded ? "18px 22px" : `${tokens.space4} ${tokens.space5}`,
+        padding: isEmbedded ? "14px 16px" : `${tokens.space4} ${tokens.space5}`,
         borderBottom: `1px solid ${tokens.borderSubtle}`,
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        background: isEmbedded ? "rgba(17,17,19,0.92)" : "transparent",
+        background: isEmbedded ? "rgba(255, 254, 250, 0.94)" : "transparent",
         flexShrink: 0,
       }}>
-        <div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
           <div style={{
-            fontSize: isEmbedded ? 20 : 16,
-            fontFamily: "'Playfair Display', serif",
-            fontWeight: 500,
+            width: 34,
+            height: 34,
+            borderRadius: 11,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: tokens.bgCard,
+            border: `1px solid ${tokens.border}`,
+            flexShrink: 0,
+          }}>
+            <MiniTreeLogo size={25} />
+          </div>
+          <div style={{ minWidth: 0 }}>
+          <div style={{
+            fontSize: 15,
+            fontFamily: "inherit",
+            fontWeight: 750,
             color: tokens.text,
-          }}>{isEmbedded ? "Planner assistant" : "SkedioAI"}</div>
-          <div style={{ fontSize: 11, color: tokens.textDim, marginTop: 3 }}>
-            {isEmbedded ? "Review drafts, request changes, and keep the schedule honest." : "Study companion"}
+            lineHeight: 1.2,
+          }}>SkedioAI</div>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: tokens.space2 }}>
@@ -458,8 +482,8 @@ export function ChatPanel({
           </button>
           <button onClick={onClose} aria-label="Close chat" style={{
             background: "transparent", border: `1px solid ${tokens.border}`,
-            borderRadius: tokens.radiusSm,
-            padding: `${tokens.space1} ${tokens.space2}`,
+            borderRadius: 10,
+            padding: "6px 9px",
             color: tokens.textMuted, cursor: "pointer", fontSize: 11,
             fontFamily: "inherit", fontWeight: 500,
             transition: `all ${tokens.transitionFast}`,
@@ -471,22 +495,21 @@ export function ChatPanel({
       </div>
 
       {/* Messages */}
-      <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: isEmbedded ? "20px 22px 0" : `${tokens.space5} ${tokens.space5} 0` }}>
+      <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: isEmbedded ? "18px 18px 0" : `${tokens.space5} ${tokens.space5} 0` }}>
         {messages.length === 0 && (
-          <div style={{ textAlign: "center", padding: isEmbedded ? "84px 0" : "60px 0" }}>
+          <div style={{ textAlign: "left", padding: isEmbedded ? "58px 4px" : "60px 0" }}>
             <div style={{
-              fontSize: isEmbedded ? 30 : 20,
+              fontSize: isEmbedded ? 25 : 20,
               fontFamily: "'Playfair Display', serif",
-              color: tokens.textDim,
-              marginBottom: tokens.space3,
+              color: tokens.text,
+              marginBottom: 10,
+              lineHeight: 1.08,
             }}>
               {isEmbedded ? "What should we do with the week?" : "What would you like to study?"}
             </div>
-            <div style={{ fontSize: 13, color: tokens.textMuted, lineHeight: 1.8 }}>
+            <div style={{ fontSize: 13, color: tokens.textSecondary, lineHeight: 1.65, maxWidth: 340 }}>
               {isEmbedded ? (
-                <>
-                  Review a draft<br />Reschedule around blockers<br />Adjust the plan without losing the thread
-                </>
+                "Ask for the next block, repair the schedule, or turn a messy study thought into a plan."
               ) : (
                 <>
                   Reschedule sessions<br />Add or remove topics<br />Adjust your plan
@@ -501,14 +524,16 @@ export function ChatPanel({
               ? msg.actionGroups
               : buildActionGroups(msg.pendingUi, msg.actions);
             return (
-          <div key={i} style={{ display: "flex", justifyContent: msg.isUser ? "flex-end" : "flex-start", marginBottom: 10, animation: "fadeUp 0.15s ease" }}>
-            <div style={{ maxWidth: "82%" }}>
+          <div key={i} style={{ display: "flex", justifyContent: msg.isUser ? "flex-end" : "flex-start", marginBottom: 12, animation: "fadeUp 0.15s ease" }}>
+            <div style={{ maxWidth: msg.isUser ? "82%" : "92%" }}>
               <div style={{
-                padding: "10px 14px", borderRadius: 10,
-                background: msg.isUser ? tokens.text : tokens.bg,
+                padding: "11px 14px",
+                borderRadius: msg.isUser ? "14px 14px 4px 14px" : "14px 14px 14px 4px",
+                background: msg.isUser ? tokens.text : tokens.bgCard,
                 color: msg.isUser ? tokens.bgCard : tokens.text,
                 fontSize: 14, lineHeight: 1.55, whiteSpace: "pre-wrap",
-                border: msg.isUser ? "none" : `1px solid ${tokens.border}`,
+                border: msg.isUser ? "none" : `1px solid ${tokens.borderSubtle}`,
+                boxShadow: msg.isUser ? "none" : "0 6px 16px rgba(76, 88, 132, 0.06)",
               }}>{msg.text}</div>
               {!msg.isUser && effectiveActionGroups.length > 0 && (
                 <div style={{
@@ -731,31 +756,112 @@ export function ChatPanel({
 
       {/* Input */}
       <form onSubmit={send} style={{
-        padding: isEmbedded ? "18px 22px 22px" : `${tokens.space4} ${tokens.space5}`,
+        padding: isEmbedded ? "12px 14px 14px" : `${tokens.space4} ${tokens.space5}`,
         borderTop: `1px solid ${tokens.borderSubtle}`,
-        display: "flex", gap: tokens.space2,
+        display: "grid",
+        gap: 10,
+        background: "rgba(255, 254, 250, 0.92)",
         flexShrink: 0,
       }}>
-        <input
-          type="text" value={input} onChange={e => setInput(e.target.value)}
-          placeholder={changeMode ? "What should change?" : "Ask SkedioAI..."} disabled={loading} autoFocus
-          style={{
-            flex: 1, background: tokens.bg, border: `1px solid ${tokens.border}`,
-            borderRadius: tokens.radiusMd, padding: `${tokens.space3} ${tokens.space4}`,
-            color: tokens.text, fontSize: 13, outline: "none", fontFamily: "inherit",
-            transition: `border-color ${tokens.transitionFast}`,
-          }}
-        />
-        <button type="submit" disabled={!input.trim() || loading} style={{
-          background: input.trim() && !loading ? tokens.accent : tokens.bgHover,
-          border: "none", borderRadius: tokens.radiusMd,
-          padding: `${tokens.space3} ${tokens.space4}`,
-          color: input.trim() && !loading ? tokens.bg : tokens.textDim,
-          cursor: input.trim() && !loading ? "pointer" : "not-allowed",
-          fontSize: 14, fontFamily: "inherit", fontWeight: 500,
-          transition: `all ${tokens.transitionFast}`,
-        }}>↑</button>
+        <div style={{ display: "flex", gap: 7, overflowX: "auto", paddingBottom: 1 }}>
+          {SUGGESTED_PROMPTS.map(prompt => (
+            <button
+              key={prompt}
+              type="button"
+              onClick={() => handleSuggestionClick(prompt)}
+              disabled={loading || !threadId}
+              style={{
+                border: `1px solid ${tokens.border}`,
+                background: tokens.bgCard,
+                color: tokens.textSecondary,
+                borderRadius: tokens.radiusFull,
+                padding: "7px 10px",
+                fontSize: 11,
+                fontWeight: 650,
+                fontFamily: "inherit",
+                whiteSpace: "nowrap",
+                cursor: loading || !threadId ? "not-allowed" : "pointer",
+                opacity: loading || !threadId ? 0.55 : 1,
+              }}
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
+        <div style={{
+          display: "flex",
+          gap: 8,
+          alignItems: "center",
+          border: `1px solid ${tokens.accentBorder}`,
+          background: tokens.bgCard,
+          borderRadius: 18,
+          padding: "8px 8px 8px 13px",
+          boxShadow: "0 10px 24px rgba(76, 88, 132, 0.08)",
+        }}>
+          <input
+            type="text" value={input} onChange={e => setInput(e.target.value)}
+            placeholder={changeMode ? "What should change?" : "Ask SkedioAI..."} disabled={loading} autoFocus
+            style={{
+              flex: 1,
+              minWidth: 0,
+              background: "transparent",
+              border: "none",
+              padding: "8px 0",
+              color: tokens.text,
+              fontSize: 13,
+              outline: "none",
+              fontFamily: "inherit",
+            }}
+          />
+          <button type="submit" disabled={!input.trim() || loading} style={{
+            width: 38,
+            height: 38,
+            background: input.trim() && !loading ? tokens.accent : tokens.bgHover,
+            border: "none",
+            borderRadius: 14,
+            color: input.trim() && !loading ? tokens.bgCard : tokens.textDim,
+            cursor: input.trim() && !loading ? "pointer" : "not-allowed",
+            fontSize: 15,
+            fontFamily: "inherit",
+            fontWeight: 700,
+            transition: `all ${tokens.transitionFast}`,
+            flexShrink: 0,
+          }}>↑</button>
+        </div>
       </form>
     </div>
+  );
+}
+
+function MiniTreeLogo({ size = 25 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <path
+        d="M32 28 20 16M32 28l12-12M32 28v17"
+        stroke="#151827"
+        strokeWidth="5.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M32 45c-4 4-8 5-13 5M32 45c4 4 8 5 13 5M32 45c-1 5-3 8-7 11M32 45c1 5 3 8 7 11"
+        stroke="#151827"
+        strokeWidth="2.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M32 57c-2.2-2.8-2.2-4.9 0-7.4 2.2 2.5 2.2 4.6 0 7.4Z"
+        fill="#8C99EC"
+        stroke="#151827"
+        strokeWidth="1.6"
+      />
+      <path d="M32 5c5 5.2 5 10.3 0 15.5C27 15.3 27 10.2 32 5Z" fill="#9EAD78" />
+      <path d="M16 17c5.5.8 8.5 3.8 9.2 9.2C19.8 25.5 16.8 22.5 16 17Z" fill="#8D9F68" />
+      <path d="M48 17c-.8 5.5-3.8 8.5-9.2 9.2C39.5 20.8 42.5 17.8 48 17Z" fill="#8D9F68" />
+      <path d="M11 30c4.4-.7 7.4.9 9.1 4.8C15.8 35.4 12.8 33.8 11 30Z" fill="#BCC2F4" />
+      <path d="M53 30c-1.8 3.8-4.8 5.4-9.1 4.8C45.6 30.9 48.6 29.3 53 30Z" fill="#BCC2F4" />
+      <path d="M24 30c3.1.6 4.8 2.4 5.2 5.5C26.1 34.9 24.4 33.1 24 30Z" fill="#9EAD78" />
+      <path d="M40 30c-.4 3.1-2.1 4.9-5.2 5.5C35.2 32.4 36.9 30.6 40 30Z" fill="#9EAD78" />
+    </svg>
   );
 }
