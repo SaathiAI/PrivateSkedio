@@ -109,6 +109,42 @@ It is used for things like:
 
 When circumstances change, the system can revise the remaining schedule instead of forcing the user to start over from scratch.
 
+## Current Frontend Product Shape
+
+The current live frontend is not a marketing shell.
+It is an authenticated product workspace shaped around a small number of operational surfaces.
+
+The main visible areas today are:
+
+- planner calendar workspace
+- AI assistant drawer and review surface
+- dashboard / overview surface
+- knowledge graph modal
+- plan history
+- settings and integrations
+- auth flow
+
+The planner is currently the clearest primary surface.
+It includes a week-based calendar, session cards, blocker overlays, draft-plan preview, and session interaction paths.
+
+The AI assistant is not treated as a decorative chatbot.
+It is part of the planning workflow:
+
+- creating or revising a plan
+- presenting review actions
+- returning structured draft data
+- helping the user commit, request changes, or cancel
+
+This matters because the product should be understood as:
+
+```text
+workspace first
+assistant second
+planner loop at the center
+```
+
+not as “chat with an AI and maybe get a schedule.”
+
 ## Product Philosophy
 
 The product tries to combine:
@@ -148,7 +184,7 @@ It is also judged by how well it behaves when the plan needs to change.
 
 At a product level, SkedioAI currently includes:
 
-- a frontend workspace
+- a frontend workspace with planner-first UI
 - a backend API layer
 - a supervisor-driven orchestration flow
 - an intake workflow

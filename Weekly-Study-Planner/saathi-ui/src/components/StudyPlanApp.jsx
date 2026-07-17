@@ -557,6 +557,7 @@ function PlannerTab({
   today,
   externalEvents,
   onSessionClick,
+  onPreviewChecklist,
 }) {
   return (
     <div style={{ minHeight: "calc(100dvh - 150px)" }}>
@@ -568,6 +569,24 @@ function PlannerTab({
         flexDirection: "column",
         borderRadius: 14,
       }}>
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+          padding: "16px 18px 0",
+          background: tokens.bgCard,
+        }}>
+          <div>
+            <Eyebrow>Planner preview</Eyebrow>
+            <div style={{ fontSize: 13, color: tokens.textMuted, marginTop: -4 }}>
+              Open a sample session to inspect the checklist checked-state UI.
+            </div>
+          </div>
+          <ActionButton quiet onClick={onPreviewChecklist} style={{ flexShrink: 0 }}>
+            Preview checklist
+          </ActionButton>
+        </div>
         <div style={{ flex: 1, minHeight: 0 }}>
           <CalendarGrid
             allDays={visiblePlan?.days || []}
@@ -1030,6 +1049,53 @@ export function StudyPlanApp() {
     setSelectedSessionOverlay({ session, date });
   };
 
+  const handleChecklistPreview = useCallback(() => {
+    const previewDate = today || "2026-07-17";
+    setSelectedSessionOverlay({
+      date: previewDate,
+      session: {
+        session_id: "preview-checklist-session",
+        title: "Checklist preview session",
+        topic: "Checklist preview session",
+        subject: "Science",
+        start_time: "16:00",
+        end_time: "17:00",
+        estimated_hours: 1,
+        status: "pending",
+        contents: [
+          {
+            name: "Review formula sheet",
+            status: "done",
+            subjects: ["Science"],
+            match_key: "preview-check-1",
+          },
+          {
+            name: "Mark weak derivations",
+            status: "done",
+            subjects: ["Science"],
+            match_key: "preview-check-2",
+          },
+          {
+            name: "Solve three mixed problems",
+            status: "pending",
+            subjects: ["Science"],
+            match_key: "preview-check-3",
+          },
+          {
+            name: "Write final recap note",
+            status: "pending",
+            subjects: ["Science"],
+            match_key: "preview-check-4",
+          },
+        ],
+        allocated_hours: [
+          { chapter: "Electricity", hours: 0.5 },
+          { chapter: "Revision", hours: 0.5 },
+        ],
+      },
+    });
+  }, [today]);
+
   const handleDraftStateChange = useCallback((nextDraftPlan) => {
     setDraftPlan(normalizePlan(nextDraftPlan));
   }, []);
@@ -1329,6 +1395,7 @@ export function StudyPlanApp() {
                   externalEvents={externalEvents}
                   calendarSync={calendarSync}
                   onSessionClick={handleCalendarSessionClick}
+                  onPreviewChecklist={handleChecklistPreview}
                   onSyncCalendar={fetchExternalEvents}
                   onOpenAssistant={openAssistant}
                 />

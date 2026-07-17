@@ -27,6 +27,16 @@ flowchart TD
     Commit --> End4["END"]
 ```
 
+The practical interpretation is:
+
+- planner drafts a schedule
+- deterministic verification checks it
+- frontend previews it
+- user approval decides whether commit happens
+
+That preview step is important.
+The planner is not directly mutating the durable active plan on first output.
+
 ## Ownership Boundary
 
 ```mermaid
@@ -45,6 +55,7 @@ Planner owns:
 - revising an existing schedule
 - handling schedule-shape feedback
 - preparing a draft for verification
+- staying inside schedule ownership instead of re-opening contract questions by itself
 
 Planner does not own:
 - collecting core contract facts
@@ -68,6 +79,8 @@ The Planner decides like this:
 - no active plan yet -> create the first schedule
 - active plan exists + user wants timing/workload changes -> revise that schedule
 - active plan exists + user request changes contract facts -> hand off back to Intake
+
+That split is one of the most important live product boundaries.
 
 ## Planner State
 
@@ -116,6 +129,8 @@ one normal planner code path
 + one explicit commit path
 ```
 
+This keeps the system easier to reason about than a pile of planner sub-agents with overlapping jobs.
+
 ## Planner Node
 
 ```mermaid
@@ -135,6 +150,7 @@ The live behavior is:
 - one planner invocation path
 - one planner tool boundary
 - one visible planner output contract
+- one draft object the frontend can preview before approval
 
 ## Tool Boundary
 
@@ -174,6 +190,14 @@ Meaning:
   - deterministic checks accepted that schedule
 - `awaiting_approval`
   - safe draft is ready for user review
+
+Frontend consequence:
+
+```text
+visiblePlan = draftPlan || activePlan
+```
+
+So the user can see the draft in calendar form before it becomes durable truth.
 
 Verifier currently checks:
 - full date coverage, including empty days
@@ -236,6 +260,8 @@ Approve plan
 Request changes
 Cancel plan
 ```
+
+That keeps interaction affordances in frontend ownership and scheduling truth in planner ownership.
 
 ## Output Contract
 

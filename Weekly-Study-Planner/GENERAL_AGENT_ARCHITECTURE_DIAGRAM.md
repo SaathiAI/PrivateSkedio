@@ -4,6 +4,7 @@
 > This file is intentionally broader than the current SkedioAI system.
 > For live system truth, prefer `documentation/03-system-architecture.md`,
 > `supervisor_slop_diagram.md`, `intake_diagram.md`, and `planner_diagram.md`.
+> If this file and the live docs disagree, the live docs win.
 
 This file shows what the usual practical multi-agent architecture looks like in detail.
 
@@ -16,6 +17,8 @@ It is intentionally general, not SkedioAI-specific, but it is designed to answer
 - what gets stored in chat vs state
 - where retries, replans, and escalation happen
 - how fixed specialists differ from swarm-style systems
+
+For SkedioAI specifically, treat this file as a mental-model explainer, not as implementation documentation.
 
 ---
 

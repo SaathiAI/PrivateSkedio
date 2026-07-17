@@ -18,17 +18,12 @@ function addDays(date, amount) {
   return next;
 }
 
-function startOfWeek(date) {
-  const next = new Date(date);
-  const weekday = next.getDay();
-  const diff = weekday === 0 ? -6 : 1 - weekday;
-  next.setDate(next.getDate() + diff);
-  next.setHours(12, 0, 0, 0);
-  return next;
-}
-
 function startOfMonth(date) {
   return new Date(date.getFullYear(), date.getMonth(), 1, 12, 0, 0, 0);
+}
+
+function normalizeDate(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0, 0);
 }
 
 function clampDay(year, monthIndex, day) {
@@ -37,7 +32,9 @@ function clampDay(year, monthIndex, day) {
 
 function buildMiniMonth(date) {
   const monthStart = startOfMonth(date);
-  const gridStart = startOfWeek(monthStart);
+  const weekday = monthStart.getDay();
+  const diff = weekday === 0 ? -6 : 1 - weekday;
+  const gridStart = addDays(monthStart, diff);
   return Array.from({ length: 42 }, (_, index) => {
     const cellDate = addDays(gridStart, index);
     return {
@@ -110,6 +107,7 @@ export function CalendarGrid({
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [jumpOpen, setJumpOpen] = useState(false);
+  const [draftAnimationKey, setDraftAnimationKey] = useState(0);
   const referenceDate = useMemo(() => {
     if (today) return parseDateAtNoon(today);
     if (allDays?.[0]?.date) return parseDateAtNoon(allDays[0].date);
@@ -143,14 +141,22 @@ export function CalendarGrid({
     return dayMap;
   }, [allDays, externalEvents]);
 
-  const weekStart = useMemo(() => startOfWeek(focusDate), [focusDate]);
+  const draftSignature = useMemo(() => {
+    if (!draftMode) return "";
+    return (allDays || [])
+      .flatMap(day => (day.sessions || []).map(session => `${day.date}:${session.session_id || session.start_time || session.title || "session"}`))
+      .join("|");
+  }, [allDays, draftMode]);
+  const previousDraftSignatureRef = useRef("");
+
+  const visibleStart = useMemo(() => normalizeDate(focusDate), [focusDate]);
   const displayDays = useMemo(() => {
     return Array.from({ length: 7 }, (_, index) => {
-      const date = addDays(weekStart, index);
+      const date = addDays(visibleStart, index);
       const key = formatDateKey(date);
       return dayMap.get(key) || { date: key, sessions: [] };
     });
-  }, [dayMap, weekStart]);
+  }, [dayMap, visibleStart]);
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 60000);
@@ -167,6 +173,17 @@ export function CalendarGrid({
     document.addEventListener("mousedown", handleOutside);
     return () => document.removeEventListener("mousedown", handleOutside);
   }, [jumpOpen]);
+
+  useEffect(() => {
+    if (!draftMode || !draftSignature) {
+      previousDraftSignatureRef.current = draftSignature;
+      return;
+    }
+    if (draftSignature !== previousDraftSignatureRef.current) {
+      setDraftAnimationKey(prev => prev + 1);
+      previousDraftSignatureRef.current = draftSignature;
+    }
+  }, [draftMode, draftSignature]);
 
   if (displayDays.length === 0) {
     return (
@@ -230,9 +247,9 @@ export function CalendarGrid({
   const markerNearBottom = currentTimeMarkerPixels > calendarHeight - 22;
   const todayColumnIndex = displayDays.findIndex(day => day.date === today);
   const showCurrentTime = todayColumnIndex !== -1;
-  const weekEnd = useMemo(() => addDays(weekStart, 6), [weekStart]);
-  const monthLabel = weekStart.toLocaleDateString("en-US", { month: "long" });
-  const rangeLabel = `${weekStart.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${weekEnd.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${weekEnd.getFullYear()}`;
+  const weekEnd = useMemo(() => addDays(visibleStart, 6), [visibleStart]);
+  const monthLabel = visibleStart.toLocaleDateString("en-US", { month: "long" });
+  const rangeLabel = `${visibleStart.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${weekEnd.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${weekEnd.getFullYear()}`;
   const jumpMonthLabel = focusDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   const miniMonthDays = useMemo(() => buildMiniMonth(focusDate), [focusDate]);
   const weekdayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -277,6 +294,49 @@ export function CalendarGrid({
       flex: 1,
       overflow: "hidden",
     }}>
+      <style>{`
+        @keyframes skDraftSlotIn {
+          0% {
+            opacity: 0;
+            transform: translateY(16px) scale(0.985);
+            filter: blur(6px);
+          }
+          60% {
+            opacity: 1;
+            transform: translateY(-1px) scale(1.003);
+            filter: blur(0);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0);
+          }
+        }
+        @keyframes skDraftFloat {
+          0% {
+            transform: translateY(0px);
+            box-shadow: 0 0 0 1px rgba(140, 153, 236, 0.42), 0 12px 24px rgba(111, 126, 228, 0.16), 0 0 22px rgba(140, 153, 236, 0.18);
+          }
+          50% {
+            transform: translateY(-2px);
+            box-shadow: 0 0 0 1px rgba(140, 153, 236, 0.52), 0 16px 30px rgba(111, 126, 228, 0.2), 0 0 30px rgba(140, 153, 236, 0.24);
+          }
+          100% {
+            transform: translateY(0px);
+            box-shadow: 0 0 0 1px rgba(140, 153, 236, 0.42), 0 12px 24px rgba(111, 126, 228, 0.16), 0 0 22px rgba(140, 153, 236, 0.18);
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          @keyframes skDraftSlotIn {
+            0% { opacity: 1; transform: none; filter: none; }
+            100% { opacity: 1; transform: none; filter: none; }
+          }
+          @keyframes skDraftFloat {
+            0% { transform: none; box-shadow: 0 0 0 1px rgba(140, 153, 236, 0.42), 0 12px 24px rgba(111, 126, 228, 0.16), 0 0 22px rgba(140, 153, 236, 0.18); }
+            100% { transform: none; box-shadow: 0 0 0 1px rgba(140, 153, 236, 0.42), 0 12px 24px rgba(111, 126, 228, 0.16), 0 0 22px rgba(140, 153, 236, 0.18); }
+          }
+        }
+      `}</style>
       <div style={{
         display: "flex",
         alignItems: "center",
@@ -614,6 +674,8 @@ export function CalendarGrid({
                   const isSkipped = s.status === 'skipped';
                   const titleToUse = String(s.title || s.topic || "Calendar event");
                   const isDraftSession = draftMode && !s.isBlocker;
+                  const draftOrder = displayDays.findIndex(item => item.date === day.date) * 8 + idx;
+                  const draftDelay = Math.min(420, draftOrder * 70);
                   
                   const boxStyles = s.isBlocker ? {
                     position: "absolute", top: top + 1, height: height - 2, left: 5, right: 5,
@@ -630,25 +692,36 @@ export function CalendarGrid({
                     padding: "7px 9px",
                     background: isDone
                       ? tokens.doneBg
-                      : (isSkipped ? tokens.skipBg : palette.bg),
-                    border: `1px solid ${isDraftSession ? tokens.draftBorder : (isDone ? tokens.doneBorder : (isSkipped ? tokens.skipBorder : palette.border))}`,
+                      : (isSkipped
+                        ? tokens.skipBg
+                        : isDraftSession
+                          ? "linear-gradient(180deg, rgba(245, 247, 255, 0.96) 0%, rgba(234, 238, 255, 0.94) 100%)"
+                          : palette.bg),
+                    border: `1px solid ${isDraftSession ? "rgba(140, 153, 236, 0.38)" : (isDone ? tokens.doneBorder : (isSkipped ? tokens.skipBorder : palette.border))}`,
                     opacity: isSkipped ? 0.6 : (isDone ? 0.8 : 1),
                     display: "flex", flexDirection: "column",
                     overflow: "hidden", cursor: "pointer",
                     transition: `all ${tokens.transitionNormal}`,
-                    boxShadow: isDraftSession ? `0 0 0 1px ${tokens.draftBorder}` : "none",
-                    zIndex: 3
+                    boxShadow: isDraftSession
+                      ? "0 0 0 1px rgba(140, 153, 236, 0.42), 0 12px 24px rgba(111, 126, 228, 0.16), 0 0 22px rgba(140, 153, 236, 0.18)"
+                      : "none",
+                    zIndex: 3,
+                    animation: isDraftSession
+                      ? `skDraftSlotIn 420ms cubic-bezier(0.16, 1, 0.3, 1) ${draftDelay}ms both, skDraftFloat 3.6s ease-in-out ${draftDelay + 440}ms infinite`
+                      : "none",
+                    transformOrigin: "50% 20%",
+                    willChange: isDraftSession ? "transform, opacity" : "auto",
                   };
 
                   return (
-                    <div key={`${day.date}-${s.start_time}-${idx}`} 
+                    <div key={`${draftAnimationKey}-${day.date}-${s.start_time}-${idx}`} 
                          style={boxStyles}
                          onClick={(e) => { e.stopPropagation(); if(onSessionClick && !s.isBlocker) onSessionClick(s, day.date); }}
                          onMouseEnter={e => { 
                            if(!s.isBlocker) {
                              e.currentTarget.style.transform = "translateY(-1px)"; 
                              e.currentTarget.style.boxShadow = isDraftSession
-                               ? `0 0 0 1px ${tokens.draftBorder}, 0 8px 18px rgba(76, 88, 132, 0.12)`
+                               ? "0 0 0 1px rgba(140, 153, 236, 0.5), 0 16px 34px rgba(111, 126, 228, 0.22), 0 0 30px rgba(140, 153, 236, 0.24)"
                                : "0 8px 18px rgba(76, 88, 132, 0.12)";
                              e.currentTarget.style.zIndex = 25; 
                            }
@@ -657,7 +730,7 @@ export function CalendarGrid({
                            if(!s.isBlocker) {
                              e.currentTarget.style.transform = "none"; 
                              e.currentTarget.style.boxShadow = isDraftSession
-                               ? `0 0 0 1px ${tokens.draftBorder}`
+                               ? "0 0 0 1px rgba(140, 153, 236, 0.42), 0 12px 24px rgba(111, 126, 228, 0.16), 0 0 22px rgba(140, 153, 236, 0.18)"
                                : "none";
                              e.currentTarget.style.zIndex = 3; 
                            }
@@ -678,9 +751,10 @@ export function CalendarGrid({
                            position: "absolute", top: 6, right: 6,
                            padding: "1px 5px", borderRadius: tokens.radiusFull,
                            fontSize: 9, fontWeight: 600, letterSpacing: "0.05em",
-                           color: tokens.redText,
-                           background: tokens.draftBg,
-                           border: `1px solid ${tokens.draftBorder}`,
+                           color: tokens.accentHover,
+                           background: "rgba(255,255,255,0.72)",
+                           border: "1px solid rgba(140, 153, 236, 0.28)",
+                           boxShadow: "0 0 0 1px rgba(255,255,255,0.55)",
                          }}>
                            DRAFT
                          </div>

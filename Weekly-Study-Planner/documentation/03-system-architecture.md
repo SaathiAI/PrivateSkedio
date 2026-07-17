@@ -41,10 +41,11 @@ The frontend is the user’s operational workspace.
 It includes:
 
 - planner surface
-- chat/review surface
-- progress surface
+- AI assistant drawer and review surface
+- dashboard / progress surface
 - knowledge graph surface
 - settings/connections surface
+- auth surface
 
 Its job is not just display.
 It also participates in:
@@ -53,6 +54,15 @@ It also participates in:
 - session completion
 - draft visibility
 - email-review re-entry
+- navigation between live product surfaces
+
+The important current framing is:
+
+```text
+planner is the anchor surface
+assistant is attached to the planner loop
+other surfaces explain or support that loop
+```
 
 ## API Layer
 
@@ -66,6 +76,9 @@ Its responsibilities include:
 - coordinating calendar-related endpoints
 - carrying review workflow endpoints
 - managing checkpoint-backed graph execution
+
+The API layer is also the place where frontend-safe domain shapes are enforced.
+The UI should not have to reverse-engineer raw orchestration internals.
 
 ## Supervisor Layer
 
@@ -86,6 +99,14 @@ The supervisor currently routes among:
 - user-facing
 
 It also reads worker results and can continue routing rather than treating a turn as a one-shot classification event.
+
+The supervisor matters because SkedioAI is not a single-prompt product.
+It is a staged workflow where the next owner depends on:
+
+- whether the user is still clarifying contract facts
+- whether a draft needs schedule work
+- whether a verified plan is waiting for approval
+- whether the user is asking for explanation rather than mutation
 
 ## Intake Layer
 
@@ -124,6 +145,8 @@ This includes:
 
 The current architecture deliberately keeps revision inside planner ownership instead of creating a separate live rescheduler identity.
 
+That means “new plan” and “revise plan” are different runtime modes, not different agent identities.
+
 ## User-Facing Layer
 
 The user-facing node exists because domain-worker output quality and user-facing communication quality are not the same problem.
@@ -132,6 +155,8 @@ Workers may think like engineers or internal state machines.
 Users need clear communication.
 
 The user-facing layer is therefore treated as a lightweight language-polishing boundary rather than a major business-logic owner.
+
+On the frontend side, this is reflected in the fact that the UI renders structured review actions and draft-plan state instead of trusting raw freeform prose.
 
 ## Services and Deterministic Logic
 
@@ -224,6 +249,12 @@ draft
 
 This separation reduces the risk of turning weak drafts into durable truth.
 
+It also keeps the frontend honest:
+
+- preview can be immediate
+- durable truth waits for approval
+- revision can stay visible without mutating the active plan too early
+
 ## Session and Progress Architecture
 
 The product does not end when a plan is created.
@@ -242,7 +273,7 @@ That is why progress is treated as part of the architecture, not just analytics.
 
 The architecture works because each major layer has a strong job:
 
-- frontend: interaction and visibility
+- frontend: interaction, visibility, and review surfaces
 - API: runtime boundary
 - supervisor: orchestration
 - intake: contract truth

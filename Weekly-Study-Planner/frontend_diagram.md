@@ -5,10 +5,11 @@ It is current live truth for the shipped frontend app surface.
 
 It focuses on the main study-planner app surface:
 - auth gate
-- calendar view
+- planner calendar view
 - AI drawer
 - draft-plan review UI
 - API wrapper flow
+- settings and integration surfaces
 
 ---
 
@@ -30,7 +31,7 @@ flowchart TD
 ```mermaid
 flowchart LR
     Sidebar["Left sidebar"]
-    Workspace["Main workspace"]
+    Workspace["Main workspace / active tab"]
     Drawer["Right AI drawer"]
 
     Sidebar --> Workspace
@@ -39,12 +40,22 @@ flowchart LR
 
 The key live views are:
 - Calendar
+- Dashboard
 - Plan History
 - Settings
 - Knowledge Graph modal
 - Profile modal
 - Session checklist modal
 - Chat drawer
+
+The current navigation logic is planner-first:
+
+```text
+Planner
+-> Dashboard
+-> Knowledge graph
+-> Settings / history / profile paths
+```
 
 ---
 
@@ -57,6 +68,7 @@ flowchart TB
     StudyPlanApp --> GlobalStyles["GlobalStyles"]
     StudyPlanApp --> CalendarGrid["CalendarGrid"]
     StudyPlanApp --> ChatPanel["ChatPanel"]
+    StudyPlanApp --> Dashboard["DashboardTabV2"]
     StudyPlanApp --> PlanHistory["PlanHistoryView"]
     StudyPlanApp --> Settings["SettingsView"]
     StudyPlanApp --> Graph["KnowledgeGraphModal"]
@@ -76,6 +88,8 @@ It owns:
 - AI drawer visibility
 - AI drawer width
 - thread id
+- sidebar expansion / settings state
+- frontend-only preview fallbacks for local dev
 
 ---
 
@@ -108,6 +122,9 @@ Main page hydration uses:
 ## Calendar View
 
 `CalendarGrid.jsx` renders:
+- a 7-day week view
+- week navigation
+- jump-calendar popover
 - day columns
 - hour rails
 - current time line
@@ -117,14 +134,17 @@ Main page hydration uses:
 
 ```mermaid
 flowchart TD
-    Inputs["allDays + externalEvents + draftMode"] --> Merge["merge days with external blockers"]
-    Merge --> Render["render sticky day header + hour grid"]
+    Inputs["allDays + externalEvents + draftMode + focusDate"] --> Merge["merge plan days with blocker days"]
+    Merge --> Window["build visible 7-day week"]
+    Window --> Render["render sticky week header + hour grid"]
     Render --> Blocks["render external blocker cards"]
     Render --> Sessions["render session cards"]
     Sessions --> Click["onSessionClick -> modal/open details"]
 ```
 
 Important live behavior:
+- planner stays week-based even when jumping across months
+- top-right controls navigate week-first, not month-view-first
 - external blockers are inserted into the same day columns
 - draft sessions get a red “DRAFT” styling path
 - completed/skipped sessions render differently from active ones
@@ -141,6 +161,7 @@ It owns:
 - request-changes mode
 - action button handling
 - streaming reply assembly
+- layout behavior inside the right-side assistant drawer
 
 ```mermaid
 flowchart TD
@@ -186,6 +207,7 @@ visiblePlan = draftPlan || plan
 That means:
 - when backend returns a draft, the calendar can preview it immediately
 - when committed or cleared, the app falls back to the durable active plan
+- the frontend can visibly separate “proposal” from “active truth”
 
 ```mermaid
 flowchart LR
@@ -223,6 +245,7 @@ Base helpers:
 - get active plan
 - list plans
 - allocation summary
+- plan history support
 
 ### `chatApi`
 
@@ -238,6 +261,37 @@ Base helpers:
 - external blockers
 
 ### `sessionApi`
+
+- session completion
+- checklist-related updates
+
+---
+
+## Auth Surface
+
+`Auth.jsx` currently provides:
+
+- auth provider and auth gate
+- sign-in and sign-up flow
+- Google sign-in
+- frontend-only sample admin path for local dev
+- split-screen auth UI
+
+The auth screen is intentionally treated as part of the product system, not as a throwaway template.
+
+---
+
+## Current Frontend Truth
+
+The current frontend should be understood as:
+
+```text
+one planner-first app shell
+with assistant-driven review and revision
+plus supporting surfaces around progress, settings, and graph visibility
+```
+
+That is the current live shape.
 
 - complete session
 - update content status

@@ -34,7 +34,8 @@ export function ChatPanel({
   const [changeMode, setChangeMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resetting, setResetting] = useState(false);
-  const endRef = useRef(null);
+  const messagesRef = useRef(null);
+  const inputRef = useRef(null);
   const lastEmailReviewNonceRef = useRef(null);
   const lastQueuedPromptNonceRef = useRef(null);
 
@@ -46,7 +47,20 @@ export function ChatPanel({
     setMessages(loadPersistedMessages(localStorage, threadId));
   }, [threadId]);
 
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  useEffect(() => {
+    const container = messagesRef.current;
+    if (!container) return;
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [messages]);
+
+  useEffect(() => {
+    const input = inputRef.current;
+    if (!input) return;
+    input.focus({ preventScroll: true });
+  }, [changeMode, isEmbedded]);
 
   useEffect(() => {
     if (!emailReviewRequest?.nonce || !threadId) return;
@@ -495,7 +509,7 @@ export function ChatPanel({
       </div>
 
       {/* Messages */}
-      <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: isEmbedded ? "18px 18px 0" : `${tokens.space5} ${tokens.space5} 0` }}>
+      <div ref={messagesRef} style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: isEmbedded ? "18px 18px 0" : `${tokens.space5} ${tokens.space5} 0` }}>
         {messages.length === 0 && (
           <div style={{ textAlign: "left", padding: isEmbedded ? "58px 4px" : "60px 0" }}>
             <div style={{
@@ -751,7 +765,7 @@ export function ChatPanel({
             ))}
           </div>
         )}
-        <div ref={endRef} style={{ height: 20 }} />
+        <div style={{ height: 20 }} />
       </div>
 
       {/* Input */}
@@ -799,8 +813,9 @@ export function ChatPanel({
           boxShadow: "0 10px 24px rgba(76, 88, 132, 0.08)",
         }}>
           <input
+            ref={inputRef}
             type="text" value={input} onChange={e => setInput(e.target.value)}
-            placeholder={changeMode ? "What should change?" : "Ask SkedioAI..."} disabled={loading} autoFocus
+            placeholder={changeMode ? "What should change?" : "Ask SkedioAI..."} disabled={loading}
             style={{
               flex: 1,
               minWidth: 0,
