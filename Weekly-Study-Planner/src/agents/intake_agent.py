@@ -548,24 +548,70 @@ async def query_syllabus(subject: str, chapter: str | None = None) -> str:
     subject = subject.strip()
 
     try:
-        if chapter:
-            # Query specific chapter
-            results = await vs.search_syllabus(f"{subject} {chapter}", top_k=5)
-        else:
-            # Query whole subject
-            results = await vs.search_syllabus(f"{subject} Class 10 CBSE", top_k=50)
+        def norm(value: str | None) -> str:
+            return " ".join(str(value or "").lower().replace("_", " ").split())
 
-        subject_lower = subject.lower()
         subject_aliases = {
-            "mathematics": ["maths", "mathematics", "math"],
-            "science": ["science", "sciences"],
-            "english": ["english", "eng"],
-            "social science": ["social_science", "social science", "social", "sst"],
+            "maths": "maths",
+            "math": "maths",
+            "mathematics": "maths",
+            "science": "science",
+            "sciences": "science",
+            "english": "english",
+            "eng": "english",
+            "sst": "social_science",
+            "social": "social_science",
+            "social science": "social_science",
+            "social_science": "social_science",
         }
-        allowed = subject_aliases.get(subject_lower, [subject_lower])
+        canonical_subject = subject_aliases.get(norm(subject), norm(subject))
+
+        # Prefer metadata lookup. It avoids Gemini embeddings, which can timeout
+        # and should not be required for basic subject/chapter truth.
+        results = await vs.list_syllabus_by_subject(canonical_subject, top_k=50)
+
+        if chapter and results:
+            chapter_query = norm(chapter)
+            chapter_tokens = set(chapter_query.split())
+
+            def chapter_score(row: dict) -> int:
+                haystack = norm(
+                    " ".join(
+                        [
+                            str(row.get("chapter_name") or ""),
+                            str(row.get("topic_key") or ""),
+                            str(row.get("active_topics") or ""),
+                            str(row.get("removed_topics") or ""),
+                        ]
+                    )
+                )
+                if chapter_query and chapter_query in haystack:
+                    return 100
+                return len(chapter_tokens.intersection(haystack.split()))
+
+            scored = [(chapter_score(r), r) for r in results]
+            exact_matches = [r for score, r in scored if score >= 100]
+            if exact_matches:
+                results = exact_matches
+            else:
+                minimum_score = 1 if len(chapter_tokens) <= 1 else 2
+                results = [r for score, r in scored if score >= minimum_score]
+            results.sort(
+                key=lambda r: chapter_score(r),
+                reverse=True,
+            )
+
+        if not results and chapter:
+            # Last resort for fuzzy phrases only. If this times out, the tool
+            # still returns an honest miss instead of blocking whole-subject use.
+            results = await vs.search_syllabus(f"{canonical_subject} {chapter}", top_k=5)
 
         # Filter out random matches from other subjects
-        results = [r for r in results if r.get("subject", "").lower() in allowed]
+        results = [
+            r
+            for r in results
+            if norm(r.get("subject")) == norm(canonical_subject)
+        ]
 
         if not results:
             return json.dumps(

@@ -215,7 +215,7 @@ class VectorStore:
             index = self._get_index()
 
             results = index.query(
-                vector=[0.0] * 3072,
+                vector=[0.001] * EMBEDDING_DIM,
                 filter=pinecone_filter,
                 top_k=50,
                 namespace="syllabus",
@@ -236,6 +236,51 @@ class VectorStore:
 
         except Exception as e:
             return f"Error executing database filter: {str(e)}"
+
+    async def list_syllabus_by_subject(
+        self,
+        subject: str,
+        chapter_status: str | None = None,
+        top_k: int = 50,
+    ) -> list[dict]:
+        """Fetch syllabus entries by metadata only, without Gemini embeddings.
+
+        This is the reliable path for whole-subject syllabus lookups and exact
+        chapter filtering. Semantic search can still exist as a fallback, but
+        basic curriculum truth should not depend on an embedding API call.
+        """
+
+        pinecone_filter = {"subject": {"$eq": subject}}
+        if chapter_status:
+            pinecone_filter["chapter_status"] = {"$eq": chapter_status}
+
+        try:
+            index = self._get_index()
+            results = await asyncio.wait_for(
+                asyncio.to_thread(
+                    index.query,
+                    vector=[0.001] * EMBEDDING_DIM,
+                    filter=pinecone_filter,
+                    top_k=top_k,
+                    namespace="syllabus",
+                    include_metadata=True,
+                ),
+                timeout=10,
+            )
+
+            return [
+                {**m.metadata, "score": m.score}
+                for m in results.matches
+                if m.metadata
+            ]
+        except Exception as e:
+            logger.error(
+                "[syllabus] metadata fetch failed for subject=%r status=%r: %r",
+                subject,
+                chapter_status,
+                e,
+            )
+            return []
 
     async def get_all_context(self, user_id: str) -> list[dict]:
         """Fetch all context facts for a user (used by load_full_memory)."""
