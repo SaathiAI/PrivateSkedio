@@ -7,7 +7,7 @@
  *   - Use useAuth() hook to get current user
  */
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { clearClientUserState } from "../lib/clientState.js";
 import { startTimer } from "../lib/perf.js";
@@ -72,6 +72,43 @@ const authNoticeStyles = {
     border: "rgba(245, 158, 11, 0.45)",
     color: "#fbbf24",
   },
+};
+
+const authFieldStyle = {
+  width: '100%',
+  padding: '14px 15px',
+  background: tokens.bgCard,
+  border: `1px solid ${tokens.border}`,
+  borderRadius: 12,
+  fontSize: 14,
+  color: tokens.text,
+  outline: 'none',
+  boxSizing: 'border-box',
+  transition: `border-color ${tokens.transitionNormal}, box-shadow ${tokens.transitionNormal}, background ${tokens.transitionNormal}`,
+};
+
+const authLabelStyle = {
+  display: 'block',
+  marginBottom: 8,
+  fontSize: 11,
+  color: tokens.textMuted,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+  fontWeight: 700,
+};
+
+const authPrimaryButtonStyle = {
+  width: '100%',
+  padding: '14px',
+  background: `linear-gradient(135deg, ${tokens.accent} 0%, #a5aff3 100%)`,
+  color: "#fffefa",
+  border: 'none',
+  borderRadius: 12,
+  fontSize: 14,
+  fontWeight: 700,
+  cursor: 'pointer',
+  transition: `transform ${tokens.transitionFast}, box-shadow ${tokens.transitionNormal}, opacity ${tokens.transitionNormal}`,
+  boxShadow: '0 16px 34px rgba(140,153,236,0.24)',
 };
 
 const buildDevAdminSession = () => ({
@@ -302,30 +339,52 @@ export function SignIn({ onSuccess }) {
       )}
       
       <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', marginBottom: 8, fontSize: 12, color: tokens.textMuted, letterSpacing: "0.08em", textTransform: "uppercase" }}>Email</label>
+        <label style={authLabelStyle}>Email</label>
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-          style={{
-            width: '100%', padding: '13px 14px', background: "#101010", border: `1px solid ${tokens.border}`,
-            borderRadius: 8, fontSize: 14, color: tokens.text, outline: 'none',
-          }}
+          autoComplete="email"
+          placeholder="Enter your email"
+          style={authFieldStyle}
         />
       </div>
       
-      <div style={{ marginBottom: 24 }}>
-        <label style={{ display: 'block', marginBottom: 8, fontSize: 12, color: tokens.textMuted, letterSpacing: "0.08em", textTransform: "uppercase" }}>Password</label>
+      <div style={{ marginBottom: 14 }}>
+        <label style={authLabelStyle}>Password</label>
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
-          style={{
-            width: '100%', padding: '13px 14px', background: "#101010", border: `1px solid ${tokens.border}`,
-            borderRadius: 8, fontSize: 14, color: tokens.text, outline: 'none',
-          }}
+          autoComplete="current-password"
+          placeholder="Enter your password"
+          style={authFieldStyle}
         />
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 22 }}>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 12, color: tokens.textSecondary, cursor: 'pointer' }}>
+          <input type="checkbox" style={{ accentColor: tokens.accent }} />
+          Remember for 30 days
+        </label>
+        <button
+          type="button"
+          style={{
+            border: 'none',
+            background: 'transparent',
+            padding: 0,
+            color: tokens.accentHover,
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+          }}
+        >
+          Forgot password
+        </button>
       </div>
       
       <button type="submit" disabled={loading}
         style={{
-          width: '100%', padding: '13px', background: loading ? tokens.borderHover : tokens.text, color: tokens.bg,
-          border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer',
-          transition: "background 0.2s", boxShadow: loading ? "none" : "0 12px 30px rgba(238,238,238,0.08)"
+          ...authPrimaryButtonStyle,
+          background: loading ? tokens.borderHover : authPrimaryButtonStyle.background,
+          cursor: loading ? 'not-allowed' : 'pointer',
+          opacity: loading ? 0.7 : 1,
+          boxShadow: loading ? 'none' : authPrimaryButtonStyle.boxShadow,
         }}
       >
         {loading ? 'Signing in...' : 'Sign In'}
@@ -338,6 +397,7 @@ export function SignUp({ onSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [agree, setAgree] = useState(true);
   const [notice, setNotice] = useState(null);
   const [loading, setLoading] = useState(false);
   const [cooldownUntil, setCooldownUntil] = useState(() => {
@@ -366,6 +426,14 @@ export function SignUp({ onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isCoolingDown) return;
+    if (!agree) {
+      setNotice({
+        type: 'warning',
+        title: 'Confirm before continuing',
+        message: 'Please confirm the account terms before creating your workspace.',
+      });
+      return;
+    }
     if (!supabase) {
       setNotice({ type: 'error', title: 'Auth is not configured', message: 'Missing Supabase environment variables.' });
       return;
@@ -442,45 +510,50 @@ export function SignUp({ onSuccess }) {
         </div>
       )}
       
-      <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', marginBottom: 8, fontSize: 12, color: tokens.textMuted, letterSpacing: "0.08em", textTransform: "uppercase" }}>Name</label>
+      <div style={{ marginBottom: 14 }}>
+        <label style={authLabelStyle}>Name</label>
         <input type="text" value={name} onChange={(e) => setName(e.target.value)} required autoComplete="name"
-          style={{
-            width: '100%', padding: '13px 14px', background: "#101010", border: `1px solid ${tokens.border}`,
-            borderRadius: 8, fontSize: 14, color: tokens.text, outline: 'none',
-          }} />
+          placeholder="Enter your full name"
+          style={authFieldStyle} />
       </div>
       
-      <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', marginBottom: 8, fontSize: 12, color: tokens.textMuted, letterSpacing: "0.08em", textTransform: "uppercase" }}>Email</label>
+      <div style={{ marginBottom: 14 }}>
+        <label style={authLabelStyle}>Email</label>
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email"
-          style={{
-            width: '100%', padding: '13px 14px', background: "#101010", border: `1px solid ${tokens.border}`,
-            borderRadius: 8, fontSize: 14, color: tokens.text, outline: 'none',
-          }} />
+          placeholder="Enter your email"
+          style={authFieldStyle} />
       </div>
       
-      <div style={{ marginBottom: 24 }}>
-        <label style={{ display: 'block', marginBottom: 8, fontSize: 12, color: tokens.textMuted, letterSpacing: "0.08em", textTransform: "uppercase" }}>Password</label>
+      <div style={{ marginBottom: 14 }}>
+        <label style={authLabelStyle}>Password</label>
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} autoComplete="new-password"
-          style={{
-            width: '100%', padding: '13px 14px', background: "#101010", border: `1px solid ${tokens.border}`,
-            borderRadius: 8, fontSize: 14, color: tokens.text, outline: 'none',
-          }} />
+          placeholder="Create a password"
+          style={authFieldStyle} />
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 22 }}>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 12, color: tokens.textSecondary, cursor: 'pointer', lineHeight: 1.4 }}>
+          <input
+            type="checkbox"
+            checked={agree}
+            onChange={(e) => setAgree(e.target.checked)}
+            style={{ accentColor: tokens.accent }}
+          />
+          I agree to the account terms
+        </label>
+        <span style={{ color: tokens.accentHover, fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap' }}>
+          Use 6+ characters
+        </span>
       </div>
       
       <button type="submit" disabled={disabled}
         style={{
-          width: '100%',
-          padding: '13px',
-          background: disabled ? "#2a2a2a" : tokens.text,
-          color: disabled ? tokens.textMuted : tokens.bg,
-          border: 'none',
-          borderRadius: 8,
-          fontSize: 14,
-          fontWeight: 600,
+          ...authPrimaryButtonStyle,
+          background: disabled ? tokens.borderHover : authPrimaryButtonStyle.background,
+          color: disabled ? tokens.textMuted : "#fffefa",
           cursor: disabled ? 'not-allowed' : 'pointer',
-          transition: 'background 0.2s, color 0.2s',
+          opacity: disabled ? 0.7 : 1,
+          boxShadow: disabled ? 'none' : authPrimaryButtonStyle.boxShadow,
         }}
       >
         {loading ? 'Creating account...' : isCoolingDown ? `Try again in ${cooldownSeconds}s` : 'Create Account'}
@@ -542,10 +615,10 @@ export function GoogleSignIn() {
   return (
     <button onClick={handleGoogleSignIn} disabled={loading}
       style={{
-        width: '100%', padding: '13px', background: loading ? tokens.bgHover : "#101010", 
-        border: `1px solid ${tokens.borderHover}`, borderRadius: 8, fontSize: 14, fontWeight: 500, color: tokens.text,
+        width: '100%', padding: '13px', background: loading ? tokens.bgHover : tokens.bgCard, 
+        border: `1px solid ${tokens.border}`, borderRadius: 12, fontSize: 14, fontWeight: 600, color: tokens.text,
         cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-        transition: 'background 0.2s'
+        transition: 'background 0.2s, border-color 0.2s, transform 0.12s',
       }}
     >
       {loading ? 'Signing in...' : <><GoogleIcon />Continue with Google</>}
@@ -560,6 +633,218 @@ function GoogleIcon() {
       <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
       <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
       <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+    </svg>
+  );
+}
+
+function AuthCursorTrail() {
+  const frameRef = useRef(null);
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const frame = frameRef.current;
+    const canvas = canvasRef.current;
+    if (!frame || !canvas) return undefined;
+
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (media.matches) return undefined;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return undefined;
+
+    let animationFrame = 0;
+    let mouseMoved = false;
+    const params = {
+      pointsNumber: 40,
+      widthFactor: 0.3,
+      spring: 0.4,
+      friction: 0.5,
+    };
+
+    const pointer = { x: 0, y: 0 };
+    const trail = Array.from({ length: params.pointsNumber }, () => ({
+      x: 0,
+      y: 0,
+      dx: 0,
+      dy: 0,
+    }));
+
+    const syncToCenter = () => {
+      const width = frame.clientWidth;
+      const height = frame.clientHeight;
+      pointer.x = width * 0.52;
+      pointer.y = height * 0.48;
+      trail.forEach((point) => {
+        point.x = pointer.x;
+        point.y = pointer.y;
+        point.dx = 0;
+        point.dy = 0;
+      });
+    };
+
+    const resizeCanvas = () => {
+      const dpr = window.devicePixelRatio || 1;
+      const width = frame.clientWidth;
+      const height = frame.clientHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      syncToCenter();
+    };
+
+    const updatePointer = (clientX, clientY) => {
+      const rect = frame.getBoundingClientRect();
+      pointer.x = clientX - rect.left;
+      pointer.y = clientY - rect.top;
+    };
+
+    const handlePointerMove = (event) => {
+      mouseMoved = true;
+      updatePointer(event.clientX, event.clientY);
+    };
+
+    const handlePointerEnter = (event) => {
+      mouseMoved = true;
+      updatePointer(event.clientX, event.clientY);
+    };
+
+    const handleTouchMove = (event) => {
+      if (!event.targetTouches?.[0]) return;
+      mouseMoved = true;
+      updatePointer(event.targetTouches[0].clientX, event.targetTouches[0].clientY);
+    };
+
+    const draw = () => {
+      const width = frame.clientWidth;
+      const height = frame.clientHeight;
+
+      ctx.clearRect(0, 0, width, height);
+      if (!mouseMoved) {
+        animationFrame = window.requestAnimationFrame(draw);
+        return;
+      }
+
+      trail.forEach((point, index) => {
+        const prev = index === 0 ? pointer : trail[index - 1];
+        const spring = index === 0 ? params.spring * 0.45 : params.spring;
+        point.dx += (prev.x - point.x) * spring;
+        point.dy += (prev.y - point.y) * spring;
+        point.dx *= params.friction;
+        point.dy *= params.friction;
+        point.x += point.dx;
+        point.y += point.dy;
+      });
+
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = 'rgba(79, 123, 255, 0.72)';
+      ctx.beginPath();
+      ctx.moveTo(trail[0].x, trail[0].y);
+
+      for (let index = 1; index < trail.length - 1; index += 1) {
+        const xc = 0.5 * (trail[index].x + trail[index + 1].x);
+        const yc = 0.5 * (trail[index].y + trail[index + 1].y);
+        ctx.lineWidth = params.widthFactor * (params.pointsNumber - index);
+        ctx.quadraticCurveTo(trail[index].x, trail[index].y, xc, yc);
+        ctx.stroke();
+      }
+
+      ctx.lineTo(trail[trail.length - 1].x, trail[trail.length - 1].y);
+      ctx.stroke();
+
+      ctx.restore();
+      animationFrame = window.requestAnimationFrame(draw);
+    };
+
+    const resizeObserver = new ResizeObserver(resizeCanvas);
+    resizeObserver.observe(frame);
+    resizeCanvas();
+
+    window.addEventListener('mousemove', handlePointerMove);
+    window.addEventListener('click', handlePointerEnter);
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    animationFrame = window.requestAnimationFrame(draw);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('mousemove', handlePointerMove);
+      window.removeEventListener('click', handlePointerEnter);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.cancelAnimationFrame(animationFrame);
+    };
+  }, []);
+
+  return (
+    <>
+      <div
+        ref={frameRef}
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          inset: 0,
+        }}
+      />
+      <canvas
+        ref={canvasRef}
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          opacity: 0.9,
+          mixBlendMode: 'multiply',
+          zIndex: 2,
+        }}
+      />
+    </>
+  );
+}
+
+function MascotPanel() {
+  return (
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        borderRadius: 24,
+        overflow: 'hidden',
+        background: 'linear-gradient(180deg, #edf1f9 0%, #e7ebf6 100%)',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.68)',
+      }}
+    >
+      <img
+        src="/skedio_mascot.png"
+        alt="SkedioAI mascot illustration"
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block',
+        }}
+      />
+    </div>
+  );
+}
+
+function SkedioMark({ size = 34 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <path d="M32 28 20 16M32 28l12-12M32 28v17" stroke="#1c1a17" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M32 45c-4 4-8 5-13 5M32 45c4 4 8 5 13 5M32 45c-1 5-3 8-7 11M32 45c1 5 3 8 7 11" stroke="#1c1a17" strokeWidth="2.6" strokeLinecap="round" />
+      <path d="M32 57c-2.2-2.8-2.2-4.9 0-7.4 2.2 2.5 2.2 4.6 0 7.4Z" fill="#8c99ec" stroke="#1c1a17" strokeWidth="1.4" />
+      <path d="M32 5c5 5.2 5 10.3 0 15.5C27 15.3 27 10.2 32 5Z" fill="#9ead78" />
+      <path d="M16 17c5.5.8 8.5 3.8 9.2 9.2C19.8 25.5 16.8 22.5 16 17Z" fill="#8d9f68" />
+      <path d="M48 17c-.8 5.5-3.8 8.5-9.2 9.2C39.5 20.8 42.5 17.8 48 17Z" fill="#8d9f68" />
+      <path d="M11 30c4.4-.7 7.4.9 9.1 4.8C15.8 35.4 12.8 33.8 11 30Z" fill="#bcc2f4" />
+      <path d="M53 30c-1.8 3.8-4.8 5.4-9.1 4.8C45.6 30.9 48.6 29.3 53 30Z" fill="#bcc2f4" />
+      <path d="M24 30c3.1.6 4.8 2.4 5.2 5.5C26.1 34.9 24.4 33.1 24 30Z" fill="#9ead78" />
+      <path d="M40 30c-.4 3.1-2.1 4.9-5.2 5.5C35.2 32.4 36.9 30.6 40 30Z" fill="#9ead78" />
     </svg>
   );
 }
@@ -604,205 +889,134 @@ export function DefaultLoginScreen() {
   };
 
   return (
-    <div style={{ flex: 1, display: 'flex', minHeight: '100vh', background: tokens.bg, color: tokens.text }}>
-      
-      {/* Left Form Section */}
-      <div style={{ 
-        width: "min(480px, 100%)", display: 'flex', flexDirection: 'column', 
-        justifyContent: 'center', padding: `${tokens.space10} clamp(${tokens.space6}, 5vw, 64px)`,
-        borderRight: `1px solid ${tokens.borderSubtle}`,
-        position: 'relative', background: tokens.bgCard,
-      }}>
-          {/* Logo */}
-          <div style={{
-            position: 'absolute', top: tokens.space8, left: `clamp(${tokens.space6}, 5vw, 64px)`,
-            display: 'flex', alignItems: 'center', gap: tokens.space3,
-          }}>
-             <div style={{
-               width: 32, height: 32, borderRadius: tokens.radiusMd,
-               background: tokens.text, color: tokens.bg,
-               display: "flex", alignItems: "center", justifyContent: "center",
-               fontWeight: 700, fontSize: 14,
-             }}>S</div>
-             <span style={{
-               fontSize: 18, fontWeight: 500, color: tokens.text,
-               fontFamily: "'Playfair Display', serif", fontStyle: "italic",
-             }}>SkedioAI</span>
-          </div>
-          
-          {/* Heading */}
-          <div style={{ marginBottom: tokens.space8, marginTop: 80 }}>
-            <div style={{
-              fontSize: 10, color: tokens.textDim, letterSpacing: "0.12em",
-              textTransform: "uppercase", marginBottom: tokens.space4,
-            }}>Study operating system</div>
-            <h1 style={{
-              fontSize: "clamp(28px, 3.5vw, 40px)",
-              lineHeight: 1.1,
-              marginBottom: tokens.space4,
-              color: tokens.text,
-              fontFamily: "'Playfair Display', serif",
-              fontWeight: 500,
-              fontStyle: "italic",
-              letterSpacing: '-0.02em',
-            }}>
-              {mode === 'signin' ? 'Welcome back.' : 'Start studying.'}
-            </h1>
-            <p style={{ color: tokens.textMuted, fontSize: 14, lineHeight: 1.6, maxWidth: 360 }}>
-              {mode === 'signin'
-                ? 'Sign in to access your plan, progress, and study coach.'
-                : 'Create an account to save plans and track your progress.'}
-            </p>
-          </div>
-
-          {/* Mode switcher */}
-          <div style={{
-            display: 'flex', gap: 2, marginBottom: tokens.space6,
-            background: tokens.bg, padding: 3, borderRadius: tokens.radiusLg,
-            border: `1px solid ${tokens.borderSubtle}`,
-          }}>
-            <button onClick={() => setMode('signin')}
-              style={{
-                flex: 1, padding: `${tokens.space2} ${tokens.space3}`,
-                background: mode === 'signin' ? tokens.bgCard : 'transparent',
-                color: mode === 'signin' ? tokens.text : tokens.textMuted,
-                border: 'none', borderRadius: tokens.radiusMd,
-                fontSize: 13, cursor: 'pointer', fontWeight: 500,
-                transition: `all ${tokens.transitionFast}`,
-                boxShadow: mode === 'signin' ? tokens.shadowSm : 'none',
-              }}>Sign In</button>
-            <button onClick={() => setMode('signup')}
-              style={{
-                flex: 1, padding: `${tokens.space2} ${tokens.space3}`,
-                background: mode === 'signup' ? tokens.bgCard : 'transparent',
-                color: mode === 'signup' ? tokens.text : tokens.textMuted,
-                border: 'none', borderRadius: tokens.radiusMd,
-                fontSize: 13, cursor: 'pointer', fontWeight: 500,
-                transition: `all ${tokens.transitionFast}`,
-                boxShadow: mode === 'signup' ? tokens.shadowSm : 'none',
-              }}>Sign Up</button>
-          </div>
-
-          {mode === 'signin' ? <SignIn /> : <SignUp />}
-
-          {/* Divider */}
-          <div style={{ display: 'flex', alignItems: 'center', margin: `${tokens.space6} 0`, color: tokens.textDim, fontSize: 10, letterSpacing: '0.1em' }}>
-            <div style={{ flex: 1, height: 1, background: tokens.borderSubtle }} />
-            <span style={{ padding: `0 ${tokens.space4}` }}>OR</span>
-            <div style={{ flex: 1, height: 1, background: tokens.borderSubtle }} />
-          </div>
-
-          <GoogleSignIn />
-
-          {allowDevAdminAuth && (
-            <>
-              <div style={{ display: 'flex', alignItems: 'center', margin: `${tokens.space5} 0`, color: tokens.textDim, fontSize: 10, letterSpacing: '0.1em' }}>
-                <div style={{ flex: 1, height: 1, background: tokens.borderSubtle }} />
-                <span style={{ padding: `0 ${tokens.space4}` }}>DEV</span>
-                <div style={{ flex: 1, height: 1, background: tokens.borderSubtle }} />
-              </div>
-
-              <button
-                type="button"
-                onClick={handleDevAdmin}
-                style={{
-                  width: '100%',
-                  padding: '13px',
-                  background: tokens.accentMuted,
-                  color: tokens.text,
-                  border: `1px solid ${tokens.accentBorder}`,
-                  borderRadius: 12,
-                  fontSize: 14,
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  boxShadow: '0 10px 24px rgba(140,153,236,0.16)',
-                }}
-              >
-                Continue as sample admin
-              </button>
-              <p style={{ marginTop: 10, color: tokens.textMuted, fontSize: 12, lineHeight: 1.5 }}>
-                Local shortcut. Backend APIs require <code>SAATHI_DEV_AUTH_BYPASS=1</code>.
-              </p>
-            </>
-          )}
-
-          {!supabaseUrl && (
-            <div style={{
-              marginTop: tokens.space6, padding: tokens.space4,
-              background: tokens.yellowBg, border: `1px solid ${tokens.yellowBorder}`,
-              borderRadius: tokens.radiusMd, fontSize: 12, color: tokens.yellowText,
-            }}>
-              Add <b>VITE_SUPABASE_URL</b> to your .env file to enable auth.
+    <div style={{ minHeight: '100vh', position: 'relative', background: 'linear-gradient(180deg, #fcfbf7 0%, #f4f2eb 100%)', color: tokens.text, padding: '20px 24px', boxSizing: 'border-box' }}>
+      <AuthCursorTrail />
+      <div
+        style={{
+          width: 'min(1360px, 100%)',
+          height: 'calc(100vh - 40px)',
+          margin: '0 auto',
+          position: 'relative',
+          borderRadius: 28,
+          background: 'rgba(255, 254, 250, 0.96)',
+          border: `1px solid ${tokens.borderSubtle}`,
+          boxShadow: '0 28px 80px rgba(76, 88, 132, 0.12)',
+          display: 'grid',
+          gridTemplateColumns: 'minmax(420px, 0.95fr) minmax(460px, 1.05fr)',
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{ position: 'relative', zIndex: 1, padding: '22px 28px', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 0, overflow: 'hidden' }}>
+          <div style={{ width: '100%', maxWidth: 360 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
+              <SkedioMark size={34} />
+              <span style={{
+                fontSize: 19, fontWeight: 700, color: tokens.text,
+                fontFamily: 'Inter, system-ui, sans-serif',
+                letterSpacing: '-0.02em',
+              }}>SkedioAI</span>
             </div>
-          )}
-      </div>
 
-      {/* Right Product Preview Section */}
-      <div style={{ 
-        flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        background: tokens.bg, position: 'relative', overflow: 'hidden', padding: tokens.space10,
-      }}>
-        <div style={{ 
-            width: 'min(680px, 100%)', border: `1px solid ${tokens.borderSubtle}`, borderRadius: tokens.radiusXl,
-            background: tokens.bgCard, boxShadow: tokens.shadowXl, overflow: "hidden",
-            animation: 'fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-        }}>
-           {/* Preview header */}
-           <div style={{
-             padding: tokens.space5, borderBottom: `1px solid ${tokens.borderSubtle}`,
-             display: "flex", justifyContent: "space-between", alignItems: "center",
-           }}>
-             <div>
-               <div style={{ fontSize: 10, color: tokens.textDim, letterSpacing: "0.1em", textTransform: "uppercase" }}>Today</div>
-               <div style={{ marginTop: 4, fontSize: 20, fontFamily: "'Playfair Display', serif", fontWeight: 500, fontStyle: "italic" }}>Maths sprint</div>
-             </div>
-             <div style={{ display: "flex", gap: tokens.space2 }}>
-               <span style={{
-                 padding: `${tokens.space1} ${tokens.space3}`, borderRadius: tokens.radiusFull,
-                 background: tokens.greenBg, border: `1px solid ${tokens.greenBorder}`,
-                 color: tokens.greenText, fontSize: 11, fontWeight: 500,
-               }}>Synced</span>
-               <span style={{
-                 padding: `${tokens.space1} ${tokens.space3}`, borderRadius: tokens.radiusFull,
-                 background: tokens.accentMuted, border: `1px solid ${tokens.accentBorder}`,
-                 color: tokens.accent, fontSize: 11, fontWeight: 500,
-               }}>Coach</span>
-             </div>
-           </div>
+            <div style={{ marginBottom: 18 }}>
+              <h1 style={{
+                fontSize: 50,
+                lineHeight: 0.98,
+                margin: 0,
+                marginBottom: 10,
+                color: tokens.text,
+                fontFamily: 'Inter, system-ui, sans-serif',
+                fontWeight: 800,
+                letterSpacing: '-0.03em',
+              }}>
+                {mode === 'signin' ? 'Welcome Back!' : 'Create account'}
+              </h1>
+              <p style={{ color: tokens.textSecondary, fontSize: 14, lineHeight: 1.6, margin: 0 }}>
+                {mode === 'signin'
+                  ? 'Sign in with your email and password.'
+                  : 'Set up your account and start planning with clarity.'}
+              </p>
+            </div>
 
-           {/* Preview grid */}
-           <div style={{ padding: tokens.space5, display: "grid", gridTemplateColumns: "1fr 1fr", gap: tokens.space3 }}>
-             {[
-               ["08:00", "Quadratics warm-up", "18/24 checked"],
-               ["15:00", "Statistics practice", "Calendar protected"],
-               ["18:30", "Reschedule check", "No conflict"],
-               ["21:00", "Light review", "Optional buffer"],
-             ].map(([time, title, meta]) => (
-               <div key={title} style={{
-                 border: `1px solid ${tokens.borderSubtle}`,
-                 borderRadius: tokens.radiusMd, background: tokens.bg,
-                 padding: tokens.space4,
-               }}>
-                 <div style={{ fontSize: 11, color: tokens.textDim, marginBottom: tokens.space2 }}>{time}</div>
-                 <div style={{ fontSize: 13, color: tokens.text, fontWeight: 500, marginBottom: tokens.space2 }}>{title}</div>
-                 <div style={{ fontSize: 11, color: tokens.greenText }}>{meta}</div>
-               </div>
-             ))}
-           </div>
+            <div style={{
+              display: 'flex', gap: 2, marginBottom: 18,
+              background: tokens.bg, padding: 4, borderRadius: 16,
+              border: `1px solid ${tokens.borderSubtle}`,
+            }}>
+              <button onClick={() => setMode('signin')}
+                style={{
+                  flex: 1, padding: '11px 12px',
+                  background: mode === 'signin' ? tokens.bgCard : 'transparent',
+                  color: mode === 'signin' ? tokens.text : tokens.textMuted,
+                  border: 'none', borderRadius: 12,
+                  fontSize: 14, cursor: 'pointer', fontWeight: 700,
+                  transition: `all ${tokens.transitionFast}`,
+                  boxShadow: mode === 'signin' ? tokens.shadowSm : 'none',
+                }}>Sign In</button>
+              <button onClick={() => setMode('signup')}
+                style={{
+                  flex: 1, padding: '11px 12px',
+                  background: mode === 'signup' ? tokens.bgCard : 'transparent',
+                  color: mode === 'signup' ? tokens.text : tokens.textMuted,
+                  border: 'none', borderRadius: 12,
+                  fontSize: 14, cursor: 'pointer', fontWeight: 700,
+                  transition: `all ${tokens.transitionFast}`,
+                  boxShadow: mode === 'signup' ? tokens.shadowSm : 'none',
+                }}>Sign Up</button>
+            </div>
 
-           {/* Footer note */}
-           <div style={{ padding: `0 ${tokens.space5} ${tokens.space5}` }}>
-             <div style={{
-               border: `1px solid ${tokens.borderSubtle}`,
-               borderRadius: tokens.radiusMd, padding: tokens.space4,
-               background: tokens.bg,
-             }}>
-               <div style={{ color: tokens.textMuted, fontSize: 12, lineHeight: 1.6 }}>
-                 SkedioAI manages your plan, calendar, and progress — so you can focus on studying.
-               </div>
-             </div>
-           </div>
+            {mode === 'signin' ? <SignIn /> : <SignUp />}
+
+            <div style={{ display: 'flex', alignItems: 'center', margin: '14px 0', color: tokens.textDim, fontSize: 11 }}>
+              <div style={{ flex: 1, height: 1, background: tokens.borderSubtle }} />
+              <span style={{ padding: `0 ${tokens.space4}` }}>Or login with</span>
+              <div style={{ flex: 1, height: 1, background: tokens.borderSubtle }} />
+            </div>
+
+            <GoogleSignIn />
+
+            {allowDevAdminAuth && (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', margin: '14px 0 10px', color: tokens.textDim, fontSize: 10, letterSpacing: '0.1em' }}>
+                  <div style={{ flex: 1, height: 1, background: tokens.borderSubtle }} />
+                  <span style={{ padding: `0 ${tokens.space4}` }}>DEV</span>
+                  <div style={{ flex: 1, height: 1, background: tokens.borderSubtle }} />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleDevAdmin}
+                  style={{
+                    width: '100%',
+                    padding: '13px',
+                    background: tokens.accentMuted,
+                    color: tokens.text,
+                    border: `1px solid ${tokens.accentBorder}`,
+                    borderRadius: 14,
+                    fontSize: 14,
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  Continue as sample admin
+                </button>
+              </>
+            )}
+
+            {!supabaseUrl && (
+              <div style={{
+                marginTop: 18, padding: tokens.space4,
+                background: tokens.yellowBg, border: `1px solid ${tokens.yellowBorder}`,
+                borderRadius: 12, fontSize: 12, color: tokens.yellowText,
+              }}>
+                Add <b>VITE_SUPABASE_URL</b> to your .env file to enable auth.
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div style={{ position: 'relative', zIndex: 1, padding: 20, minHeight: 0 }}>
+          <MascotPanel />
         </div>
       </div>
     </div>

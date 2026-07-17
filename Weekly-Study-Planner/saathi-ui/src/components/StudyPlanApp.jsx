@@ -1314,15 +1314,10 @@ export function StudyPlanApp() {
             }}>
               <ViewErrorBoundary resetKey={activeTab}>
               {activeTab === "overview" && (
-                <OverviewTab
-                  visiblePlan={visiblePlan}
-                  draftPlan={draftPlan}
+                <DashboardTabV2
                   stats={stats}
-                  progress={progress}
-                  externalEvents={externalEvents}
-                  onOpenPlanner={openPlanner}
-                  onOpenAssistant={openAssistant}
-                  onOpenGraph={() => setShowGraph(true)}
+                  examDate={stats?.exam_date}
+                  daysUntilExam={stats?.days_until_exam}
                 />
               )}
 

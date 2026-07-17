@@ -2,6 +2,26 @@ import { tokens, getSubjectPalette } from "../theme.js";
 import { Spinner } from "./ui.jsx";
 import { useSessionActions } from "../hooks/useSessionActions.js";
 
+function CheckMarkIcon() {
+  return (
+    <svg width="11" height="9" viewBox="0 0 11 9" fill="none" aria-hidden="true">
+      <path
+        d="M1.25 4.5 4.1 7.25 9.75 1.5"
+        stroke="#fffdf8"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        pathLength="1"
+        style={{
+          strokeDasharray: 1,
+          strokeDashoffset: 0,
+          animation: "skCheckDraw 180ms cubic-bezier(0.22, 1, 0.36, 1)",
+        }}
+      />
+    </svg>
+  );
+}
+
 export function SessionChecklistModal({ sessionObj, onClose, onRefresh }) {
   const { session } = sessionObj;
   const {
@@ -79,24 +99,36 @@ export function SessionChecklistModal({ sessionObj, onClose, onRefresh }) {
 
   return (
     <div style={{
-      position: "fixed", inset: 0, background: "rgba(10, 10, 15, 0.6)",
+      position: "fixed", inset: 0, background: "rgba(24, 22, 19, 0.22)",
       display: "flex", alignItems: "center", justifyContent: "center",
-      zIndex: 2000, animation: "fadeIn 0.25s ease-out", backdropFilter: "blur(12px)",
+      zIndex: 2000, animation: "fadeIn 0.25s ease-out", backdropFilter: "blur(10px)",
     }}>
       <div style={{ position: 'absolute', inset: 0 }} onClick={onClose} />
       <div style={{
-        position: 'relative', width: 460, background: `${tokens.bgCard}ee`,
-        borderRadius: 24, border: `1px solid rgba(255, 255, 255, 0.08)`,
-        boxShadow: "0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.02) inset", 
-        animation: "modalScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards", padding: 36,
-        display: "flex", flexDirection: "column", gap: 24, backdropFilter: "blur(20px)"
+        position: 'relative', width: 472, background: tokens.bgCard,
+        borderRadius: 24, border: `1px solid ${tokens.border}`,
+        boxShadow: tokens.shadowXl,
+        animation: "modalScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards", padding: 32,
+        display: "flex", flexDirection: "column", gap: 22,
       }}>
+        <style>{`
+          @keyframes skCheckDraw {
+            from { stroke-dashoffset: 1; }
+            to { stroke-dashoffset: 0; }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            @keyframes skCheckDraw {
+              from { stroke-dashoffset: 0; }
+              to { stroke-dashoffset: 0; }
+            }
+          }
+        `}</style>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
            <div>
-             <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 100, background: `linear-gradient(135deg, ${palette.bg}, transparent)`, color: palette.dot, border: `1px solid ${palette.border}`, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 14 }}>
+             <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 100, background: palette.bg, color: palette.text || palette.dot, border: `1px solid ${palette.border}`, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 14 }}>
                {derivedSubject}
              </div>
-             <h2 style={{ fontSize: 26, fontWeight: 500, color: tokens.text, fontFamily: "'Fraunces', serif", fontStyle: "italic", lineHeight: 1.1, letterSpacing: "-0.01em" }}>{titleToUse}</h2>
+             <h2 style={{ fontSize: 28, fontWeight: 700, color: tokens.text, lineHeight: 1.08, letterSpacing: "-0.02em" }}>{titleToUse}</h2>
              <div style={{ fontSize: 13, color: tokens.textMuted, marginTop: 10, display: 'flex', gap: 12, alignItems: 'center' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -109,14 +141,14 @@ export function SessionChecklistModal({ sessionObj, onClose, onRefresh }) {
              {Array.isArray(session.allocated_hours) && session.allocated_hours.length > 0 && (
                 <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
                    {session.allocated_hours.map((alloc, i) => (
-                      <span key={i} style={{ fontSize: 10, background: "rgba(255,255,255,0.03)", border: `1px solid rgba(255,255,255,0.08)`, borderRadius: 6, padding: "2px 8px", color: tokens.textMuted }}>
+                      <span key={i} style={{ fontSize: 10, background: tokens.bg, border: `1px solid ${tokens.borderSubtle}`, borderRadius: 8, padding: "3px 8px", color: tokens.textMuted }}>
                          {alloc.chapter}: {alloc.hours}h
                       </span>
                    ))}
                 </div>
              )}
            </div>
-           <button onClick={onClose} style={{ background: tokens.bg, border: `1px solid ${tokens.border}`, borderRadius: '50%', cursor: 'pointer', color: tokens.textMuted, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }} onMouseEnter={e => { e.currentTarget.style.background = tokens.border; e.currentTarget.style.color = tokens.text; }} onMouseLeave={e => { e.currentTarget.style.background = tokens.bg; e.currentTarget.style.color = tokens.textMuted; }}>✕</button>
+           <button onClick={onClose} style={{ background: tokens.bg, border: `1px solid ${tokens.border}`, borderRadius: '50%', cursor: 'pointer', color: tokens.textMuted, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: `all ${tokens.transitionNormal}` }} onMouseEnter={e => { e.currentTarget.style.background = tokens.bgHover; e.currentTarget.style.color = tokens.text; }} onMouseLeave={e => { e.currentTarget.style.background = tokens.bg; e.currentTarget.style.color = tokens.textMuted; }}>✕</button>
         </div>
 
         {allSubs.length > 0 && (
@@ -139,14 +171,72 @@ export function SessionChecklistModal({ sessionObj, onClose, onRefresh }) {
                const isDone = completedSubs.includes(c.match_key);
                const isLoading = subtopicLoading[c.match_key];
                return (
-                 <div key={c.match_key} onClick={() => handleSubtopicClick(c.match_key)} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", borderRadius: 12, border: `1px solid ${isDone ? tokens.greenBorder : 'rgba(255,255,255,0.05)'}`, background: isDone ? `${tokens.green}15` : 'rgba(255,255,255,0.02)', cursor: isLoading ? "wait" : "pointer", opacity: isLoading ? 0.6 : 1, transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)", animation: `fadeUp 0.25s ease ${i * 0.05}s both` }} onMouseEnter={e => { if (!isLoading && !isDone) { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.2)"; } }} onMouseLeave={e => { if (!isLoading && !isDone) { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; } }}>
-                   <div style={{ width: 22, height: 22, borderRadius: "50%", border: `2px solid ${isDone ? tokens.green : 'rgba(255,255,255,0.2)'}`, background: isDone ? tokens.green : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)", flexShrink: 0 }}>
-                     {isLoading ? <Spinner size={12} /> : isDone && (
-                       <svg width="12" height="9" viewBox="0 0 12 9" fill="none" style={{ animation: "popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)" }}><path d="M1.5 4.5L4.5 7.5L10.5 1.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                     )}
+                 <button
+                   key={c.match_key}
+                   type="button"
+                   onClick={() => handleSubtopicClick(c.match_key)}
+                   style={{
+                     display: "flex",
+                     alignItems: "center",
+                     gap: 14,
+                     width: "100%",
+                     padding: "14px 16px",
+                     borderRadius: 14,
+                     border: `1px solid ${isDone ? tokens.greenBorder : tokens.borderSubtle}`,
+                     background: isDone ? tokens.doneBg : tokens.bg,
+                     cursor: isLoading ? "wait" : "pointer",
+                     opacity: isLoading ? 0.6 : 1,
+                     transition: `all ${tokens.transitionNormal}`,
+                     animation: `fadeUp 0.25s ease ${i * 0.05}s both`,
+                     textAlign: "left",
+                     boxShadow: isDone ? tokens.shadowDone : "none",
+                   }}
+                   onMouseEnter={e => {
+                     if (!isLoading && !isDone) {
+                       e.currentTarget.style.background = tokens.accentMuted;
+                       e.currentTarget.style.borderColor = tokens.accentBorder;
+                       e.currentTarget.style.transform = "translateY(-1px)";
+                     }
+                   }}
+                   onMouseLeave={e => {
+                     if (!isLoading && !isDone) {
+                       e.currentTarget.style.background = tokens.bg;
+                       e.currentTarget.style.borderColor = tokens.borderSubtle;
+                       e.currentTarget.style.transform = "translateY(0)";
+                     }
+                   }}
+                 >
+                   <div
+                     style={{
+                       width: 18,
+                       height: 18,
+                       borderRadius: 6,
+                       border: `1.5px solid ${isDone ? tokens.accentHover : tokens.borderHover}`,
+                       background: isDone ? tokens.accent : tokens.bgCard,
+                       display: "flex",
+                       alignItems: "center",
+                       justifyContent: "center",
+                       transition: `all ${tokens.transitionNormal}`,
+                       flexShrink: 0,
+                       boxShadow: isDone ? "0 0 0 4px rgba(140, 153, 236, 0.14)" : "none",
+                       transform: isDone ? "scale(1)" : "scale(0.98)",
+                     }}
+                   >
+                     {isLoading ? <Spinner size={10} /> : isDone ? <CheckMarkIcon /> : null}
                    </div>
-                   <span style={{ fontSize: 14, color: isDone ? tokens.textMuted : tokens.text, textDecoration: isDone ? "line-through" : "none", transition: "all 0.25s" }}>{c.name}</span>
-                 </div>
+                   <span
+                     style={{
+                       fontSize: 14,
+                       fontWeight: isDone ? 500 : 600,
+                       color: isDone ? tokens.textMuted : tokens.text,
+                       textDecoration: isDone ? "line-through" : "none",
+                       textDecorationThickness: "1px",
+                       transition: `all ${tokens.transitionNormal}`,
+                     }}
+                   >
+                     {c.name}
+                   </span>
+                 </button>
                );
              })
            )}
@@ -154,15 +244,15 @@ export function SessionChecklistModal({ sessionObj, onClose, onRefresh }) {
 
         <div style={{ marginTop: 8, display: "flex", gap: 12 }}>
           {isCompleted || isSkipped ? (
-            <button disabled={sessionLoading} onClick={doUndoSession} style={{ flex: 1, padding: "14px", borderRadius: 12, border: `1px solid ${tokens.border}`, background: tokens.bg, color: tokens.text, fontSize: 14, fontWeight: 500, cursor: sessionLoading ? "wait" : "pointer", opacity: sessionLoading ? 0.7 : 1 }}>
+            <button disabled={sessionLoading} onClick={doUndoSession} style={{ flex: 1, padding: "14px", borderRadius: 12, border: `1px solid ${tokens.border}`, background: tokens.bg, color: tokens.text, fontSize: 14, fontWeight: 600, cursor: sessionLoading ? "wait" : "pointer", opacity: sessionLoading ? 0.7 : 1 }}>
               {sessionLoading ? "Undoing..." : (isSkipped ? "Undo Skip" : "Undo Completion")}
             </button>
           ) : (
             <>
-              <button disabled={sessionLoading || isSkipped} onClick={doCompleteSession} style={{ flex: 1, padding: "14px", borderRadius: 12, border: "none", background: tokens.green, color: "#000", fontSize: 14, fontWeight: 600, cursor: sessionLoading || isSkipped ? "not-allowed" : "pointer", opacity: sessionLoading || isSkipped ? 0.7 : 1, boxShadow: `0 4px 16px ${tokens.green}66` }}>
+              <button disabled={sessionLoading || isSkipped} onClick={doCompleteSession} style={{ flex: 1, padding: "14px", borderRadius: 12, border: `1px solid ${tokens.greenBorder}`, background: tokens.green, color: "#fffefa", fontSize: 14, fontWeight: 700, cursor: sessionLoading || isSkipped ? "not-allowed" : "pointer", opacity: sessionLoading || isSkipped ? 0.7 : 1, boxShadow: `0 10px 24px rgba(33, 184, 146, 0.18)` }}>
                 {sessionLoading ? "Completing..." : "Complete Session ✓"}
               </button>
-              <button disabled={sessionLoading || isSkipped} onClick={doSkipSession} style={{ padding: "14px 16px", borderRadius: 12, border: `1px solid rgba(251, 113, 133, 0.25)`, background: "rgba(251, 113, 133, 0.08)", color: "#fecdd3", fontSize: 14, fontWeight: 500, cursor: sessionLoading || isSkipped ? "not-allowed" : "pointer", opacity: sessionLoading || isSkipped ? 0.6 : 1 }}>
+              <button disabled={sessionLoading || isSkipped} onClick={doSkipSession} style={{ padding: "14px 16px", borderRadius: 12, border: `1px solid ${tokens.redBorder}`, background: tokens.redBg, color: tokens.redText, fontSize: 14, fontWeight: 600, cursor: sessionLoading || isSkipped ? "not-allowed" : "pointer", opacity: sessionLoading || isSkipped ? 0.6 : 1 }}>
                 Skip
               </button>
             </>

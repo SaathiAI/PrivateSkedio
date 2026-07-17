@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "./Auth.jsx";
 import { tokens } from "../theme.js";
 import { calendarApi } from "../lib/calendarApi.js";
@@ -20,6 +20,12 @@ export function SettingsView({ onBack, initialSection = "profile", onSectionChan
   const [confirmDisconnect, setConfirmDisconnect] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [logoutError, setLogoutError] = useState("");
+  const [logoutHoldProgress, setLogoutHoldProgress] = useState(0);
+  const [logoutHoldActive, setLogoutHoldActive] = useState(false);
+  const [logoutReady, setLogoutReady] = useState(false);
+
+  const logoutHoldFrameRef = useRef(0);
+  const logoutHoldStartRef = useRef(0);
 
   const profileLabel = getProfileLabel(user);
   const profileInitials = getProfileInitials(user);
@@ -123,30 +129,59 @@ export function SettingsView({ onBack, initialSection = "profile", onSectionChan
     }
   };
 
+  useEffect(() => {
+    return () => {
+      if (logoutHoldFrameRef.current) {
+        window.cancelAnimationFrame(logoutHoldFrameRef.current);
+      }
+    };
+  }, []);
+
+  const stopLogoutHold = useCallback((reset = true) => {
+    if (logoutHoldFrameRef.current) {
+      window.cancelAnimationFrame(logoutHoldFrameRef.current);
+      logoutHoldFrameRef.current = 0;
+    }
+    setLogoutHoldActive(false);
+    if (reset) {
+      setLogoutHoldProgress(0);
+    }
+  }, []);
+
+  const startLogoutHold = useCallback(() => {
+    if (logoutReady || signingOut) return;
+    stopLogoutHold(false);
+    setLogoutError("");
+    setLogoutHoldActive(true);
+    logoutHoldStartRef.current = performance.now();
+
+    const HOLD_DURATION = 1450;
+
+    const tick = (now) => {
+      const elapsed = now - logoutHoldStartRef.current;
+      const nextProgress = Math.min(100, (elapsed / HOLD_DURATION) * 100);
+      setLogoutHoldProgress(nextProgress);
+
+      if (nextProgress >= 100) {
+        setLogoutHoldActive(false);
+        setLogoutReady(true);
+        logoutHoldFrameRef.current = 0;
+        return;
+      }
+
+      logoutHoldFrameRef.current = window.requestAnimationFrame(tick);
+    };
+
+    logoutHoldFrameRef.current = window.requestAnimationFrame(tick);
+  }, [logoutReady, signingOut, stopLogoutHold]);
+
+  const cancelLogoutReady = useCallback(() => {
+    stopLogoutHold(true);
+    setLogoutReady(false);
+  }, [stopLogoutHold]);
+
   return (
     <div>
-      <button
-        type="button"
-        onClick={onBack}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 8,
-          background: tokens.bgCard,
-          border: `1px solid ${tokens.border}`,
-          borderRadius: tokens.radiusFull,
-          padding: "9px 13px",
-          color: tokens.textSecondary,
-          cursor: "pointer",
-          fontSize: 13,
-          fontFamily: "inherit",
-          marginBottom: 22,
-        }}
-      >
-        <ChevronLeftIcon />
-        Back to planner
-      </button>
-
         <main style={{
           minHeight: 620,
           background: tokens.bgCard,
@@ -217,22 +252,143 @@ export function SettingsView({ onBack, initialSection = "profile", onSectionChan
                 />
                 <section style={{
                   display: "flex",
-                  justifyContent: "space-between",
-                  gap: 18,
-                  alignItems: "center",
-                  padding: 16,
-                  borderRadius: 16,
+                  flexDirection: "column",
+                  gap: 16,
+                  alignItems: "stretch",
+                  padding: 18,
+                  borderRadius: 18,
                   border: `1px solid ${tokens.redBorder}`,
                   background: tokens.redBg,
                 }}>
-                  <div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: tokens.redText, marginBottom: 4 }}>Log out</div>
-                    <div style={{ fontSize: 13, color: tokens.textSecondary }}>End this local session on the current device.</div>
-                    {logoutError && <div style={{ marginTop: 8, fontSize: 12, color: tokens.redText }}>{logoutError}</div>}
+                  <style>{`
+                    @keyframes skLogoutShake {
+                      0% { transform: translateX(0); }
+                      20% { transform: translateX(-0.7px); }
+                      40% { transform: translateX(0.9px); }
+                      60% { transform: translateX(-0.8px); }
+                      80% { transform: translateX(0.7px); }
+                      100% { transform: translateX(0); }
+                    }
+                    @media (prefers-reduced-motion: reduce) {
+                      @keyframes skLogoutShake {
+                        0% { transform: none; }
+                        100% { transform: none; }
+                      }
+                    }
+                  `}</style>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 18, alignItems: "flex-start" }}>
+                    <div>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: tokens.redText, marginBottom: 4 }}>Log out</div>
+                      <div style={{ fontSize: 13, color: tokens.textSecondary }}>Hold the bar to arm logout, then confirm it.</div>
+                    </div>
+                    <span style={{
+                      padding: "6px 10px",
+                      borderRadius: tokens.radiusFull,
+                      border: `1px solid ${logoutReady ? tokens.redBorder : tokens.border}`,
+                      background: logoutReady ? "rgba(232, 93, 122, 0.16)" : tokens.bgCard,
+                      color: logoutReady ? tokens.redText : tokens.textMuted,
+                      fontSize: 11,
+                      fontWeight: 800,
+                      flexShrink: 0,
+                    }}>
+                      {logoutReady ? "Ready" : "Hold to arm"}
+                    </span>
                   </div>
-                  <SmallButton danger onClick={handleLogout} disabled={signingOut}>
-                    {signingOut ? "Logging out..." : "Log out"}
-                  </SmallButton>
+
+                  <button
+                    type="button"
+                    disabled={signingOut}
+                    onMouseDown={startLogoutHold}
+                    onMouseUp={() => stopLogoutHold(!logoutReady)}
+                    onMouseLeave={() => stopLogoutHold(!logoutReady)}
+                    onTouchStart={startLogoutHold}
+                    onTouchEnd={() => stopLogoutHold(!logoutReady)}
+                    onTouchCancel={() => stopLogoutHold(!logoutReady)}
+                    style={{
+                      position: "relative",
+                      overflow: "hidden",
+                      width: "100%",
+                      minHeight: 54,
+                      borderRadius: 14,
+                      border: `1px solid ${logoutReady ? tokens.redBorder : "rgba(232, 93, 122, 0.28)"}`,
+                      background: "#fff7f8",
+                      color: tokens.redText,
+                      cursor: signingOut ? "wait" : "pointer",
+                      fontFamily: "inherit",
+                      textAlign: "left",
+                      padding: 0,
+                      opacity: signingOut ? 0.7 : 1,
+                      boxShadow: logoutReady ? "0 10px 30px rgba(232, 93, 122, 0.16)" : "none",
+                      transition: `border-color ${tokens.transitionNormal}, box-shadow ${tokens.transitionNormal}`,
+                    }}
+                  >
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        width: `${logoutReady ? 100 : logoutHoldProgress}%`,
+                        background: logoutReady
+                          ? "linear-gradient(90deg, rgba(232, 93, 122, 0.24) 0%, rgba(232, 93, 122, 0.14) 100%)"
+                          : "linear-gradient(90deg, rgba(232, 93, 122, 0.22) 0%, rgba(232, 93, 122, 0.1) 100%)",
+                        transition: logoutHoldActive ? "none" : "width 180ms ease",
+                      }}
+                    />
+                    <span
+                      style={{
+                        position: "relative",
+                        zIndex: 1,
+                        minHeight: 54,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 16,
+                        padding: "0 16px",
+                        animation: logoutHoldActive ? "skLogoutShake 110ms linear infinite" : "none",
+                      }}
+                    >
+                      <span style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                        <span style={{ fontSize: 14, fontWeight: 800, color: tokens.redText }}>
+                          {logoutReady ? "Logout armed" : signingOut ? "Logging out..." : "Hold to log out"}
+                        </span>
+                        <span style={{ fontSize: 11, color: logoutReady ? tokens.redText : tokens.textMuted }}>
+                          {logoutReady ? "Release and confirm below." : "Press and hold for a moment."}
+                        </span>
+                      </span>
+                      <span style={{ fontSize: 12, fontWeight: 800, color: tokens.redText, flexShrink: 0 }}>
+                        {logoutReady ? "100%" : `${Math.round(logoutHoldProgress)}%`}
+                      </span>
+                    </span>
+                  </button>
+
+                  {logoutReady && (
+                    <div style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: 16,
+                      padding: 14,
+                      borderRadius: 14,
+                      border: `1px solid rgba(232, 93, 122, 0.22)`,
+                      background: "rgba(255, 255, 255, 0.58)",
+                      animation: "fadeUp 0.18s ease",
+                    }}>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: tokens.text, marginBottom: 4 }}>Log out now?</div>
+                        <div style={{ fontSize: 12, color: tokens.textSecondary }}>This ends the local session on this device.</div>
+                      </div>
+                      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                        <SmallButton onClick={cancelLogoutReady} disabled={signingOut}>
+                          Cancel
+                        </SmallButton>
+                        <SmallButton danger onClick={handleLogout} disabled={signingOut}>
+                          {signingOut ? "Logging out..." : "Confirm logout"}
+                        </SmallButton>
+                      </div>
+                    </div>
+                  )}
+
+                  {logoutError && <div style={{ marginTop: 4, fontSize: 12, color: tokens.redText }}>{logoutError}</div>}
                 </section>
               </div>
             </SettingsSection>
@@ -336,7 +492,7 @@ export function SettingsView({ onBack, initialSection = "profile", onSectionChan
                     Integrations and connected apps
                   </div>
                   <p style={{ fontSize: 14, color: tokens.textSecondary, lineHeight: 1.55, maxWidth: 640 }}>
-                    Connect the channels SkedioAI uses to understand your day and bring you back to the plan.
+                    Supercharge your workflow and connect the tools you use every day.
                   </p>
                 </div>
                 <button
@@ -367,6 +523,7 @@ export function SettingsView({ onBack, initialSection = "profile", onSectionChan
                 justifyContent: "space-between",
                 gap: 16,
                 marginBottom: 18,
+                flexWrap: "wrap",
               }}>
                 <div style={{
                   display: "inline-flex",
@@ -375,7 +532,7 @@ export function SettingsView({ onBack, initialSection = "profile", onSectionChan
                   overflow: "hidden",
                   background: tokens.bgCard,
                 }}>
-                  {["All integrations", "Productivity", "Communication"].map((label, index) => (
+                  {["All integrations", "Developer tools", "Communication", "Productivity", "Browser tools", "Custom integrations"].map((label, index) => (
                     <span
                       key={label}
                       style={{
@@ -384,7 +541,8 @@ export function SettingsView({ onBack, initialSection = "profile", onSectionChan
                         color: index === 0 ? tokens.text : tokens.textSecondary,
                         fontWeight: index === 0 ? 750 : 600,
                         background: index === 0 ? tokens.bgElevated : "transparent",
-                        borderRight: index < 2 ? `1px solid ${tokens.border}` : "none",
+                        borderRight: index < 5 ? `1px solid ${tokens.border}` : "none",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       {label}
@@ -408,21 +566,15 @@ export function SettingsView({ onBack, initialSection = "profile", onSectionChan
                 </div>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 16 }}>
                 <IntegrationTile
-                  title="Email"
+                  title="Gmail"
                   domain={user?.email || "mail.google.com"}
-                  description="Send review links, missed-session alerts, and plan summaries to the right inbox."
+                  description="Send review links, missed-session alerts, and weekly study summaries to the right inbox."
                   connected={Boolean(emailStatus?.ready)}
                   icon={<MailIntegrationIcon />}
                   actionLabel="View integration"
-                >
-                  {(emailError || emailStatus?.lookup_error || emailStatus?.ready === false) && (
-                    <InlineNotice tone="warning">
-                      {emailError || emailStatus?.lookup_error || "Email delivery needs backend SMTP configuration."}
-                    </InlineNotice>
-                  )}
-                </IntegrationTile>
+                />
 
                 <IntegrationTile
                   title="Google Calendar"
@@ -430,36 +582,27 @@ export function SettingsView({ onBack, initialSection = "profile", onSectionChan
                   description="Read blockers and sync study sessions around real-life events in your calendar."
                   connected={Boolean(calendarStatus?.connected)}
                   icon={<CalendarIntegrationIcon />}
-                  actionLabel={calendarStatus?.connected ? "Manage calendar" : connecting ? "Redirecting..." : "View integration"}
+                  actionLabel={connecting ? "Redirecting..." : "View integration"}
                   onAction={DEV_FRONTEND_ONLY ? undefined : calendarStatus?.connected ? refreshCalendarStatus : handleConnect}
                   disabled={connecting || disconnecting}
-                >
-                  {calendarCheckedAt && (
-                    <p style={{ ...copyStyle, fontSize: 12, marginBottom: calendarError ? 10 : 0 }}>
-                      Checked {calendarCheckedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </p>
-                  )}
+                />
+              </div>
+
+              {(calendarError || (calendarStatus?.connected && confirmDisconnect)) && (
+                <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
                   {calendarError && <InlineNotice tone="danger">{calendarError}</InlineNotice>}
-                  {calendarStatus?.connected && (
-                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 12 }}>
-                      {confirmDisconnect ? (
-                        <>
-                          <SmallButton danger onClick={handleDisconnect} disabled={disconnecting}>
-                            {disconnecting ? "Disconnecting..." : "Confirm disconnect"}
-                          </SmallButton>
-                          <SmallButton onClick={() => setConfirmDisconnect(false)} disabled={disconnecting}>
-                            Cancel
-                          </SmallButton>
-                        </>
-                      ) : (
-                        <SmallButton danger onClick={() => setConfirmDisconnect(true)} disabled={disconnecting}>
-                          Disconnect
-                        </SmallButton>
-                      )}
+                  {calendarStatus?.connected && confirmDisconnect && (
+                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                      <SmallButton danger onClick={handleDisconnect} disabled={disconnecting}>
+                        {disconnecting ? "Disconnecting..." : "Confirm disconnect"}
+                      </SmallButton>
+                      <SmallButton onClick={() => setConfirmDisconnect(false)} disabled={disconnecting}>
+                        Cancel
+                      </SmallButton>
                     </div>
                   )}
-                </IntegrationTile>
-              </div>
+                </div>
+              )}
             </section>
           )}
         </main>
@@ -548,18 +691,19 @@ function ActionRow({ title, description, actionLabel, onClick }) {
 function IntegrationTile({ title, domain, description, connected, icon, actionLabel, onAction, disabled = false, children }) {
   return (
     <section style={{
-      minHeight: 190,
+      minHeight: 220,
       border: `1px solid ${tokens.border}`,
       borderRadius: 12,
       background: tokens.bgCard,
       overflow: "hidden",
       display: "flex",
       flexDirection: "column",
+      boxShadow: "0 1px 2px rgba(36,34,30,0.02)",
     }}>
-      <div style={{ padding: 18, display: "grid", gridTemplateColumns: "minmax(0, 1fr) 54px", gap: 16 }}>
+      <div style={{ padding: 18, display: "grid", gridTemplateColumns: "minmax(0, 1fr) 64px", gap: 16, minHeight: 148 }}>
         <div style={{ minWidth: 0 }}>
           <div style={{ fontSize: 16, fontWeight: 800, color: tokens.text, marginBottom: 3 }}>{title}</div>
-          <div style={{ fontSize: 12, color: tokens.textMuted, marginBottom: 18, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          <div style={{ fontSize: 12, color: tokens.textMuted, marginBottom: 14, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {domain}
           </div>
           <p style={{ fontSize: 13, color: tokens.textSecondary, lineHeight: 1.55, margin: 0 }}>
@@ -780,21 +924,20 @@ function SearchGlyph() {
 function MailIntegrationIcon() {
   return (
     <div style={{
-      width: 54,
-      height: 54,
-      borderRadius: 13,
+      width: 60,
+      height: 60,
+      borderRadius: 999,
       background: "#ffffff",
-      border: `1px solid ${tokens.border}`,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      boxShadow: "0 10px 24px rgba(36,34,30,0.08)",
+      boxShadow: "0 8px 24px rgba(36,34,30,0.08)",
     }}>
       <img
         src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg"
         alt=""
-        width="38"
-        height="38"
+        width="40"
+        height="40"
         style={{ display: "block" }}
       />
     </div>
@@ -804,21 +947,20 @@ function MailIntegrationIcon() {
 function CalendarIntegrationIcon() {
   return (
     <div style={{
-      width: 54,
-      height: 54,
-      borderRadius: 13,
+      width: 60,
+      height: 60,
+      borderRadius: 999,
       background: "#ffffff",
-      border: `1px solid ${tokens.border}`,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      boxShadow: "0 10px 24px rgba(36,34,30,0.08)",
+      boxShadow: "0 8px 24px rgba(36,34,30,0.08)",
     }}>
       <img
         src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Google_Calendar_icon_%282020%29.svg"
         alt=""
-        width="38"
-        height="38"
+        width="40"
+        height="40"
         style={{ display: "block" }}
       />
     </div>
