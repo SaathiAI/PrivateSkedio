@@ -1,5 +1,66 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { tokens } from "../theme.js";
+
+function parseDateAtNoon(dateStr) {
+  return new Date(`${dateStr}T12:00:00`);
+}
+
+function formatDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function addDays(date, amount) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + amount);
+  return next;
+}
+
+function startOfWeek(date) {
+  const next = new Date(date);
+  const weekday = next.getDay();
+  const diff = weekday === 0 ? -6 : 1 - weekday;
+  next.setDate(next.getDate() + diff);
+  next.setHours(12, 0, 0, 0);
+  return next;
+}
+
+function startOfMonth(date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1, 12, 0, 0, 0);
+}
+
+function clampDay(year, monthIndex, day) {
+  return Math.min(day, new Date(year, monthIndex + 1, 0).getDate());
+}
+
+function buildMiniMonth(date) {
+  const monthStart = startOfMonth(date);
+  const gridStart = startOfWeek(monthStart);
+  return Array.from({ length: 42 }, (_, index) => {
+    const cellDate = addDays(gridStart, index);
+    return {
+      date: cellDate,
+      key: formatDateKey(cellDate),
+      inMonth: cellDate.getMonth() === monthStart.getMonth(),
+    };
+  });
+}
+
+function ChevronIcon({ direction = "left" }) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <path
+        d={direction === "left" ? "M8.75 3.25 5 7l3.75 3.75" : "M5.25 3.25 9 7l-3.75 3.75"}
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 function timeToPixels(timeStr, baseHour = 7, pixelsPerHour = 60) {
   if (!timeStr) return 0;
@@ -48,7 +109,20 @@ export function CalendarGrid({
   const hours = Array.from({ length: endHour - baseHour + 1 }, (_, i) => baseHour + i);
 
   const [currentTime, setCurrentTime] = useState(new Date());
-  const displayDays = useMemo(() => {
+  const [jumpOpen, setJumpOpen] = useState(false);
+  const referenceDate = useMemo(() => {
+    if (today) return parseDateAtNoon(today);
+    if (allDays?.[0]?.date) return parseDateAtNoon(allDays[0].date);
+    return new Date();
+  }, [allDays, today]);
+  const [focusDate, setFocusDate] = useState(referenceDate);
+
+  useEffect(() => {
+    setFocusDate(referenceDate);
+  }, [referenceDate]);
+  const jumpRef = useRef(null);
+
+  const dayMap = useMemo(() => {
     const dayMap = new Map();
 
     (allDays || []).forEach(day => {
@@ -66,13 +140,33 @@ export function CalendarGrid({
       }
     });
 
-    return Array.from(dayMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+    return dayMap;
   }, [allDays, externalEvents]);
+
+  const weekStart = useMemo(() => startOfWeek(focusDate), [focusDate]);
+  const displayDays = useMemo(() => {
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = addDays(weekStart, index);
+      const key = formatDateKey(date);
+      return dayMap.get(key) || { date: key, sessions: [] };
+    });
+  }, [dayMap, weekStart]);
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (!jumpOpen) return undefined;
+    const handleOutside = (event) => {
+      if (jumpRef.current && !jumpRef.current.contains(event.target)) {
+        setJumpOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [jumpOpen]);
 
   if (displayDays.length === 0) {
     return (
@@ -135,9 +229,43 @@ export function CalendarGrid({
       : currentTimePixels;
   const markerNearBottom = currentTimeMarkerPixels > calendarHeight - 22;
   const todayColumnIndex = displayDays.findIndex(day => day.date === today);
-  const monthLabel = new Date(`${displayDays[0].date}T12:00:00`).toLocaleDateString("en-US", {
-    month: "long",
-  });
+  const showCurrentTime = todayColumnIndex !== -1;
+  const weekEnd = useMemo(() => addDays(weekStart, 6), [weekStart]);
+  const monthLabel = weekStart.toLocaleDateString("en-US", { month: "long" });
+  const rangeLabel = `${weekStart.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${weekEnd.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${weekEnd.getFullYear()}`;
+  const jumpMonthLabel = focusDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const miniMonthDays = useMemo(() => buildMiniMonth(focusDate), [focusDate]);
+  const weekdayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const selectedFocusKey = formatDateKey(focusDate);
+
+  const jumpToToday = () => setFocusDate(parseDateAtNoon(today || formatDateKey(new Date())));
+  const stepWeek = (direction) => setFocusDate(prev => addDays(prev, direction * 7));
+  const stepMiniMonth = (direction) => {
+    setFocusDate(prev => {
+      const nextMonth = prev.getMonth() + direction;
+      const year = prev.getFullYear() + Math.floor(nextMonth / 12);
+      const monthIndex = ((nextMonth % 12) + 12) % 12;
+      const day = clampDay(year, monthIndex, prev.getDate());
+      return new Date(year, monthIndex, day, 12, 0, 0, 0);
+    });
+  };
+  const controlButtonStyle = {
+    height: 32,
+    minWidth: 32,
+    borderRadius: 9,
+    border: `1px solid ${tokens.borderSubtle}`,
+    background: tokens.bgCard,
+    color: tokens.textSecondary,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    fontFamily: "inherit",
+    fontSize: 12,
+    fontWeight: 600,
+    transition: `all ${tokens.transitionFast}`,
+    boxShadow: tokens.shadowSm,
+  };
 
   return (
     <div style={{
@@ -160,34 +288,117 @@ export function CalendarGrid({
         flexShrink: 0,
       }}>
         <div style={{
-          fontSize: 26,
-          lineHeight: 1,
-          fontWeight: 800,
-          color: tokens.text,
-          letterSpacing: "-0.01em",
+          display: "grid",
+          gap: 4,
         }}>
-          {monthLabel}
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <div style={{
-            width: 74,
-            height: 20,
-            borderRadius: 5,
-            background: tokens.bgElevated,
-            border: `1px solid ${tokens.borderSubtle}`,
-          }} />
-          {[0, 1, 2].map(index => (
+            fontSize: 12,
+            lineHeight: 1.2,
+            fontWeight: 700,
+            color: tokens.textMuted,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+          }}>
+            {monthLabel}
+          </div>
+          <div style={{
+            fontSize: 24,
+            lineHeight: 1,
+            fontWeight: 800,
+            color: tokens.text,
+            letterSpacing: "-0.01em",
+          }}>
+            {rangeLabel}
+          </div>
+          <div style={{ fontSize: 12, color: tokens.textMuted, fontWeight: 600 }}>
+            Week view
+          </div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, position: "relative" }} ref={jumpRef}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <button type="button" onClick={() => stepWeek(-1)} style={controlButtonStyle} aria-label="Previous week">
+              <ChevronIcon direction="left" />
+            </button>
+            <button type="button" onClick={jumpToToday} style={{ ...controlButtonStyle, paddingInline: 12, minWidth: 62 }}>
+              Today
+            </button>
+            <button type="button" onClick={() => stepWeek(1)} style={controlButtonStyle} aria-label="Next week">
+              <ChevronIcon direction="right" />
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => setJumpOpen(prev => !prev)}
+            style={{ ...controlButtonStyle, paddingInline: 12, minWidth: 118, justifyContent: "space-between", gap: 10 }}
+            aria-label="Open jump calendar"
+          >
+            <span>{jumpMonthLabel}</span>
+            <ChevronIcon direction={jumpOpen ? "left" : "right"} />
+          </button>
+          {jumpOpen && (
             <div
-              key={index}
               style={{
-                width: 22,
-                height: 22,
-                borderRadius: 6,
-                background: tokens.bgElevated,
+                position: "absolute",
+                top: "calc(100% + 10px)",
+                right: 0,
+                width: 272,
+                borderRadius: 16,
                 border: `1px solid ${tokens.borderSubtle}`,
+                background: tokens.bgCard,
+                boxShadow: tokens.shadowLg,
+                padding: 14,
+                zIndex: 40,
               }}
-            />
-          ))}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <button type="button" onClick={() => stepMiniMonth(-1)} style={controlButtonStyle} aria-label="Previous month">
+                  <ChevronIcon direction="left" />
+                </button>
+                <div style={{ fontSize: 13, fontWeight: 700, color: tokens.text }}>
+                  {jumpMonthLabel}
+                </div>
+                <button type="button" onClick={() => stepMiniMonth(1)} style={controlButtonStyle} aria-label="Next month">
+                  <ChevronIcon direction="right" />
+                </button>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6, marginBottom: 8 }}>
+                {weekdayLabels.map(label => (
+                  <div key={label} style={{ textAlign: "center", fontSize: 10, fontWeight: 700, color: tokens.textDim, paddingBlock: 4 }}>
+                    {label}
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6 }}>
+                {miniMonthDays.map(({ date, key, inMonth }) => {
+                  const isToday = key === today;
+                  const isSelected = key === selectedFocusKey;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => {
+                        setFocusDate(date);
+                        setJumpOpen(false);
+                      }}
+                      style={{
+                        height: 32,
+                        borderRadius: 10,
+                        border: `1px solid ${isSelected ? tokens.accentBorder : "transparent"}`,
+                        background: isSelected ? tokens.accentMuted : isToday ? tokens.redBg : "transparent",
+                        color: !inMonth ? tokens.textDim : isToday ? tokens.redText : tokens.text,
+                        fontSize: 12,
+                        fontWeight: isSelected || isToday ? 700 : 600,
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                      }}
+                    >
+                      {date.getDate()}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -288,76 +499,77 @@ export function CalendarGrid({
             ))}
           </div>
 
-          {/* Current Time Line */}
-          <div style={{
-            position: "absolute",
-            top: currentTimeMarkerPixels,
-            left: 0,
-            right: 0,
-            height: 24,
-            zIndex: 30,
-            pointerEvents: "none",
-            opacity: currentTimeBeforeRange || currentTimeAfterRange ? 0.92 : 1,
-          }}>
+          {showCurrentTime && (
             <div style={{
               position: "absolute",
-              top: markerNearBottom ? 9 : 11,
-              left: 64,
+              top: currentTimeMarkerPixels,
+              left: 0,
               right: 0,
-              display: "flex",
-              alignItems: "center",
-              height: 2,
+              height: 24,
+              zIndex: 30,
+              pointerEvents: "none",
+              opacity: currentTimeBeforeRange || currentTimeAfterRange ? 0.92 : 1,
             }}>
-              {displayDays.map((day, index) => {
-                const isTodayColumn = day.date === today || (todayColumnIndex === -1 && index === 0);
-                return (
-                  <div
-                    key={`${day.date}-time-line`}
-                    style={{
-                      flex: 1,
-                      height: 2,
-                      background: isTodayColumn ? "rgba(232, 93, 122, 0.94)" : "rgba(232, 93, 122, 0.28)",
-                      boxShadow: isTodayColumn ? "0 0 10px rgba(232, 93, 122, 0.24)" : "none",
-                    }}
-                  />
-                );
-              })}
+              <div style={{
+                position: "absolute",
+                top: markerNearBottom ? 9 : 11,
+                left: 64,
+                right: 0,
+                display: "flex",
+                alignItems: "center",
+                height: 2,
+              }}>
+                {displayDays.map((day) => {
+                  const isTodayColumn = day.date === today;
+                  return (
+                    <div
+                      key={`${day.date}-time-line`}
+                      style={{
+                        flex: 1,
+                        height: 2,
+                        background: isTodayColumn ? "rgba(232, 93, 122, 0.94)" : "rgba(232, 93, 122, 0.28)",
+                        boxShadow: isTodayColumn ? "0 0 10px rgba(232, 93, 122, 0.24)" : "none",
+                      }}
+                    />
+                  );
+                })}
+              </div>
+              <div style={{
+                position: "absolute",
+                top: markerNearBottom ? 6 : 8,
+                left: 64,
+                right: 0,
+                display: "flex",
+                alignItems: "center",
+                height: 8,
+                filter: "blur(4px)",
+              }}>
+                {displayDays.map((day) => {
+                  const isTodayColumn = day.date === today;
+                  return (
+                    <div
+                      key={`${day.date}-time-glow`}
+                      style={{
+                        flex: 1,
+                        height: 8,
+                        background: isTodayColumn ? "rgba(232, 93, 122, 0.16)" : "rgba(232, 93, 122, 0.05)",
+                      }}
+                    />
+                  );
+                })}
+              </div>
+              <div style={{
+                position: "absolute",
+                left: 59,
+                top: markerNearBottom ? 3 : 5,
+                width: 12,
+                height: 12,
+                borderRadius: "50%",
+                background: tokens.red,
+                boxShadow: `0 0 0 4px ${tokens.redBg}, 0 0 14px rgba(232, 93, 122, 0.5)`,
+              }} />
             </div>
-            <div style={{
-              position: "absolute",
-              top: markerNearBottom ? 6 : 8,
-              left: 64,
-              right: 0,
-              display: "flex",
-              alignItems: "center",
-              height: 8,
-              filter: "blur(4px)",
-            }}>
-              {displayDays.map((day, index) => {
-                const isTodayColumn = day.date === today || (todayColumnIndex === -1 && index === 0);
-                return (
-                  <div
-                    key={`${day.date}-time-glow`}
-                    style={{
-                      flex: 1,
-                      height: 8,
-                      background: isTodayColumn ? "rgba(232, 93, 122, 0.16)" : "rgba(232, 93, 122, 0.05)",
-                    }}
-                  />
-                );
-              })}
-            </div>
-            <div style={{
-              position: "absolute",
-              left: 59,
-              top: markerNearBottom ? 3 : 5,
-              width: 12,
-              height: 12,
-              borderRadius: "50%",
-              background: tokens.red,
-              boxShadow: `0 0 0 4px ${tokens.redBg}, 0 0 14px rgba(232, 93, 122, 0.5)`,
-            }} />
-          </div>
+          )}
 
           {/* Day Columns */}
           {displayDays.map(day => {
