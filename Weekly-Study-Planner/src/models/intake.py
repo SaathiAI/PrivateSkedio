@@ -104,9 +104,9 @@ class Availability(StrictModel):
         default_factory=dict,
         description="Date-keyed commitments and rest windows.",
     )
-    planning_notes: List[str] = Field(
+    intake_guidance: List[str] = Field(
         default_factory=list,
-        description="General planner-facing notes.",
+        description="Guidance created by the Intake agent for the Planner agent to use.",
     )
     @model_validator(mode="before")
     @classmethod
@@ -122,8 +122,8 @@ class Availability(StrictModel):
         if data.get("time_blocks") is None:
             data["time_blocks"] = {}
 
-        if data.get("planning_notes") is None:
-            data["planning_notes"] = []
+        if data.get("intake_guidance") is None:
+            data["intake_guidance"] = []
 
         return data
 
@@ -151,9 +151,9 @@ class WorkItem(StrictModel):
         default=None,
         description="Short reason this work is included or prioritized.",
     )
-    planning_notes: List[str] = Field(
+    intake_guidance: List[str] = Field(
         default_factory=list,
-        description="Planner-facing notes for this work item.",
+        description="Guidance created by the Intake agent for the Planner agent to use.",
     )
     remaining_subtopics: List[str] = Field(
         default_factory=list,

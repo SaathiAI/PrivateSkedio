@@ -416,8 +416,8 @@ def _normalize_intake_payload(intake_payload: dict[str, Any]) -> dict[str, Any]:
     if availability.get("time_blocks") is None:
         availability["time_blocks"] = {}
 
-    if availability.get("planning_notes") is None:
-        availability["planning_notes"] = []
+    if availability.get("intake_guidance") is None:
+        availability["intake_guidance"] = []
 
     # Repair common mistake: study_items accidentally nested under availability.
     if "study_items" in availability:

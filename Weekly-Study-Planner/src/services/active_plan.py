@@ -292,7 +292,7 @@ def _work_item_meta_from_intake(
             "subject": item.get("subject") or "",
             "chapter": item.get("chapter") or item_id,
             "reason": item.get("reason"),
-            "planning_notes": item.get("planning_notes") or [],
+            "intake_guidance": item.get("intake_guidance") or [],
             "remaining_subtopics": item.get("remaining_subtopics") or [],
         }
     return meta
@@ -321,7 +321,7 @@ def build_work_item_progress(
             "completed_match_keys": [],
             "pending_match_keys": [],
             "reason": meta.get("reason"),
-            "planning_notes": meta.get("planning_notes") or [],
+            "intake_guidance": meta.get("intake_guidance") or [],
             "remaining_subtopics": meta.get("remaining_subtopics") or [],
         }
 
@@ -348,7 +348,7 @@ def build_work_item_progress(
             "completed_match_keys": [],
             "pending_match_keys": [],
             "reason": None,
-            "planning_notes": [],
+            "intake_guidance": [],
             "remaining_subtopics": [],
         }
         return exact

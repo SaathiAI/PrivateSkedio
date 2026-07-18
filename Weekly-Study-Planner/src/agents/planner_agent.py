@@ -33,7 +33,6 @@ import time
 from langchain_openai import ChatOpenAI
 
 from langchain_core.tools import tool
-from src.agents.intake_agent import query_backlog, query_syllabus
 from src.prompts.planner.prompt import draft_agent_prompt
 from src.services.planner_verifier import verify_plan
 from src.services.planner_context import (
@@ -309,9 +308,7 @@ def create_planner_graph(user_context: str = ""):
 
     draft_agent = create_agent(
         model=model,
-        # Reuse Intake's canonical read-only grounding tools so both workers
-        # see the same backlog and syllabus truth.
-        tools=[query_backlog, query_syllabus],
+        tools=[],
         system_prompt=draft_agent_prompt(
             user_id=None, user_context=user_context
         ),
@@ -336,7 +333,7 @@ def create_planner_graph(user_context: str = ""):
                         "[RUNTIME PLANNER CONTEXT]\n"
                         f"user_id: {runtime_user_id}\n"
                         "mode: revise\n"
-                        "When a tool or decision needs user_id, use this exact value."
+                        "When a decision needs user_id, use this exact value."
                     )
                 ),
                 HumanMessage(
@@ -361,7 +358,7 @@ def create_planner_graph(user_context: str = ""):
                     f"user_id: {runtime_user_id}\n"
                     "mode: create\n"
                     f"current_datetime: {runtime_now}\n"
-                    "When a tool or decision needs user_id, use this exact value."
+                    "When a decision needs user_id, use this exact value."
                 )
             ),
             HumanMessage(
@@ -933,8 +930,8 @@ if __name__ == "__main__":
     def _prompt_mode() -> str:
         """Read and validate the harness mode selection."""
 
-        choice = input("\nEnter choice (1/2/3): ").strip()
-        if choice not in {"1", "2", "3"}:
+        choice = input("\nEnter choice (1/2/3/4): ").strip()
+        if choice not in {"1", "2", "3", "4"}:
             print("❌ Invalid choice. Exiting.")
             sys.exit(1)
         return choice
@@ -970,6 +967,15 @@ if __name__ == "__main__":
         os.environ.pop("SAATHI_USE_MOCK_ACTIVE_PLAN", None)
         return planner_input, user_id, "demo_planner_request"
 
+    def _load_intake_ca57994c_harness_input() -> tuple[Dict[str, Any], str, str]:
+        """Load the approved Intake fixture from convo_intake_ca57994c."""
+
+        planner_input = load_demo_planner_input_from_json(
+            "data_models/planner_request_intake_ca57994c.json"
+        )
+        os.environ.pop("SAATHI_USE_MOCK_ACTIVE_PLAN", None)
+        return planner_input, planner_input["user_id"], "intake_ca57994c_planner_request"
+
     async def main():
         """Run the local interactive Planner harness."""
 
@@ -981,6 +987,7 @@ if __name__ == "__main__":
         print("1. CREATE_PLAN - Build fresh 7-day plan")
         print("2. RESCHEDULE - Adjust existing active plan")
         print("3. CUSTOM - Enter your own scenario")
+        print("4. INTAKE_CA57994C - Use the latest approved Intake contract fixture")
 
         choice = _prompt_mode()
         harness_user_id = planner_input.get("user_id", "demo-user")
@@ -1009,6 +1016,10 @@ if __name__ == "__main__":
                 planner_input, harness_user_id, active_plan_source = _load_reschedule_harness_input()
             else:
                 planner_input, harness_user_id, active_plan_source = _load_create_harness_input()
+        elif choice == "4":
+            TEST_MODE = "create_plan"
+            test_message = None
+            planner_input, harness_user_id, active_plan_source = _load_intake_ca57994c_harness_input()
 
         print(f"\n STARTING IN MODE: [{TEST_MODE.upper()}]")
         print(f" User ID: {harness_user_id}")

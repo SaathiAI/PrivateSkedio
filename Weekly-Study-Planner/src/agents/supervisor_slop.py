@@ -31,6 +31,7 @@ import os
 import logging
 import asyncio
 import json
+import re
 import time
 from datetime import datetime
 from typing import Any, Dict, TypedDict, Literal, Annotated, Optional, List
@@ -256,23 +257,63 @@ Return exactly one intent from this set:
 <routing_principles>
 Use these principles:
 
-1. Decide from ownership first, then runtime state, then the latest worker reply.
+1. Classify the user's requested change by ownership first, then use runtime
+state to decide whether that owner can act now.
 
 2. Treat `worker_envelope.message` as the worker reply for this turn.
 
 3. Route to `intake` when the user is creating or changing the study contract.
-Examples: subjects, chapters, scope, deadline, hours, commitments, feasibility constraints
+Contract truth includes: study goal, subjects, chapters, topics, scope,
+deadline, exam/cutoff time, workload estimates, daily study capacity,
+availability, commitments, rest, and feasibility constraints.
+This stays true even when a verified draft plan already exists or the user is
+reviewing a draft. Contract changes must go to Intake before Planner revises.
 
-4. Route to `planner` when the contract is ready and the user wants a plan, a plan revision, or schedule-shape changes.
-Examples: lighter/heavier plan, timing changes, ordering changes, more revision, more practice
+4. Route to `planner` when the contract is ready and the user wants a plan or a
+schedule-only revision.
+Schedule-only changes include: moving sessions, reordering existing work,
+splitting or merging sessions, changing session timing, changing pacing inside
+the same total hours, or making the presentation of an existing draft easier to
+follow.
+Only choose Planner for changes that keep the locked contract the same.
 
-5. Route to `planner` for approval-related work only when a draft exists that planner owns.
+5. Use this boundary test:
+- If satisfying the request requires changing what must be studied, how much
+  work exists, or when/how much the student is available, choose Intake.
+- If satisfying the request only changes where already-approved work sits on
+  the calendar, choose Planner.
+Changing "daily hours", "study hours", "focused hours", "available time", or
+"hours per day" changes availability/capacity. That is always Intake-owned
+unless the user names an existing session and only asks to move/resize it.
 
-6. Route to `user_facing` when the latest worker reply should be shown to the user, or when the user message is casual, unclear, or outside worker scope.
+6. Route to `planner` for approval-related work only when a draft exists that planner owns.
 
-7. Do not call a worker again in the same turn unless more worker-side processing is actually needed now.
+7. Route to `user_facing` when the latest worker reply should be shown to the user, or when the user message is casual, unclear, or outside worker scope.
 
-8. If `worker_envelope.message` is a question, clarification request, confirmation request, or result meant for the user, choose `user_facing` unless the current user message clearly asks for another worker action.
+8. Do not call a worker again in the same turn unless more worker-side processing is actually needed now.
+
+9. If `worker_envelope.message` is a question, clarification request, or
+confirmation request and the latest user message answers it, route back to the
+same worker that asked. If the worker reply is only a result meant to be shown,
+choose user_facing.
+
+10. During pending plan review, do not assume all feedback belongs to Planner.
+Review feedback still follows the same ownership boundary: contract edits go to
+Intake; schedule-only edits go to Planner.
+
+11. Treat study-domain nouns after add/remove/include/drop/replace/skip as
+possible scope changes. If the sentence is about studying, planning, an exam, a
+chapter, a subject, a topic, or plan contents, choose Intake for those scope
+changes. If the sentence is clearly a normal chat/math question, choose
+user_facing.
+
+12. When `contract_ready` is true, a contract-changing user message is
+`update_plan`, not `create_plan`, because an existing contract is being repaired.
+When `draft_status` is `awaiting_review`, interpret the latest user message as
+feedback on the draft unless it is clearly unrelated casual chat. In review
+context, "add/include/remove/drop/replace" followed by a study-domain noun is
+plan feedback, not a general academic question, unless the user explicitly asks
+for an explanation, solution, definition, or calculation.
 
 </routing_principles>
 
@@ -286,6 +327,26 @@ When multiple rules seem relevant, decide in this order:
 5. If `contract_ready` is true and the user wants planning or schedule revision, choose `planner`.
 6. If `plan_verified` is true and the user is clearly approving or revising the draft, choose `planner`.
 </priority_rules>
+
+<decision_table>
+Contract edit -> intake / update_plan:
+- add, remove, replace, reduce, or expand required study scope
+- change subject, chapter, topic, exam, deadline, cutoff, daily capacity,
+  available time, commitment, rest, workload estimate, or feasibility assumption
+- if contract_ready is false and the user is starting a new plan, use
+  intake / create_plan instead
+
+Schedule-only edit -> planner / update_plan:
+- move, reorder, split, merge, shorten, lengthen, or rebalance named sessions
+  while preserving the same locked scope, total work, deadline, and availability
+
+Approval action -> planner / approve_plan:
+- approve/confirm/commit a verified draft when plan_verified is true
+
+No worker needed -> user_facing / chat:
+- greeting, general question, unclear message, or a worker result that should be
+  shown to the user
+</decision_table>
 
 <safety>
 Never:
@@ -415,6 +476,114 @@ def _latest_user_text(state: SupervisorState) -> str:
         if isinstance(message, HumanMessage):
             return str(message.content or "").strip()
     return ""
+
+
+def _has_any(text: str, terms: tuple[str, ...]) -> bool:
+    return any(term in text for term in terms)
+
+
+def _deterministic_router_decision(state: SupervisorState) -> Optional[RoutingDecision]:
+    """Fast-path obvious routing cases before spending tokens on the router LLM."""
+
+    latest = _latest_user_text(state).lower().strip()
+    if not latest:
+        return RoutingDecision(
+            intent="unknown",
+            confidence=1.0,
+            reasoning="No latest user message was available.",
+            agent_chosen="user_facing",
+        )
+
+    contract_ready = bool(state.get("contract_ready"))
+    plan_verified = bool(state.get("verified_plan"))
+    draft_status = state.get("draft_status")
+    worker_envelope = state.get("worker_envelope") or {}
+    worker_agent = str(worker_envelope.get("agent_name") or "")
+    worker_message = str(worker_envelope.get("message") or "").lower()
+
+    if (
+        worker_agent in {"intake", "planner"}
+        and _has_any(worker_message, ("?", "confirm", "clarify", "do you mean"))
+        and latest in {"yes", "yeah", "yep", "correct", "right", "no", "nope"}
+    ):
+        return RoutingDecision(
+            intent="update_plan" if contract_ready else "create_plan",
+            confidence=1.0,
+            reasoning="The user directly answered a worker clarification, so route back to the same worker.",
+            agent_chosen=worker_agent,
+        )
+
+    if latest in {"hi", "hello", "hey", "yo", "hi bro", "hey bro"}:
+        return RoutingDecision(
+            intent="chat",
+            confidence=1.0,
+            reasoning="The latest message is a casual greeting.",
+            agent_chosen="user_facing",
+        )
+
+    if not contract_ready and _has_any(
+        latest,
+        ("make a plan", "create a plan", "study plan", "plan my", "schedule my"),
+    ):
+        return RoutingDecision(
+            intent="create_plan",
+            confidence=1.0,
+            reasoning="The user wants a plan and no contract is ready yet.",
+            agent_chosen="intake",
+        )
+
+    teaching_question = _has_any(
+        latest,
+        ("what is", "explain", "solve", "calculate", "definition", "how do i solve"),
+    )
+    capacity_edit = _has_any(
+        latest,
+        (
+            "daily hours",
+            "study hours",
+            "focused hours",
+            "available hours",
+            "hours per day",
+            "daily study",
+            "availability",
+            "commitment",
+            "deadline",
+            "exam",
+            "cutoff",
+            "sleep",
+            "tuition",
+        ),
+    )
+    scope_edit = bool(
+        re.search(r"\b(add|include|remove|drop|replace|skip)\b", latest)
+        and (
+            draft_status == "awaiting_review"
+            or contract_ready
+            or _has_any(latest, ("chapter", "topic", "subject", "scope", "syllabus"))
+        )
+        and not teaching_question
+    )
+    if capacity_edit or scope_edit:
+        return RoutingDecision(
+            intent="update_plan" if contract_ready else "create_plan",
+            confidence=1.0,
+            reasoning="The user is changing contract-owned scope, time, availability, or constraints.",
+            agent_chosen="intake",
+        )
+
+    schedule_edit = _has_any(
+        latest,
+        ("move", "shift", "reschedule", "postpone", "prepone", "split", "merge", "reorder"),
+    ) and _has_any(latest, ("session", "slot", "time", "day", "today", "tomorrow", "morning", "evening", "later", "earlier"))
+    if contract_ready and schedule_edit:
+        return RoutingDecision(
+            intent="update_plan",
+            confidence=1.0,
+            reasoning="The user is changing placement of already-approved scheduled work.",
+            agent_chosen="planner",
+        )
+
+    return None
 
 
 def _extract_planner_visible_text(messages: List[BaseMessage]) -> str:
@@ -553,20 +722,6 @@ async def supervisor_node(state: SupervisorState) -> dict:
     Minimal structured router for the slop supervisor.
     """
     started_at = time.time()
-    ui_context = state.get("ui_context") or {}
-    if (
-        state.get("draft_status") == "awaiting_review"
-        and str(ui_context.get("source") or "").strip() == "pending_plan_review"
-    ):
-        return {
-            "routing_decision": RoutingDecision(
-                intent="update_plan",
-                confidence=1.0,
-                reasoning="The user submitted free-form feedback while reviewing a verified draft plan.",
-                agent_chosen="planner",
-            )
-        }
-
     if state.get("worker_hops_this_turn", 0) >= 3:
         decision = RoutingDecision(
             intent="unknown",
@@ -576,6 +731,16 @@ async def supervisor_node(state: SupervisorState) -> dict:
         )
         logger.info("[SLOP ROUTER] worker hop limit reached agent=user_facing")
         return {"routing_decision": decision}
+
+    deterministic_decision = _deterministic_router_decision(state)
+    if deterministic_decision is not None:
+        logger.info(
+            "[SLOP ROUTER] deterministic intent=%s agent=%s reason=%s",
+            deterministic_decision.intent,
+            deterministic_decision.agent_chosen,
+            deterministic_decision.reasoning,
+        )
+        return {"routing_decision": deterministic_decision}
 
     try:
         from src.database.client_cache import get_llm
@@ -786,6 +951,30 @@ def route_after_intake(state: SupervisorState) -> str:
         outcome.get("outcome", "failed"),
     )
     return "user_facing_node"
+
+
+def route_after_planner(state: SupervisorState) -> str:
+    """Show finished Planner outcomes instead of re-routing the same user turn."""
+
+    planner_status = state.get("planner_status")
+    if planner_status in {
+        "awaiting_approval",
+        "committed",
+        "needs_input",
+        "rejected",
+        "escalate",
+    }:
+        logger.info(
+            "[SLOP ROUTER] deterministic planner outcome=%s next=user_facing",
+            planner_status,
+        )
+        return "user_facing_node"
+
+    logger.info(
+        "[SLOP ROUTER] deterministic planner outcome=%s next=supervisor",
+        planner_status,
+    )
+    return "supervisor_node"
 
 
 def _planner_commit_requested(state: SupervisorState) -> bool:
@@ -1100,7 +1289,14 @@ def create_supervisor_graph(checkpointer: Optional[MemorySaver] = None):
             "user_facing_node": "user_facing_node",
         },
     )
-    workflow.add_edge("planner_node", "supervisor_node")
+    workflow.add_conditional_edges(
+        "planner_node",
+        route_after_planner,
+        {
+            "supervisor_node": "supervisor_node",
+            "user_facing_node": "user_facing_node",
+        },
+    )
     workflow.add_edge("user_facing_node", END)
 
     return workflow.compile(checkpointer=checkpointer) if checkpointer else workflow.compile()

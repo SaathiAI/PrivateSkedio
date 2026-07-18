@@ -272,7 +272,7 @@ def build_planner_context(state: Any) -> Dict[str, Any]:
                 "estimated_hours": round(float(work_item.estimated_hours), 2),
                 "target_minutes": target_minutes,
                 "reason": work_item.reason,
-                "planning_notes": work_item.planning_notes,
+                "intake_guidance": work_item.intake_guidance,
                 "remaining_subtopics": list(work_item.remaining_subtopics or []),
             }
         )

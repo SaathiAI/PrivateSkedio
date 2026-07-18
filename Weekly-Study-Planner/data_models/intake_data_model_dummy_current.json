@@ -164,7 +164,7 @@
         }
       ]
     },
-    "planning_notes": [
+    "intake_guidance": [
       "This intake is intentionally current-date and planner-ready.",
       "Respect the hard deadline on 30 June at 11:00 PM local time.",
       "The planner must not overlap user commitments or fresh calendar blockers.",
@@ -184,7 +184,7 @@
       "chapter": "Surface Areas and Volumes",
       "estimated_hours": 4.0,
       "reason": "Primary Maths repair item because formula recall is still shaky and mixed application questions are leaking marks.",
-      "planning_notes": [
+      "intake_guidance": [
         "Do this early in the window.",
         "Mix formula recall with cone-cylinder-frustum application sets.",
         "End with mixed word problems rather than only direct formula substitution."
@@ -202,7 +202,7 @@
       "chapter": "Arithmetic Progressions",
       "estimated_hours": 3.0,
       "reason": "Secondary Maths item with manageable backlog, mainly nth-term interpretation, sums, and one short word-problem pass.",
-      "planning_notes": [
+      "intake_guidance": [
         "Keep this practice-first.",
         "Use quick solved examples, then shift to independent questions.",
         "Good candidate for a medium-energy slot."
@@ -219,7 +219,7 @@
       "chapter": "Control and Coordination",
       "estimated_hours": 3.5,
       "reason": "Concept-heavy Science repair item with recall gaps in neuron flow, reflex arc, and endocrine mapping.",
-      "planning_notes": [
+      "intake_guidance": [
         "Use labelled-diagram recall and oral self-explanation.",
         "Break the chapter into nervous system, plant movement, and hormones.",
         "Do not keep this too late at night because retention quality drops."
@@ -237,7 +237,7 @@
       "chapter": "Light - Reflection and Refraction",
       "estimated_hours": 3.0,
       "reason": "Needs targeted numerical correction and ray-diagram accuracy rather than full relearning.",
-      "planning_notes": [
+      "intake_guidance": [
         "Pair numericals with sign-convention correction.",
         "Use one short formula sheet refresh before problem sets.",
         "Place before the final day so numericals are not rushed."
@@ -255,7 +255,7 @@
       "chapter": "Nationalism in India",
       "estimated_hours": 2.0,
       "reason": "Important theory chapter, but the learner mainly needs timeline, source, and map-linked recall rather than long reading.",
-      "planning_notes": [
+      "intake_guidance": [
         "Keep it recap-heavy and writing-light.",
         "Use one timeline pass and one source recall pass.",
         "Best suited to lower-energy evening or post-Maths recovery slots."
@@ -273,7 +273,7 @@
       "chapter": "Resources and Development",
       "estimated_hours": 1.5,
       "reason": "Lower-priority selective breadth item included so the chapter is not fully untouched.",
-      "planning_notes": [
+      "intake_guidance": [
         "Keep this shortest and easiest to cut if time pressure rises.",
         "Focus on soil types, resource classification, and one map pass.",
         "Do not over-read the textbook here."

@@ -73,7 +73,7 @@
       { "title": "Tuition", "start": "14:00", "end": "15:00", "source": "manual" }
     ]
   },
-    "planning_notes": [
+    "intake_guidance": [
       "Prefers morning study session blocks on weekends",
       "Needs a 10 min break after every 50 mins of study"
     ]

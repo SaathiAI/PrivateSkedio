@@ -192,7 +192,7 @@ def build_intake_output() -> dict:
                 "2026-06-30": 0.5,
             },
             "time_blocks": commitments,
-            "planning_notes": [
+            "intake_guidance": [
                 "Calendar-owned midday blockers are already heavy on 24, 25, 26, 29, and 30.",
                 "The student can do better in morning or late-evening windows than in fragmented noon windows.",
                 "30 June should stay as a very light landing day.",
@@ -207,7 +207,7 @@ def build_intake_output() -> dict:
                 "chapter": "Surface Areas and Volumes",
                 "estimated_hours": 4.0,
                 "reason": "Still leaking marks on formula recall and mixed shape application.",
-                "planning_notes": [
+                "intake_guidance": [
                     "Use this in clear-headed slots.",
                     "Keep formula recall close to practice, not isolated.",
                 ],
@@ -224,7 +224,7 @@ def build_intake_output() -> dict:
                 "chapter": "Arithmetic Progressions",
                 "estimated_hours": 3.5,
                 "reason": "Needs one more cycle of direct questions plus short word-problem translation work.",
-                "planning_notes": [
+                "intake_guidance": [
                     "Keep AP practice compact and finishable.",
                 ],
                 "remaining_subtopics": [
@@ -239,7 +239,7 @@ def build_intake_output() -> dict:
                 "chapter": "Control and Coordination",
                 "estimated_hours": 4.0,
                 "reason": "This chapter still has unstable recall and diagram confidence.",
-                "planning_notes": [
+                "intake_guidance": [
                     "Prefer concept-plus-diagram pairings.",
                 ],
                 "remaining_subtopics": [
@@ -255,7 +255,7 @@ def build_intake_output() -> dict:
                 "chapter": "Light - Reflection and Refraction",
                 "estimated_hours": 3.5,
                 "reason": "Still needs numerical confidence and cleaner ray-diagram accuracy.",
-                "planning_notes": [
+                "intake_guidance": [
                     "Do this where uninterrupted concentration is available.",
                 ],
                 "remaining_subtopics": [
@@ -271,7 +271,7 @@ def build_intake_output() -> dict:
                 "chapter": "Nationalism in India",
                 "estimated_hours": 2.5,
                 "reason": "Works best as short review passes without stealing too much math/science time.",
-                "planning_notes": [
+                "intake_guidance": [
                     "Use short recap slots, not giant reading blocks.",
                 ],
                 "remaining_subtopics": [
@@ -287,7 +287,7 @@ def build_intake_output() -> dict:
                 "chapter": "Resources and Development",
                 "estimated_hours": 2.0,
                 "reason": "Selective coverage only, but still worth keeping alive for breadth.",
-                "planning_notes": [
+                "intake_guidance": [
                     "This is the most cuttable item if a squeeze happens.",
                 ],
                 "remaining_subtopics": [
@@ -601,7 +601,7 @@ def build_progress_budget(intake_output: dict) -> dict:
                 "mathematics_volume_conversion_units_errors",
             ],
             "reason": items["mathematics|surface_areas_and_volumes"]["reason"],
-            "planning_notes": items["mathematics|surface_areas_and_volumes"]["planning_notes"],
+            "intake_guidance": items["mathematics|surface_areas_and_volumes"]["intake_guidance"],
             "remaining_subtopics": items["mathematics|surface_areas_and_volumes"]["remaining_subtopics"],
         },
         "mathematics|arithmetic_progressions": {
@@ -623,7 +623,7 @@ def build_progress_budget(intake_output: dict) -> dict:
                 "mathematics_ap_word_problem_translation",
             ],
             "reason": items["mathematics|arithmetic_progressions"]["reason"],
-            "planning_notes": items["mathematics|arithmetic_progressions"]["planning_notes"],
+            "intake_guidance": items["mathematics|arithmetic_progressions"]["intake_guidance"],
             "remaining_subtopics": items["mathematics|arithmetic_progressions"]["remaining_subtopics"],
         },
         "science|control_and_coordination": {
@@ -647,7 +647,7 @@ def build_progress_budget(intake_output: dict) -> dict:
                 "science_control_coordination_plant_tropism_examples",
             ],
             "reason": items["science|control_and_coordination"]["reason"],
-            "planning_notes": items["science|control_and_coordination"]["planning_notes"],
+            "intake_guidance": items["science|control_and_coordination"]["intake_guidance"],
             "remaining_subtopics": items["science|control_and_coordination"]["remaining_subtopics"],
         },
         "science|light_reflection_and_refraction": {
@@ -671,7 +671,7 @@ def build_progress_budget(intake_output: dict) -> dict:
                 "science_light_magnification_direct_questions",
             ],
             "reason": items["science|light_reflection_and_refraction"]["reason"],
-            "planning_notes": items["science|light_reflection_and_refraction"]["planning_notes"],
+            "intake_guidance": items["science|light_reflection_and_refraction"]["intake_guidance"],
             "remaining_subtopics": items["science|light_reflection_and_refraction"]["remaining_subtopics"],
         },
         "social_science|nationalism_in_india": {
@@ -695,7 +695,7 @@ def build_progress_budget(intake_output: dict) -> dict:
                 "sst_nationalism_map_linked_locations",
             ],
             "reason": items["social_science|nationalism_in_india"]["reason"],
-            "planning_notes": items["social_science|nationalism_in_india"]["planning_notes"],
+            "intake_guidance": items["social_science|nationalism_in_india"]["intake_guidance"],
             "remaining_subtopics": items["social_science|nationalism_in_india"]["remaining_subtopics"],
         },
         "social_science|resources_and_development": {
@@ -719,7 +719,7 @@ def build_progress_budget(intake_output: dict) -> dict:
                 "sst_resources_map_single_revision_cycle",
             ],
             "reason": items["social_science|resources_and_development"]["reason"],
-            "planning_notes": items["social_science|resources_and_development"]["planning_notes"],
+            "intake_guidance": items["social_science|resources_and_development"]["intake_guidance"],
             "remaining_subtopics": items["social_science|resources_and_development"]["remaining_subtopics"],
         },
     }

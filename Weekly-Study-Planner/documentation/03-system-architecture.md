@@ -249,6 +249,19 @@ draft
 
 This separation reduces the risk of turning weak drafts into durable truth.
 
+The supervisor enforces this as a turn lifecycle rule:
+
+```text
+Planner returns verified draft
+-> supervisor routes deterministically to user-facing
+-> draft and review controls are shown
+-> turn ends
+```
+
+The same user message that triggered draft creation is not reused as approval
+for that draft. Approval is evaluated only after the draft has already been
+shown to the user in the review state.
+
 It also keeps the frontend honest:
 
 - preview can be immediate

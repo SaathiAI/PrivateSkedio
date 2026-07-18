@@ -234,6 +234,10 @@ Examples:
 - `request_changes`
 - `cancel_plan`
 
+Review actions operate on an already-shown verified draft. A draft created in
+the current backend turn is first returned to the frontend with `pending_ui`;
+approval or changes happen in a later frontend action/chat turn.
+
 ### Pending review fetch
 
 `GET /chat/pending-review`
@@ -277,6 +281,12 @@ flowchart TD
 
 The important design idea is that review is not a frontend-only state.
 It is backed by persisted supervisor thread state.
+
+Another important rule: draft display and commit do not happen from the same
+human message. When the planner returns `awaiting_approval`, supervisor sends
+the planner envelope to user-facing and ends the turn. The frontend then shows
+the draft plus actions. A later action or later chat message can approve,
+request changes, or cancel.
 
 ## Streaming Chat Behavior
 

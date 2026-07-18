@@ -149,6 +149,36 @@ must be separated clearly.
 
 If those blur together, failure becomes much more expensive.
 
+### Same-turn approval bug
+
+A confusing failure happened when one user message caused:
+
+```text
+Intake approved
+-> Planner created verified draft
+-> Supervisor re-read the same user message
+-> Planner committed
+```
+
+The product problem was not that Supervisor can command Planner to commit. That
+power is intentional. The problem was lifecycle timing: the user message existed
+before the Planner draft existed, so it should not count as approval for that
+new draft.
+
+### Fix
+
+Planner `awaiting_approval` is now treated as a display-ready worker outcome:
+
+```text
+Planner verified draft
+-> deterministic route to user-facing
+-> show draft/review actions
+-> end turn
+```
+
+Approval, typed changes, or cancellation are handled in a later turn after the
+draft has actually been shown.
+
 ## Remaining Weak Spot: Checkbox / Actual-Hours Assumption
 
 This is one of the most important still-open practical issues.

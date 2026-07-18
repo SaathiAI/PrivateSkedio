@@ -105,6 +105,19 @@ planner draft
 -> commit
 ```
 
+For normal in-app flow, the moment a verified draft is created is a hard
+display boundary:
+
+```text
+Planner verified draft
+-> supervisor sends planner envelope to user-facing
+-> user sees draft and review actions
+-> turn ends
+```
+
+The user may approve by a review action or by a clear later-turn message, but
+the message that caused the draft to be created is not reused as approval.
+
 This applies both to:
 
 - normal in-app planning flow
@@ -120,6 +133,7 @@ That means:
 - supervisor state carries `verified_plan`
 - `draft_status` becomes reviewable
 - UI actions and email actions both return to the same thread logic
+- the latest planner `worker_envelope` is preserved so user-facing can display the draft-ready message
 
 For calendar-triggered review specifically, the system builds a scoped review thread and stores:
 
@@ -153,6 +167,10 @@ user approves
 -> planner moves from verified draft toward commit
 ```
 
+Approval is only valid from the review state after the draft was shown. The
+supervisor still commands Planner to commit, but it must not turn the same
+message that triggered draft generation into approval.
+
 ### Request changes
 
 ```text
@@ -161,6 +179,10 @@ user requests changes
 -> user is asked what should change
 -> planner revises based on that feedback
 ```
+
+If the requested change alters the study contract, such as scope, deadline,
+availability, or workload, the supervisor routes back to Intake before Planner
+revises.
 
 ### Cancel
 

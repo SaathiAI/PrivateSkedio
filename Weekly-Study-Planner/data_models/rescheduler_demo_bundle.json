@@ -144,7 +144,7 @@
           }
         ]
       },
-      "planning_notes": [
+      "intake_guidance": [
         "Calendar-owned midday blockers are already heavy on 24, 25, 26, 29, and 30.",
         "The student can do better in morning or late-evening windows than in fragmented noon windows.",
         "30 June should stay as a very light landing day.",
@@ -159,7 +159,7 @@
         "chapter": "Surface Areas and Volumes",
         "estimated_hours": 4.0,
         "reason": "Still leaking marks on formula recall and mixed shape application.",
-        "planning_notes": [
+        "intake_guidance": [
           "Use this in clear-headed slots.",
           "Keep formula recall close to practice, not isolated."
         ],
@@ -176,7 +176,7 @@
         "chapter": "Arithmetic Progressions",
         "estimated_hours": 3.5,
         "reason": "Needs one more cycle of direct questions plus short word-problem translation work.",
-        "planning_notes": [
+        "intake_guidance": [
           "Keep AP practice compact and finishable."
         ],
         "remaining_subtopics": [
@@ -191,7 +191,7 @@
         "chapter": "Control and Coordination",
         "estimated_hours": 4.0,
         "reason": "This chapter still has unstable recall and diagram confidence.",
-        "planning_notes": [
+        "intake_guidance": [
           "Prefer concept-plus-diagram pairings."
         ],
         "remaining_subtopics": [
@@ -207,7 +207,7 @@
         "chapter": "Light - Reflection and Refraction",
         "estimated_hours": 3.5,
         "reason": "Still needs numerical confidence and cleaner ray-diagram accuracy.",
-        "planning_notes": [
+        "intake_guidance": [
           "Do this where uninterrupted concentration is available."
         ],
         "remaining_subtopics": [
@@ -223,7 +223,7 @@
         "chapter": "Nationalism in India",
         "estimated_hours": 2.5,
         "reason": "Works best as short review passes without stealing too much math/science time.",
-        "planning_notes": [
+        "intake_guidance": [
           "Use short recap slots, not giant reading blocks."
         ],
         "remaining_subtopics": [
@@ -239,7 +239,7 @@
         "chapter": "Resources and Development",
         "estimated_hours": 2.0,
         "reason": "Selective coverage only, but still worth keeping alive for breadth.",
-        "planning_notes": [
+        "intake_guidance": [
           "This is the most cuttable item if a squeeze happens."
         ],
         "remaining_subtopics": [
@@ -1616,7 +1616,7 @@
               }
             ]
           },
-          "planning_notes": [
+          "intake_guidance": [
             "Calendar-owned midday blockers are already heavy on 24, 25, 26, 29, and 30.",
             "The student can do better in morning or late-evening windows than in fragmented noon windows.",
             "30 June should stay as a very light landing day.",
@@ -1631,7 +1631,7 @@
             "chapter": "Surface Areas and Volumes",
             "estimated_hours": 4.0,
             "reason": "Still leaking marks on formula recall and mixed shape application.",
-            "planning_notes": [
+            "intake_guidance": [
               "Use this in clear-headed slots.",
               "Keep formula recall close to practice, not isolated."
             ],
@@ -1648,7 +1648,7 @@
             "chapter": "Arithmetic Progressions",
             "estimated_hours": 3.5,
             "reason": "Needs one more cycle of direct questions plus short word-problem translation work.",
-            "planning_notes": [
+            "intake_guidance": [
               "Keep AP practice compact and finishable."
             ],
             "remaining_subtopics": [
@@ -1663,7 +1663,7 @@
             "chapter": "Control and Coordination",
             "estimated_hours": 4.0,
             "reason": "This chapter still has unstable recall and diagram confidence.",
-            "planning_notes": [
+            "intake_guidance": [
               "Prefer concept-plus-diagram pairings."
             ],
             "remaining_subtopics": [
@@ -1679,7 +1679,7 @@
             "chapter": "Light - Reflection and Refraction",
             "estimated_hours": 3.5,
             "reason": "Still needs numerical confidence and cleaner ray-diagram accuracy.",
-            "planning_notes": [
+            "intake_guidance": [
               "Do this where uninterrupted concentration is available."
             ],
             "remaining_subtopics": [
@@ -1695,7 +1695,7 @@
             "chapter": "Nationalism in India",
             "estimated_hours": 2.5,
             "reason": "Works best as short review passes without stealing too much math/science time.",
-            "planning_notes": [
+            "intake_guidance": [
               "Use short recap slots, not giant reading blocks."
             ],
             "remaining_subtopics": [
@@ -1711,7 +1711,7 @@
             "chapter": "Resources and Development",
             "estimated_hours": 2.0,
             "reason": "Selective coverage only, but still worth keeping alive for breadth.",
-            "planning_notes": [
+            "intake_guidance": [
               "This is the most cuttable item if a squeeze happens."
             ],
             "remaining_subtopics": [
@@ -2427,7 +2427,7 @@
               "mathematics_volume_conversion_units_errors"
             ],
             "reason": "Still leaking marks on formula recall and mixed shape application.",
-            "planning_notes": [
+            "intake_guidance": [
               "Use this in clear-headed slots.",
               "Keep formula recall close to practice, not isolated."
             ],
@@ -2457,7 +2457,7 @@
               "mathematics_ap_word_problem_translation"
             ],
             "reason": "Needs one more cycle of direct questions plus short word-problem translation work.",
-            "planning_notes": [
+            "intake_guidance": [
               "Keep AP practice compact and finishable."
             ],
             "remaining_subtopics": [
@@ -2487,7 +2487,7 @@
               "science_control_coordination_plant_tropism_examples"
             ],
             "reason": "This chapter still has unstable recall and diagram confidence.",
-            "planning_notes": [
+            "intake_guidance": [
               "Prefer concept-plus-diagram pairings."
             ],
             "remaining_subtopics": [
@@ -2518,7 +2518,7 @@
               "science_light_magnification_direct_questions"
             ],
             "reason": "Still needs numerical confidence and cleaner ray-diagram accuracy.",
-            "planning_notes": [
+            "intake_guidance": [
               "Do this where uninterrupted concentration is available."
             ],
             "remaining_subtopics": [
@@ -2549,7 +2549,7 @@
               "sst_nationalism_map_linked_locations"
             ],
             "reason": "Works best as short review passes without stealing too much math/science time.",
-            "planning_notes": [
+            "intake_guidance": [
               "Use short recap slots, not giant reading blocks."
             ],
             "remaining_subtopics": [
@@ -2580,7 +2580,7 @@
               "sst_resources_map_single_revision_cycle"
             ],
             "reason": "Selective coverage only, but still worth keeping alive for breadth.",
-            "planning_notes": [
+            "intake_guidance": [
               "This is the most cuttable item if a squeeze happens."
             ],
             "remaining_subtopics": [

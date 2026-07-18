@@ -23,7 +23,9 @@ flowchart TD
     RouteB -->|user_facing| UserFacing
 
     Intake --> Supervisor
-    Planner --> Supervisor
+    Planner --> PlannerRoute{"route_after_planner"}
+    PlannerRoute -->|display-ready outcome| UserFacing
+    PlannerRoute -->|needs more routing| Supervisor
     UserFacing --> End["END"]
 ```
 
@@ -160,11 +162,17 @@ flowchart TD
     Extract --> PendingUI{"planner_status == awaiting_approval?"}
     PendingUI -->|yes| BuildUI["build pending_ui"]
     PendingUI -->|no| SkipUI["pending_ui = null"]
+    BuildUI --> PlannerEnvelope["return planner worker_envelope"]
+    SkipUI --> PlannerEnvelope
 ```
 
 Rule:
 - commit is the only explicit planner command
 - `has_active_plan` provides the create-vs-revise runtime truth
+- `awaiting_approval`, `committed`, `needs_input`, `rejected`, and `escalate`
+  route directly to `user_facing_node` after Planner
+- a verified draft created in this turn is shown before any approval decision is
+  made in a later turn
 
 ## `user_facing_node`
 
@@ -185,7 +193,10 @@ flowchart TD
 ```mermaid
 flowchart TD
     Verified["planner_status = awaiting_approval"] --> UI["pending_ui plan_review payload"]
-    UI --> UserChoice{"user clicks action"}
+    UI --> Display["user_facing displays planner envelope + draft controls"]
+    Display --> EndTurn["END current turn"]
+    EndTurn --> NextTurn["later user action/message"]
+    NextTurn --> UserChoice{"user reviews"}
     UserChoice -->|approve_plan| Commit["plan_action_node -> planner commit"]
     UserChoice -->|request_changes| Ask["plan_action_node -> user_facing asks for change details"]
     UserChoice -->|cancel_plan| Cancel["plan_action_node clears review state"]

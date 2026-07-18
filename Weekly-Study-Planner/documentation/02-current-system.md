@@ -115,6 +115,17 @@ This is a turn-based orchestration model.
 The important detail is that the supervisor is not a one-time classifier.
 It can inspect worker output and continue deciding what should happen next in the same turn.
 
+Important lifecycle boundary:
+
+```text
+Planner verified draft -> user-facing review -> END
+```
+
+When Planner returns a verifier-approved draft, the supervisor does not ask the
+router LLM to reinterpret the same user message again. The planner envelope is
+sent directly to user-facing so the user can see the draft and review actions.
+Approval or change requests happen in a later turn.
+
 ## Current Plan Lifecycle
 
 The current plan lifecycle is:
@@ -130,6 +141,10 @@ user goal
 -> progress updates
 -> later revision if needed
 ```
+
+Draft creation and commit are separate user-visible moments. A message that
+causes Intake to hand off to Planner cannot also approve the draft produced
+after that handoff.
 
 ## Current Intake Lifecycle
 
@@ -168,6 +183,14 @@ The current system supports:
 - cancel
 
 The planner can surface a draft, and the supervisor/user-facing flow can present it in a structured way for the frontend or chat layer.
+
+When a verified draft is ready:
+
+- `verified_plan` is stored in supervisor state
+- `draft_status` becomes `awaiting_review`
+- `pending_ui` carries the review actions
+- the latest planner `worker_envelope` is preserved for user-facing delivery
+- the current turn ends after the draft is shown
 
 ## Current Shared State Philosophy
 

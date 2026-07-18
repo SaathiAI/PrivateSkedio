@@ -331,8 +331,8 @@ def sanitize_commit_payload(payload: Any) -> dict:
         if availability.get("time_blocks") is None:
             availability["time_blocks"] = {}
 
-        if availability.get("planning_notes") is None:
-            availability["planning_notes"] = []
+        if availability.get("intake_guidance") is None:
+            availability["intake_guidance"] = []
 
         # Repair common mistake: study_items placed inside availability.
         if "study_items" in availability:

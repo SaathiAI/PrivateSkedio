@@ -189,7 +189,7 @@ def intake_agent_prompt(
 
         Once goal.start_date and goal.end_date are known, availability.daily_study_hours and availability.time_blocks should only cover that window.
 
-        planning_notes are concise hints for Planner, not conversation logs.
+        intake_guidance contains concise guidance for Planner, not conversation logs.
 
         ## Feasibility
 
@@ -240,7 +240,7 @@ def intake_agent_prompt(
                 {{"title": "string", "start": "HH:MM or null", "end": "HH:MM or null", "source": "user_commitment" | "user_rest_window"}}
               ]
             }},
-            "planning_notes": ["string"]
+            "intake_guidance": ["string"]
           }} | null,
           "study_items": [
             {{
@@ -249,7 +249,7 @@ def intake_agent_prompt(
               "chapter": "string",
               "estimated_hours": 1,
               "reason": "string or null",
-              "planning_notes": ["string"],
+              "intake_guidance": ["string"],
               "remaining_subtopics": ["exact backlog/content handles, else empty"]
             }}
           ]

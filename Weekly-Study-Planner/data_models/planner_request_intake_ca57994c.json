@@ -1,0 +1,216 @@
+{
+  "user_id": "test_user_99",
+  "intake": {
+    "status": "approved",
+    "message": "Locked — plan saved. Summary: Maths revision before Monday (2026-07-18 to 2026-07-20), exam deadline 2026-07-20 14:00 IST. Scope: Polynomials; Quadratic Equations; Pair of Linear Equations in Two Variables; Real Numbers. Total estimated study workload: 9.5 hours (Polynomials 2.0h; Quadratic Equations 3.0h; Pair of Linear Equations 2.0h; Real Numbers 2.5h). Availability: 5.0 focused hours each day on 2026-07-18, 2026-07-19, 2026-07-20. No-study blocks: 2026-07-18 Tuition 17:00-20:00; 2026-07-19 Tuition 10:00-13:00; 2026-07-20 finish study by exam (no study after 12:00) 12:00-14:00. Protected rest windows (user): daily 23:00-07:00 on 2026-07-18, 2026-07-19, 2026-07-20. Key assumptions: estimates are rough where backlog had no detailed progress; calendar was not re-checked (you can ask me to re-check). I’ll hand this to the planner to make the session timetable. If anything changes, tell me and I’ll repair the contract.",
+    "goal": {
+      "title": "Maths revision before Monday",
+      "subjects": [
+        "Mathematics"
+      ],
+      "start_date": "2026-07-18",
+      "end_date": "2026-07-20",
+      "deadline_datetime": "2026-07-20T14:00:00+05:30",
+      "study_scope": [
+        {
+          "subject": "Mathematics",
+          "chapter": "Polynomials",
+          "intent": null
+        },
+        {
+          "subject": "Mathematics",
+          "chapter": "Quadratic Equations",
+          "intent": null
+        },
+        {
+          "subject": "Mathematics",
+          "chapter": "Pair of Linear Equations in Two Variables",
+          "intent": null
+        },
+        {
+          "subject": "Mathematics",
+          "chapter": "Real Numbers",
+          "intent": null
+        }
+      ]
+    },
+    "availability": {
+      "timezone": "Asia/Kolkata",
+      "daily_study_hours": {
+        "2026-07-18": 5.0,
+        "2026-07-19": 5.0,
+        "2026-07-20": 5.0
+      },
+      "time_blocks": {
+        "2026-07-18": [
+          {
+            "title": "Tuition (no study)",
+            "start": "17:00",
+            "end": "20:00",
+            "source": "user_commitment"
+          },
+          {
+            "title": "Sleep (protected rest)",
+            "start": "23:00",
+            "end": "07:00",
+            "source": "user_rest_window"
+          }
+        ],
+        "2026-07-19": [
+          {
+            "title": "Tuition (no study)",
+            "start": "10:00",
+            "end": "13:00",
+            "source": "user_commitment"
+          },
+          {
+            "title": "Sleep (protected rest)",
+            "start": "23:00",
+            "end": "07:00",
+            "source": "user_rest_window"
+          }
+        ],
+        "2026-07-20": [
+          {
+            "title": "Finish study by exam (no study after 12:00)",
+            "start": "12:00",
+            "end": "14:00",
+            "source": "user_commitment"
+          },
+          {
+            "title": "Sleep (protected rest)",
+            "start": "23:00",
+            "end": "07:00",
+            "source": "user_rest_window"
+          }
+        ]
+      },
+      "intake_guidance": [
+        "User prefers to finish studying before 12:00 on exam day."
+      ]
+    },
+    "study_items": [
+      {
+        "scope_reference_key": null,
+        "subject": "Mathematics",
+        "chapter": "Polynomials",
+        "estimated_hours": 2.0,
+        "reason": "Core revision for exam",
+        "intake_guidance": [],
+        "remaining_subtopics": []
+      },
+      {
+        "scope_reference_key": null,
+        "subject": "Mathematics",
+        "chapter": "Quadratic Equations",
+        "estimated_hours": 3.0,
+        "reason": "Core revision and problem practice",
+        "intake_guidance": [],
+        "remaining_subtopics": []
+      },
+      {
+        "scope_reference_key": null,
+        "subject": "Mathematics",
+        "chapter": "Pair of Linear Equations in Two Variables",
+        "estimated_hours": 2.0,
+        "reason": "Pick an algebra chapter to cover basics and problem-solving",
+        "intake_guidance": [],
+        "remaining_subtopics": []
+      },
+      {
+        "scope_reference_key": null,
+        "subject": "Mathematics",
+        "chapter": "Real Numbers",
+        "estimated_hours": 2.5,
+        "reason": "Fundamentals and quick proofs/number theory practice",
+        "intake_guidance": [],
+        "remaining_subtopics": []
+      }
+    ]
+  },
+  "scheduling_context": {
+    "timezone": "Asia/Kolkata",
+    "daily_study_hours": {
+      "2026-07-18": 5.0,
+      "2026-07-19": 5.0,
+      "2026-07-20": 5.0
+    },
+    "time_blocks": {
+      "2026-07-18": [
+        {
+          "title": "Tuition (no study)",
+          "start": "17:00",
+          "end": "20:00",
+          "source": "user_commitment"
+        },
+        {
+          "title": "Sleep (protected rest)",
+          "start": "23:00",
+          "end": "07:00",
+          "source": "user_rest_window"
+        }
+      ],
+      "2026-07-19": [
+        {
+          "title": "Tuition (no study)",
+          "start": "10:00",
+          "end": "13:00",
+          "source": "user_commitment"
+        },
+        {
+          "title": "Sleep (protected rest)",
+          "start": "23:00",
+          "end": "07:00",
+          "source": "user_rest_window"
+        }
+      ],
+      "2026-07-20": [
+        {
+          "title": "Finish study by exam (no study after 12:00)",
+          "start": "12:00",
+          "end": "14:00",
+          "source": "user_commitment"
+        },
+        {
+          "title": "Sleep (protected rest)",
+          "start": "23:00",
+          "end": "07:00",
+          "source": "user_rest_window"
+        }
+      ]
+    },
+    "calendar_blocks": [],
+    "available_time_windows": {
+      "2026-07-18": [
+        {
+          "start": "08:00",
+          "end": "17:00"
+        },
+        {
+          "start": "20:00",
+          "end": "23:00"
+        }
+      ],
+      "2026-07-19": [
+        {
+          "start": "08:00",
+          "end": "10:00"
+        },
+        {
+          "start": "13:00",
+          "end": "23:00"
+        }
+      ],
+      "2026-07-20": [
+        {
+          "start": "08:00",
+          "end": "12:00"
+        }
+      ]
+    }
+  },
+  "active_plan_context": {
+    "has_plan": false,
+    "plan_details": null
+  }
+}
