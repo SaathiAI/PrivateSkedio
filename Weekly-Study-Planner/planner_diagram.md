@@ -21,9 +21,12 @@ flowchart TD
     Retry -->|yes| Planner
     Retry -->|no| End2["END"]
     Passed -->|yes| Await["awaiting_approval"]
-    Await --> End3["END"]
+    Await --> ReviewRoute["route_after_planner"]
+    ReviewRoute --> UserFacing["user_facing_node"]
+    UserFacing --> End3["END"]
 
-    CommitTrigger["approve_plan from user"] --> Commit["commit_node"]
+    LaterTurn["later user approval"] --> CommitTrigger["commit_requested"]
+    CommitTrigger --> Commit["commit_node"]
     Commit --> End4["END"]
 ```
 
@@ -31,8 +34,8 @@ The practical interpretation is:
 
 - planner drafts a schedule
 - deterministic verification checks it
-- frontend previews it
-- user approval decides whether commit happens
+- the same turn ends with a user-facing draft preview
+- a later user approval decides whether commit happens
 
 That preview step is important.
 The planner is not directly mutating the durable active plan on first output.
@@ -137,8 +140,8 @@ This keeps the system easier to reason about than a pile of planner sub-agents w
 flowchart TD
     PlannerNode["planner_node"] --> Build["build planner invocation"]
     Build --> Prompt["planner prompt"]
-    Prompt --> Tools["planner tools available"]
-    Tools --> Model["one Planner LLM path"]
+    Prompt --> Context["planner context only"]
+    Context --> Model["one Planner LLM path"]
     Model --> Parse["parse PlannerOutput"]
     Parse --> DraftCheck{"plan present?"}
     DraftCheck -->|yes| Fill["fill computed fields"]
@@ -148,7 +151,7 @@ flowchart TD
 
 The live behavior is:
 - one planner invocation path
-- one planner tool boundary
+- no retrieval tool loop during normal planning
 - one visible planner output contract
 - one draft object the frontend can preview before approval
 
@@ -156,21 +159,19 @@ The live behavior is:
 
 ```mermaid
 flowchart LR
-    PlannerTools["Planner grounding tools"] --> Backlog["query_backlog"]
-    PlannerTools --> Syllabus["query_syllabus"]
+    Context["Intake-provided evidence and contract"] --> Planner["Planner"]
+    ContextBlocks["Calendar and active-plan context"] --> Planner
     Approval["explicit user approval"] --> Commit["commit_plan code path"]
 ```
 
 Typical usage:
-- `query_backlog`
-  - only when the locked contract lacks enough learner-progress detail for concrete session content
-- `query_syllabus`
-  - when official topic names, removed topics, active topics, or weightage matter
+- Intake gathers syllabus, backlog, and contract evidence before Planner receives the job.
+- Planner uses the locked contract, calendar context, and active-plan context it is given.
 - commit path
   - only after explicit user approval and deterministic verification
 
 Calendar truth is passed in planner context.
-Planner should not fetch calendar data during normal draft generation.
+Planner should not fetch calendar, syllabus, or backlog data during normal draft generation.
 
 ## Verification Path
 
@@ -241,14 +242,18 @@ This is the current live boundary.
 
 ```mermaid
 flowchart TD
-    Verified["verified_plan"] --> Supervisor["supervisor or user-facing"]
-    Supervisor --> User["user reviews"]
-    User --> Choice{"response"}
+    Verified["verified_plan"] --> Awaiting["planner_status = awaiting_approval"]
+    Awaiting --> RouteAfterPlanner["route_after_planner"]
+    RouteAfterPlanner --> UserFacing["user_facing_node"]
+    UserFacing --> EndTurn["END current turn"]
+    EndTurn --> LaterUser["later user action"]
+    LaterUser --> Choice{"response"}
     Choice -->|Approve plan| Commit["commit_node"]
-    Choice -->|Request changes| TextBox["free-form feedback box"]
-    TextBox --> Planner["planner_node again"]
+    Choice -->|Request changes| TextBox["free-form feedback"]
+    TextBox --> Supervisor["supervisor decides owner"]
+    Supervisor -->|schedule change| Planner["planner_node again"]
+    Supervisor -->|contract change| Intake["intake_node"]
     Choice -->|Cancel plan| Cancel["clear review state"]
-    Choice -->|contract change| Intake["intake_node"]
 ```
 
 The Planner does not generate review-option buttons.
@@ -286,7 +291,8 @@ Top-level intent of the output:
 Intake approves contract
 -> Planner drafts schedule
 -> Verifier checks it
--> User reviews it
+-> User-facing node shows the draft and ends the turn
+-> Later user approval or feedback is routed
 -> Planner commits it after approval
 -> same Planner later revises that same plan when schedule-only changes happen
 ```

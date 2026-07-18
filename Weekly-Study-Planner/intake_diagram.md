@@ -185,3 +185,6 @@ flowchart TD
 ```
 
 That is the current handoff contract between intake and planner.
+Intake approval can hand the same work forward to Planner, but it does not mean
+the final study plan is approved. Planner still drafts, verifies, and sends the
+draft to user-facing review before any later commit.
