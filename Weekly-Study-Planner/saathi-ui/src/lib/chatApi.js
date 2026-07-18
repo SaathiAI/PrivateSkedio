@@ -1,4 +1,11 @@
-import { API, authFetch, authPost } from "./api.js";
+import { API, authFetch, authPost, apiErrorMessage } from "./api.js";
+
+const readChatResponse = async (response, fallback) => {
+  if (!response.ok) {
+    throw new Error(await apiErrorMessage(response, fallback));
+  }
+  return response.json();
+};
 
 export const chatApi = {
   async send(message, threadId, uiContext = null) {
@@ -7,7 +14,7 @@ export const chatApi = {
       thread_id: threadId,
       ui_context: uiContext,
     });
-    return response.json();
+    return readChatResponse(response, "Chat request failed");
   },
 
   async action(action, threadId) {
@@ -15,20 +22,20 @@ export const chatApi = {
       action,
       thread_id: threadId,
     });
-    return response.json();
+    return readChatResponse(response, "Plan action failed");
   },
 
   async pendingReview(threadId) {
     const params = new URLSearchParams({ thread_id: threadId });
     const response = await authFetch(`${API}/chat/pending-review?${params.toString()}`);
-    return response.json();
+    return readChatResponse(response, "Pending review could not be loaded");
   },
 
   async reset(threadId) {
     const response = await authFetch(`${API}/chat/reset/${encodeURIComponent(threadId)}`, {
       method: "DELETE",
     });
-    return response.json();
+    return readChatResponse(response, "Chat reset failed");
   },
 
   async sendStream(message, threadId, handlers = {}, uiContext = null) {

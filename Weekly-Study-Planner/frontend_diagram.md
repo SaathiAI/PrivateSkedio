@@ -184,7 +184,10 @@ flowchart TD
     Backend["ChatResponse with pending_ui + draft_plan"] --> ChatPanel["buildAssistantMessage"]
     ChatPanel --> ActionGroups["buildActionGroups"]
     ActionGroups --> Core["Approve / Request changes / Cancel"]
-    Core --> Action["chatApi.action(...)"]
+    Core --> Approve["Approve -> chatApi.action(approve_plan)"]
+    Core --> Request["Request changes -> open text input"]
+    Request --> SendChange["typed feedback -> chatApi.sendStream + ui_context"]
+    Core --> Cancel["Cancel -> clear draft locally / optional action"]
 ```
 
 Important rule:
@@ -192,6 +195,7 @@ Important rule:
 ```text
 The frontend does not guess review actions.
 It renders structured actions from backend payload.
+Request changes asks the student for text before calling the backend.
 ```
 
 ---

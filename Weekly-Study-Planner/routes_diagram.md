@@ -165,7 +165,7 @@ Other OAuth calendar routes are mounted from:
 Main endpoints:
 - `/chat/send` — one-shot chat
 - `/chat/send/stream` — streaming chat (NDJSON)
-- `/chat/action` — structured UI action (approve/reject/cancel)
+- `/chat/action` — structured UI action (approve/request-changes/cancel)
 - `/chat/reset/{thread_id}` — clear conversation history
 
 These are the most important routes for agent orchestration.
@@ -226,6 +226,7 @@ Important rule:
 ```text
 UI actions are sent structurally.
 The route no longer needs to fake normal chat for approval/cancel buttons.
+Typed change requests still go through normal chat with `ui_context`.
 ```
 
 ---
