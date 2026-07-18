@@ -173,6 +173,91 @@ export const GlobalStyles = () => (
       50% { opacity: 0.7; transform: scale(1.02); }
     }
 
+    @keyframes skConnectionDrift {
+      0% { transform: translate3d(-10px, 0, 0); opacity: 0.38; }
+      50% { opacity: 0.62; }
+      100% { transform: translate3d(10px, 0, 0); opacity: 0.38; }
+    }
+
+    @keyframes skPlugFloatLeft {
+      0%, 100% { transform: translate3d(0, 0, 0) rotate(-1deg); }
+      50% { transform: translate3d(8px, -5px, 0) rotate(1deg); }
+    }
+
+    @keyframes skPlugFloatRight {
+      0%, 100% { transform: translate3d(0, 0, 0) rotate(1deg); }
+      50% { transform: translate3d(-8px, 5px, 0) rotate(-1deg); }
+    }
+
+    @keyframes skSignalPulse {
+      0%, 100% {
+        transform: scale(0.94);
+        opacity: 0.32;
+      }
+      50% {
+        transform: scale(1.08);
+        opacity: 0.78;
+      }
+    }
+
+    .sk-connect-empty-state {
+      position: relative;
+      min-height: calc(100dvh - 136px);
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(140, 153, 236, 0.2), transparent 34%),
+        radial-gradient(circle at 50% 58%, rgba(188, 194, 244, 0.13), transparent 32%),
+        radial-gradient(circle at 34% 64%, rgba(33, 184, 146, 0.07), transparent 28%),
+        linear-gradient(180deg, rgba(255, 254, 250, 0.98), rgba(247, 246, 242, 0.98));
+    }
+
+    .sk-connect-empty-state::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(22deg, transparent 0 42%, rgba(140, 153, 236, 0.09) 42.2% 42.6%, transparent 42.8% 100%),
+        linear-gradient(-18deg, transparent 0 48%, rgba(33, 184, 146, 0.06) 48.2% 48.6%, transparent 48.8% 100%);
+      background-size: 220px 160px, 260px 190px;
+      mask-image: radial-gradient(circle at 50% 46%, black 0%, transparent 72%);
+      opacity: 0.54;
+      animation: skConnectionDrift 10s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    .sk-connect-empty-state::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, transparent, rgba(255, 254, 250, 0.76) 24%, rgba(255, 254, 250, 0.88) 50%, rgba(255, 254, 250, 0.76) 76%, transparent);
+      pointer-events: none;
+    }
+
+    .sk-connect-plug-left {
+      animation: skPlugFloatLeft 4.8s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    .sk-connect-plug-right {
+      animation: skPlugFloatRight 4.8s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    .sk-connect-signal {
+      animation: skSignalPulse 2.2s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .sk-connect-empty-state::before,
+      .sk-connect-plug-left,
+      .sk-connect-plug-right,
+      .sk-connect-signal {
+        animation: none !important;
+      }
+    }
+
     @keyframes logoLeafDriftA {
       0%, 100% { transform: rotate(-2deg) translateY(0); }
       50% { transform: rotate(1deg) translateY(-1px); }

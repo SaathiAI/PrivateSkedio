@@ -108,6 +108,75 @@ The system is already complex enough with one active planning truth.
 
 This limits multi-plan scenarios, but avoids multiplying ambiguity around active scope and review state.
 
+## Decision 10: Calendar connection gates the Planner calendar surface
+
+### Why
+
+The Planner calendar is only trustworthy if SkedioAI knows the student's real busy-time context.
+
+So when calendar is not connected, the Planner tab shows a focused connect-calendar state instead of pretending the calendar is ready.
+
+This keeps the product honest:
+
+- no fake calendar data for normal users
+- no hidden admin/dev preview unless explicitly enabled
+- no assistant opening into a planning flow that cannot use real calendar context
+
+### Tradeoff
+
+This adds friction before first planning use.
+
+The benefit is that users do not see a polished but misleading planning surface.
+
+## Decision 11: Use a full-day calendar grid, not a dynamic event-based range
+
+### Why
+
+Google Calendar and other familiar calendars use a stable day model.
+
+The correct mental model is:
+
+```text
+12 AM starts the day.
+11 PM is the final hour block.
+After the 11 PM block ends, the next day starts at 12 AM.
+```
+
+SkedioAI follows that model so the calendar behaves like a real calendar, not a compressed timeline that changes shape based on events.
+
+### Tradeoff
+
+A full-day grid can create more scrolling and more empty space.
+
+The benefit is predictability:
+
+- time positions are stable
+- current-time marker is easier to understand
+- students can reason about the whole day
+- the UI feels closer to calendar tools users already know
+
+## Decision 12: Calendar blockers and study sessions are visually separate
+
+### Why
+
+Calendar blockers and study sessions mean different things.
+
+Blockers are busy-time facts.
+Study sessions are SkedioAI plan items.
+
+The UI now keeps them visually related but not identical.
+
+### Tradeoff
+
+This requires more styling logic.
+
+The benefit is clarity:
+
+- short blockers can be compact
+- long blockers can fill their time range
+- study sessions can keep richer progress/checklist affordances
+- users can quickly tell what SkedioAI planned versus what already existed
+
 ## Summary
 
 Most of the major SkedioAI decisions trade theoretical flexibility for:

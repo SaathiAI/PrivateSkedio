@@ -9,6 +9,7 @@ const DEV_FRONTEND_ONLY = import.meta.env.DEV && import.meta.env.VITE_USE_REAL_B
 
 export function SettingsView({ onBack, initialSection = "profile", onSectionChange, onOpenPastPlans }) {
   const { user, supabase, isDevAdmin, signOutDevAdmin } = useAuth();
+  const useDevWorkspace = DEV_FRONTEND_ONLY && isDevAdmin;
   const activeSection = initialSection || "profile";
   const [calendarStatus, setCalendarStatus] = useState(null);
   const [calendarError, setCalendarError] = useState("");
@@ -32,6 +33,11 @@ export function SettingsView({ onBack, initialSection = "profile", onSectionChan
 
   const refreshCalendarStatus = useCallback(async () => {
     setCalendarError("");
+    if (useDevWorkspace) {
+      setCalendarStatus({ connected: false });
+      setCalendarCheckedAt(new Date());
+      return;
+    }
     try {
       setCalendarStatus(await calendarApi.status());
       setCalendarCheckedAt(new Date());
@@ -39,10 +45,10 @@ export function SettingsView({ onBack, initialSection = "profile", onSectionChan
       setCalendarStatus({ connected: false });
       setCalendarError(error.message || "Calendar status check failed");
     }
-  }, []);
+  }, [useDevWorkspace]);
 
   useEffect(() => {
-    if (DEV_FRONTEND_ONLY) {
+    if (useDevWorkspace) {
       setCalendarStatus({ connected: false });
       setCalendarCheckedAt(new Date());
       return;
@@ -60,10 +66,10 @@ export function SettingsView({ onBack, initialSection = "profile", onSectionChan
         setCalendarError(error.message || "Calendar status check failed");
       });
     return () => { cancelled = true; };
-  }, []);
+  }, [useDevWorkspace]);
 
   useEffect(() => {
-    if (DEV_FRONTEND_ONLY) {
+    if (useDevWorkspace) {
       setEmailStatus({ ready: false, recipient: user?.email || "preview@skedio.local" });
       setEmailError("");
       return;
@@ -81,7 +87,7 @@ export function SettingsView({ onBack, initialSection = "profile", onSectionChan
         setEmailError(error.message || "Email status check failed");
       });
     return () => { cancelled = true; };
-  }, [user?.email]);
+  }, [user?.email, useDevWorkspace]);
 
   const handleConnect = async () => {
     setConnecting(true);
@@ -583,7 +589,7 @@ export function SettingsView({ onBack, initialSection = "profile", onSectionChan
                   connected={Boolean(calendarStatus?.connected)}
                   icon={<CalendarIntegrationIcon />}
                   actionLabel={connecting ? "Redirecting..." : "View integration"}
-                  onAction={DEV_FRONTEND_ONLY ? undefined : calendarStatus?.connected ? refreshCalendarStatus : handleConnect}
+                  onAction={useDevWorkspace ? undefined : calendarStatus?.connected ? refreshCalendarStatus : handleConnect}
                   disabled={connecting || disconnecting}
                 />
               </div>

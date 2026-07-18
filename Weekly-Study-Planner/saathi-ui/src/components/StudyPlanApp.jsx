@@ -28,6 +28,7 @@ const NAV_ITEMS = [
 ];
 
 const DEV_FRONTEND_ONLY = import.meta.env.DEV && import.meta.env.VITE_USE_REAL_BACKEND !== "1";
+const CALENDAR_CONNECT_RETURN_KEY = "skedio_calendar_connect_return";
 
 const buildDevWorkspace = (today) => {
   const start = new Date(`${today}T12:00:00`);
@@ -219,6 +220,178 @@ function MetricTile({ label, value, detail, accent = tokens.accent }) {
       </div>
       <div style={{ fontSize: 13, color: tokens.textMuted, lineHeight: 1.6 }}>{detail}</div>
     </SurfaceCard>
+  );
+}
+
+function CalendarConnectionIllustration() {
+  return (
+    <svg
+      viewBox="0 0 760 300"
+      role="img"
+      aria-label="Two calendar connection plugs waiting to connect"
+      style={{
+        width: "min(760px, 100%)",
+        height: "auto",
+        display: "block",
+        margin: "0 auto",
+      }}
+    >
+      <defs>
+        <linearGradient id="plugBody" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#fffefa" />
+          <stop offset="100%" stopColor="#dedbf1" />
+        </linearGradient>
+        <linearGradient id="plugFace" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#f4f1e8" />
+          <stop offset="100%" stopColor="#c9c4dd" />
+        </linearGradient>
+        <filter id="plugShadow" x="-20%" y="-30%" width="140%" height="160%">
+          <feDropShadow dx="0" dy="18" stdDeviation="18" floodColor="#4c5884" floodOpacity="0.16" />
+        </filter>
+      </defs>
+
+      <g opacity="0.52" stroke={tokens.borderHover} strokeWidth="1.4" fill="none">
+        <path d="M126 62h82v42h68v56h78" />
+        <path d="M600 70h-84v40h-72v50h-56" />
+        <path d="M210 214h64v-36h84" />
+        <path d="M546 222h-72v-42h-70" />
+      </g>
+      <g opacity="0.42" fill={tokens.borderHover}>
+        {[126, 208, 276, 354, 600, 516, 444, 388, 210, 274, 546, 474].map((x, index) => (
+          <circle key={`${x}-${index}`} cx={x} cy={index < 8 ? [62, 104, 160, 160, 70, 110, 160, 160][index] : [214, 178, 222, 180][index - 8]} r="4" />
+        ))}
+      </g>
+
+      <g className="sk-connect-signal">
+        <circle cx="380" cy="151" r="45" fill={tokens.accentMuted} />
+        <circle cx="380" cy="151" r="22" fill="rgba(33, 184, 146, 0.12)" />
+      </g>
+
+      <g className="sk-connect-plug-left" filter="url(#plugShadow)">
+        <path d="M74 194c68 0 88-50 122-58 20-4 40 2 56 16" stroke="#c7c1b7" strokeWidth="26" strokeLinecap="round" fill="none" />
+        <path d="M232 112h74c19 0 35 16 35 35v18c0 19-16 35-35 35h-74z" fill="url(#plugBody)" stroke="#b9b2cb" strokeWidth="1.8" />
+        <path d="M203 124h36v64h-36c-18 0-32-14-32-32s14-32 32-32z" fill="url(#plugFace)" stroke="#aaa397" strokeWidth="1.8" />
+        <rect x="242" y="130" width="8" height="52" rx="4" fill="#aaa397" opacity="0.72" />
+        <rect x="258" y="134" width="8" height="44" rx="4" fill="#aaa397" opacity="0.58" />
+        <rect x="322" y="132" width="48" height="14" rx="7" fill="#9f9a90" />
+        <rect x="322" y="166" width="48" height="14" rx="7" fill="#9f9a90" />
+        <circle cx="307" cy="122" r="4" fill="#c3bdd6" />
+      </g>
+
+      <g className="sk-connect-plug-right" filter="url(#plugShadow)">
+        <path d="M686 194c-68 0-88-50-122-58-20-4-40 2-56 16" stroke="#c7c1b7" strokeWidth="26" strokeLinecap="round" fill="none" />
+        <path d="M528 112h-74c-19 0-35 16-35 35v18c0 19 16 35 35 35h74z" fill="url(#plugBody)" stroke="#b9b2cb" strokeWidth="1.8" />
+        <path d="M557 124h-36v64h36c18 0 32-14 32-32s-14-32-32-32z" fill="url(#plugFace)" stroke="#aaa397" strokeWidth="1.8" />
+        <rect x="510" y="130" width="8" height="52" rx="4" fill="#aaa397" opacity="0.72" />
+        <rect x="494" y="134" width="8" height="44" rx="4" fill="#aaa397" opacity="0.58" />
+        <rect x="390" y="132" width="48" height="14" rx="7" fill="#9f9a90" />
+        <rect x="390" y="166" width="48" height="14" rx="7" fill="#9f9a90" />
+        <circle cx="453" cy="122" r="4" fill="#c3bdd6" />
+      </g>
+    </svg>
+  );
+}
+
+function CalendarConnectEmptyState({ onConnect, connecting = false, error = "" }) {
+  return (
+    <div className="sk-connect-empty-state" style={{ height: "100%" }}>
+      <div style={{
+        position: "relative",
+        zIndex: 1,
+        minHeight: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "34px 30px",
+      }}>
+        <div style={{
+          width: "min(860px, 100%)",
+          textAlign: "center",
+        }}>
+          <div style={{
+            height: "clamp(190px, 27vh, 260px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: 18,
+          }}>
+            <CalendarConnectionIllustration />
+          </div>
+          <div style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "7px 11px",
+            borderRadius: tokens.radiusFull,
+            border: `1px solid ${tokens.accentBorder}`,
+            background: tokens.accentMuted,
+            color: tokens.accentHover,
+            fontSize: 11,
+            fontWeight: 750,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            marginBottom: 14,
+          }}>
+            Calendar setup
+          </div>
+          <h1 style={{
+            margin: 0,
+            fontSize: "clamp(30px, 3vw, 42px)",
+            lineHeight: 1.12,
+            letterSpacing: 0,
+            color: tokens.text,
+            fontWeight: 800,
+          }}>
+            Connect your calendar to unlock planning
+          </h1>
+          <p style={{
+            maxWidth: 560,
+            margin: "12px auto 0",
+            color: tokens.textSecondary,
+            fontSize: 16,
+            lineHeight: 1.65,
+          }}>
+            SkedioAI needs your real busy times before it can place study sessions safely around school, sleep, blockers, and exam deadlines.
+          </p>
+
+          <div style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 9,
+            marginTop: 24,
+          }}>
+            <ActionButton onClick={onConnect} disabled={connecting}>
+              <GoogleCalendarMiniIcon />
+              {connecting ? "Opening Google..." : "Connect Google Calendar"}
+            </ActionButton>
+            <span style={{
+              color: tokens.textMuted,
+              fontSize: 12,
+            }}>
+              Your schedule stays your own.
+            </span>
+          </div>
+
+          {error && (
+            <div style={{
+              margin: "18px auto 0",
+              maxWidth: 520,
+              padding: "10px 12px",
+              borderRadius: 10,
+              border: `1px solid ${tokens.redBorder}`,
+              background: tokens.redBg,
+              color: tokens.redText,
+              fontSize: 13,
+              lineHeight: 1.45,
+            }}>
+              {error}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -558,7 +731,37 @@ function PlannerTab({
   externalEvents,
   onSessionClick,
   onPreviewChecklist,
+  isDevPreview = false,
+  calendarConnected = true,
+  calendarConnecting = false,
+  calendarError = "",
+  onConnectCalendar,
 }) {
+  if (!calendarConnected && !isDevPreview) {
+    return (
+      <div style={{
+        height: "calc(100dvh - 28px)",
+        minHeight: 680,
+        marginTop: -12,
+        marginBottom: -12,
+      }}>
+        <SurfaceCard style={{
+          padding: 0,
+          overflow: "hidden",
+          height: "100%",
+          borderRadius: 18,
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.92), 0 22px 62px rgba(76, 88, 132, 0.12)",
+        }}>
+          <CalendarConnectEmptyState
+            onConnect={onConnectCalendar}
+            connecting={calendarConnecting}
+            error={calendarError}
+          />
+        </SurfaceCard>
+      </div>
+    );
+  }
+
   return (
     <div style={{ minHeight: "calc(100dvh - 150px)" }}>
       <SurfaceCard style={{
@@ -578,14 +781,18 @@ function PlannerTab({
           background: tokens.bgCard,
         }}>
           <div>
-            <Eyebrow>Planner preview</Eyebrow>
+            <Eyebrow>{isDevPreview ? "Planner preview" : "Planner"}</Eyebrow>
             <div style={{ fontSize: 13, color: tokens.textMuted, marginTop: -4 }}>
-              Open a sample session to inspect the checklist checked-state UI.
+              {isDevPreview
+                ? "Open a sample session to inspect the checklist checked-state UI."
+                : "Your active study plan and calendar blockers appear here."}
             </div>
           </div>
-          <ActionButton quiet onClick={onPreviewChecklist} style={{ flexShrink: 0 }}>
-            Preview checklist
-          </ActionButton>
+          {isDevPreview && (
+            <ActionButton quiet onClick={onPreviewChecklist} style={{ flexShrink: 0 }}>
+              Preview checklist
+            </ActionButton>
+          )}
         </div>
         <div style={{ flex: 1, minHeight: 0 }}>
           <CalendarGrid
@@ -779,6 +986,8 @@ export function StudyPlanApp() {
   const [showGraph, setShowGraph] = useState(false);
   const [selectedSessionOverlay, setSelectedSessionOverlay] = useState(null);
   const [threadId, setThreadId] = useState(null);
+  const [calendarStatus, setCalendarStatus] = useState(null);
+  const [calendarConnectLoading, setCalendarConnectLoading] = useState(false);
   const [externalEvents, setExternalEvents] = useState([]);
   const [draftPlan, setDraftPlan] = useState(null);
   const [devPreviewNonce, setDevPreviewNonce] = useState(0);
@@ -786,7 +995,12 @@ export function StudyPlanApp() {
   const [emailReviewRequest, setEmailReviewRequest] = useState(null);
 
   const today = new Date().toISOString().split("T")[0];
-  const devToolsEnabled = import.meta.env.DEV || new URLSearchParams(window.location.search).has("devtools");
+  const useDevWorkspace = DEV_FRONTEND_ONLY && isDevAdmin;
+  const calendarConnected = useDevWorkspace || calendarStatus?.connected === true;
+  const isCalendarConnectEmpty = activeTab === "planner" && !calendarConnected && !useDevWorkspace;
+  const devToolsEnabled = isDevAdmin && (
+    import.meta.env.DEV || new URLSearchParams(window.location.search).has("devtools")
+  );
 
   useEffect(() => {
     if (!userId) {
@@ -812,7 +1026,7 @@ export function StudyPlanApp() {
   const visiblePlan = draftPlan || plan;
 
   const fetchAllPlans = async () => {
-    if (DEV_FRONTEND_ONLY) {
+    if (useDevWorkspace) {
       setPlans([buildDevWorkspace(today).plan]);
       return;
     }
@@ -824,7 +1038,7 @@ export function StudyPlanApp() {
   };
 
   const fetchProgress = async () => {
-    if (DEV_FRONTEND_ONLY) {
+    if (useDevWorkspace) {
       setProgress(buildDevWorkspace(today).progress);
       return;
     }
@@ -836,7 +1050,7 @@ export function StudyPlanApp() {
   };
 
   const fetchStats = async () => {
-    if (DEV_FRONTEND_ONLY) {
+    if (useDevWorkspace) {
       setStats(buildDevWorkspace(today).stats);
       return;
     }
@@ -847,8 +1061,27 @@ export function StudyPlanApp() {
     }
   };
 
+  const fetchCalendarStatus = async () => {
+    if (useDevWorkspace) {
+      setCalendarStatus({ connected: true, calendar_id: "dev-preview" });
+      return { connected: true, calendar_id: "dev-preview" };
+    }
+    try {
+      const status = await calendarApi.status();
+      setCalendarStatus(status);
+      return status;
+    } catch (error) {
+      const status = {
+        connected: false,
+        message: error.message || "Calendar status unavailable",
+      };
+      setCalendarStatus(status);
+      return status;
+    }
+  };
+
   const fetchExternalEvents = async () => {
-    if (DEV_FRONTEND_ONLY) {
+    if (useDevWorkspace) {
       setExternalEvents([
         {
           id: "dev-blocker-1",
@@ -885,7 +1118,7 @@ export function StudyPlanApp() {
   };
 
   const fetchWorkspaceBootstrap = async () => {
-    if (DEV_FRONTEND_ONLY) {
+    if (useDevWorkspace) {
       const data = buildDevWorkspace(today);
       setPlan(data.plan);
       setProgress(data.progress);
@@ -902,7 +1135,7 @@ export function StudyPlanApp() {
 
   const hydrateCoreWorkspace = async () => {
     setLoading(true);
-    if (DEV_FRONTEND_ONLY) {
+    if (useDevWorkspace) {
       setBootMessage("Loading frontend preview...");
       const data = buildDevWorkspace(today);
       setPlan(data.plan);
@@ -925,7 +1158,13 @@ export function StudyPlanApp() {
     try {
       setBootMessage("Loading your study plan...");
       await fetchWorkspaceBootstrap();
-      fetchExternalEvents();
+      const status = await fetchCalendarStatus();
+      if (status?.connected) {
+        fetchExternalEvents();
+      } else {
+        setExternalEvents([]);
+        setCalendarSync({ loading: false, error: "", checkedAt: new Date() });
+      }
     } catch (error) {
       setToast(error.message || "Backend is still waking up");
       setTimeout(() => setToast(null), 5000);
@@ -937,7 +1176,14 @@ export function StudyPlanApp() {
   const handleRefreshAll = () => {
     setLoading(true);
     Promise.resolve(fetchWorkspaceBootstrap()).finally(() => setLoading(false));
-    fetchExternalEvents();
+    Promise.resolve(fetchCalendarStatus()).then(status => {
+      if (status?.connected) {
+        fetchExternalEvents();
+      } else {
+        setExternalEvents([]);
+        setCalendarSync({ loading: false, error: "", checkedAt: new Date() });
+      }
+    });
   };
 
   useEffect(() => {
@@ -952,6 +1198,13 @@ export function StudyPlanApp() {
   }, [activeTab, plans.length]);
 
   useEffect(() => {
+    if (!calendarConnected && calendarStatus?.connected === false && showAI) {
+      setShowAI(false);
+      setActiveTab("planner");
+    }
+  }, [calendarConnected, calendarStatus?.connected, showAI]);
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const calendarStatus = params.get("calendar_status");
     const calendarMessage = params.get("calendar_message");
@@ -959,12 +1212,20 @@ export function StudyPlanApp() {
     const reviewAction = params.get("review_action");
     if (calendarStatus) {
       window.history.replaceState({}, "", "/");
-      setActiveTab("settings");
-      setSettingsSection("integrations");
+      const returnTarget = localStorage.getItem(CALENDAR_CONNECT_RETURN_KEY);
+      localStorage.removeItem(CALENDAR_CONNECT_RETURN_KEY);
+      if (returnTarget === "planner") {
+        setActiveTab("planner");
+      } else {
+        setActiveTab("settings");
+        setSettingsSection("integrations");
+      }
       if (calendarStatus === "connected") {
         setToast("Calendar connected! ✓");
+        setCalendarStatus({ connected: true, calendar_id: "primary" });
         fetchExternalEvents();
       } else {
+        setCalendarStatus({ connected: false, message: calendarMessage || "Calendar connection failed" });
         setToast(calendarMessage || "Calendar connection failed");
       }
       setTimeout(() => setToast(null), 5000);
@@ -1117,10 +1378,43 @@ export function StudyPlanApp() {
     setDevReviewPreviewPayload(null);
   }, []);
 
+  const handleConnectCalendar = useCallback(async () => {
+    setCalendarConnectLoading(true);
+    setCalendarSync(prev => ({ ...prev, error: "" }));
+    try {
+      localStorage.setItem(CALENDAR_CONNECT_RETURN_KEY, "planner");
+      const authUrl = await calendarApi.connectUrl();
+      if (authUrl) {
+        window.location.href = authUrl;
+        return;
+      }
+      localStorage.removeItem(CALENDAR_CONNECT_RETURN_KEY);
+      setCalendarSync(prev => ({
+        ...prev,
+        error: "Google Calendar did not return a connection link.",
+      }));
+    } catch (error) {
+      localStorage.removeItem(CALENDAR_CONNECT_RETURN_KEY);
+      setCalendarSync(prev => ({
+        ...prev,
+        error: error.message || "Could not start Google Calendar connection",
+      }));
+    } finally {
+      setCalendarConnectLoading(false);
+    }
+  }, []);
+
   const openAssistant = useCallback(() => {
+    if (!calendarConnected) {
+      setActiveTab("planner");
+      setShowAI(false);
+      setToast("Connect your calendar first so SkedioAI can plan around your real time.");
+      setTimeout(() => setToast(null), 5000);
+      return;
+    }
     setQueuedAssistantPrompt(null);
     setShowAI(true);
-  }, []);
+  }, [calendarConnected]);
 
   const closeAssistant = useCallback(() => {
     setQueuedAssistantPrompt(null);
@@ -1129,6 +1423,13 @@ export function StudyPlanApp() {
 
   const handleAssistantLauncherSubmit = useCallback((event) => {
     event.preventDefault();
+    if (!calendarConnected) {
+      setActiveTab("planner");
+      setShowAI(false);
+      setToast("Connect your calendar first so SkedioAI can plan around your real time.");
+      setTimeout(() => setToast(null), 5000);
+      return;
+    }
     const prompt = assistantLauncherInput.trim();
     if (!prompt) {
       setShowAI(true);
@@ -1141,7 +1442,7 @@ export function StudyPlanApp() {
     setAssistantLauncherInput("");
     setLogoAwake(true);
     setShowAI(true);
-  }, [assistantLauncherInput]);
+  }, [assistantLauncherInput, calendarConnected]);
 
   const openPlanner = useCallback(() => {
     setActiveTab("planner");
@@ -1396,6 +1697,11 @@ export function StudyPlanApp() {
                   calendarSync={calendarSync}
                   onSessionClick={handleCalendarSessionClick}
                   onPreviewChecklist={handleChecklistPreview}
+                  isDevPreview={useDevWorkspace}
+                  calendarConnected={calendarConnected}
+                  calendarConnecting={calendarConnectLoading}
+                  calendarError={calendarSync.error}
+                  onConnectCalendar={handleConnectCalendar}
                   onSyncCalendar={fetchExternalEvents}
                   onOpenAssistant={openAssistant}
                 />
@@ -1466,8 +1772,8 @@ export function StudyPlanApp() {
               onSubmit={handleAssistantLauncherSubmit}
               className="sk-ai-launcher"
               style={{
-                position: "fixed",
-                left: launcherCenterX ?? window.innerWidth / 2,
+                position: isCalendarConnectEmpty ? "absolute" : "fixed",
+                left: isCalendarConnectEmpty ? "50%" : (launcherCenterX ?? window.innerWidth / 2),
                 bottom: 24,
                 transform: "translateX(-50%)",
                 width: "min(560px, calc(100% - 96px))",
@@ -1491,7 +1797,11 @@ export function StudyPlanApp() {
               <input
                 type="text"
                 value={assistantLauncherInput}
-                onChange={event => setAssistantLauncherInput(event.target.value)}
+                readOnly={!calendarConnected}
+                onChange={event => {
+                  if (!calendarConnected) return;
+                  setAssistantLauncherInput(event.target.value);
+                }}
                 onFocus={() => setLogoAwake(true)}
                 placeholder="Ask SkedioAI about your plan, blockers, or next study move..."
                 aria-label="Ask SkedioAI"
@@ -1639,6 +1949,19 @@ function CalendarIcon() {
       <line x1="8" y1="2.5" x2="8" y2="6" />
       <line x1="16" y1="2.5" x2="16" y2="6" />
       <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  );
+}
+
+function GoogleCalendarMiniIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="17" rx="3" fill="#fffefa" />
+      <path d="M6 4h12a3 3 0 0 1 3 3v2H3V7a3 3 0 0 1 3-3Z" fill="#4285F4" />
+      <path d="M3 9h4v12H6a3 3 0 0 1-3-3V9Z" fill="#34A853" />
+      <path d="M17 9h4v9a3 3 0 0 1-3 3h-1V9Z" fill="#FBBC05" />
+      <path d="M7 4h10v5H7V4Z" fill="#EA4335" opacity="0.9" />
+      <path d="M8.5 14.2h2.4v-2h1.7v2h2.4v1.6h-2.4v2h-1.7v-2H8.5v-1.6Z" fill="#24221e" opacity="0.76" />
     </svg>
   );
 }

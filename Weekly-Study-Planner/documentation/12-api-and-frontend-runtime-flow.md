@@ -151,6 +151,53 @@ These routes support external connectivity:
 
 These are not the study flow itself, but they strongly affect the realism of the study flow.
 
+## Frontend Calendar and Planner UX Notes
+
+The Planner tab now treats calendar connection as a first-class runtime state.
+
+If the user's real calendar is not connected:
+
+- the Planner tab shows a calendar-connect empty state
+- the normal calendar grid is not shown
+- the floating chat launcher does not open the assistant
+- typing into the launcher is blocked so the UI does not briefly accept text and then reject it
+- the connect button starts the Google Calendar OAuth flow
+
+This is intentional because planning without real busy-time visibility can create false confidence.
+
+The calendar-connect empty state is visually sized like the sidebar-height work surface, but this sizing belongs only to that Planner empty state. Other tabs, especially Dashboard, keep their normal page layout.
+
+The Planner calendar itself uses a full-day grid:
+
+```text
+12 AM -> 11 PM
+```
+
+Each row represents one hour block:
+
+```text
+12 AM = 00:00-01:00
+1 AM  = 01:00-02:00
+...
+11 PM = 23:00-24:00
+```
+
+Calendar blockers are rendered differently from SkedioAI study sessions:
+
+- blockers come from the calendar or user busy-time layer
+- sessions come from the study plan
+- blockers use softer event-bar styling
+- sessions keep the richer study-session card styling
+
+The current-time marker is calculated for `Asia/Kolkata` and placed by minute position inside the full-day grid.
+
+Important UI behavior:
+
+- the current-time marker should align exactly with the computed minute
+- it should not be visually offset below the actual time
+- compact calendar blockers should still show their time
+- short blockers should not become oversized cards
+
 ## What the Frontend Sends for Session Actions
 
 ### Complete full session

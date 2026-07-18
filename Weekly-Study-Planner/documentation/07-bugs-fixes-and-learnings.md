@@ -179,6 +179,89 @@ Planner verified draft
 Approval, typed changes, or cancellation are handled in a later turn after the
 draft has actually been shown.
 
+## Frontend Calendar UX Fixes
+
+The frontend had several calendar-surface bugs that made the product feel less trustworthy.
+
+### Fake/admin state leaking into normal user flow
+
+Normal users were seeing admin/dev-style preview behavior.
+
+### Fix
+
+Admin preview is now explicit.
+Normal login should remain normal login.
+Dev/admin behavior is only entered through the intended admin path.
+
+### Learning
+
+Preview data is useful, but it must never silently override real user state.
+
+## Calendar-connect empty state
+
+The Planner tab previously could show a calendar-like surface even when the calendar was not connected.
+
+### Fix
+
+When calendar is disconnected, Planner shows a dedicated connect-calendar state.
+
+The empty state:
+
+- explains that calendar connection is needed
+- provides a Google Calendar connect button
+- keeps the layout aligned with the sidebar-height work surface
+- prevents the chat launcher from opening into a planning flow without calendar context
+
+### Learning
+
+An empty state is not just decoration.
+It should protect the workflow from invalid assumptions.
+
+## Calendar grid rendering issues
+
+The calendar grid had several practical UI bugs:
+
+- event rows felt too tall
+- short blockers became oversized cards
+- lunch text could clip after row-height reduction
+- compact blockers could hide their time
+- the current-time marker was visually offset below the actual computed time
+- a dynamic event-based visible range made the calendar feel unlike a real calendar
+
+### Fix
+
+The calendar grid now:
+
+- renders a full day from `12 AM` to `11 PM`
+- uses denser hour rows
+- separates blocker styling from study-session styling
+- shows compact blockers as one-line title/time bars
+- keeps long blockers as filled time-range blocks
+- places the current-time line by exact minute position
+- computes the current-time marker in `Asia/Kolkata`
+
+### Learning
+
+Calendar UI should be boring in the right way.
+
+Users already understand calendar tools.
+The product should not invent a dynamic timeline when a stable full-day grid is the clearer model.
+
+### Pros
+
+- more familiar calendar behavior
+- less fake-looking event layout
+- clearer distinction between busy time and study sessions
+- current-time marker is easier to trust
+- compact events remain readable
+
+### Cons
+
+- full-day grids create more vertical scroll
+- denser rows make very short events harder to show with rich text
+- event rendering needs special handling for tiny, compact, and long blocks
+- matching calendar familiarity reduces room for unusual custom layout ideas
+
 ## Remaining Weak Spot: Checkbox / Actual-Hours Assumption
 
 This is one of the most important still-open practical issues.

@@ -19,7 +19,6 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const DEV_ADMIN_AUTH_KEY = 'skedio_dev_admin_auth';
 const DEV_ADMIN_USER_ID = 'dev-admin';
 const allowDevAdminAuth = import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEV_ADMIN === '1';
-const frontendOnlyDevAuth = import.meta.env.DEV && import.meta.env.VITE_USE_REAL_BACKEND !== '1';
 
 // Create client - will show error if env vars not set
 let supabase = null;
@@ -153,7 +152,7 @@ const clearDevAdminSession = () => {
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const initialDevSession = frontendOnlyDevAuth ? buildDevAdminSession() : readDevAdminSession();
+  const initialDevSession = supabase ? null : readDevAdminSession();
   const [session, setSession] = useState(initialDevSession);
   const [user, setUser] = useState(initialDevSession?.user ?? null);
   const [loading, setLoading] = useState(!initialDevSession && !!supabase);
@@ -177,8 +176,12 @@ export function AuthProvider({ children }) {
         console.error('Supabase auth error:', err);
         setError(err.message);
       }
-      setSession(session);
-      setUser(session?.user ?? null);
+      if (session) {
+        clearDevAdminSession();
+      }
+      const nextSession = session || readDevAdminSession();
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
       setLoading(false);
     }).catch((err) => {
       stop();
@@ -189,9 +192,16 @@ export function AuthProvider({ children }) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+      (event, session) => {
+        if (session) {
+          clearDevAdminSession();
+        }
+        if (event === 'SIGNED_OUT') {
+          clearDevAdminSession();
+        }
+        const nextSession = session || (event === 'SIGNED_OUT' ? null : readDevAdminSession());
+        setSession(nextSession);
+        setUser(nextSession?.user ?? null);
         setLoading(false);
       }
     );
@@ -207,7 +217,8 @@ export function AuthProvider({ children }) {
     supabase,
     isAuthenticated: !!session,
     isDevAdmin: session?.access_token?.startsWith('dev:') || false,
-    signInAsDevAdmin: () => {
+    signInAsDevAdmin: async () => {
+      await supabase?.auth.signOut({ scope: 'local' }).catch(() => {});
       const nextSession = setDevAdminSession();
       if (!nextSession) return false;
       setSession(nextSession);
@@ -244,20 +255,21 @@ export function getSupabase() {
 }
 
 export function getAccessToken() {
-  const devSession = readDevAdminSession();
-  if (devSession) return Promise.resolve(devSession.access_token);
-  return supabase?.auth.getSession().then(({ data }) => data.session?.access_token);
+  return supabase?.auth.getSession().then(({ data }) => (
+    data.session?.access_token || readDevAdminSession()?.access_token
+  )) || Promise.resolve(readDevAdminSession()?.access_token);
 }
 
 // ─── API Helper with Auth ───
 export async function authFetch(url, options = {}) {
-  const devSession = readDevAdminSession();
+  const realSession = supabase ? (await supabase.auth.getSession()).data.session : null;
+  const devSession = realSession ? null : readDevAdminSession();
 
   if (!supabase && !devSession) {
     throw new Error('Supabase not configured');
   }
 
-  const session = devSession || (await supabase.auth.getSession()).data.session;
+  const session = realSession || devSession;
   
   const headers = {
     'Content-Type': 'application/json',
@@ -312,6 +324,7 @@ export function SignIn({ onSuccess }) {
 
     setLoading(true);
     setError('');
+    clearDevAdminSession();
 
     const stop = startTimer('auth:signIn');
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -440,6 +453,7 @@ export function SignUp({ onSuccess }) {
     }
     setLoading(true);
     setNotice(null);
+    clearDevAdminSession();
 
     const stop = startTimer('auth:signUp');
     const { data, error } = await supabase.auth.signUp({
@@ -600,6 +614,7 @@ export function GoogleSignIn() {
   const handleGoogleSignIn = async () => {
     if (!supabase) return;
     setLoading(true);
+    clearDevAdminSession();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -885,7 +900,7 @@ export function DefaultLoginScreen() {
   const { signInAsDevAdmin } = useAuth();
 
   const handleDevAdmin = () => {
-    signInAsDevAdmin?.();
+    void signInAsDevAdmin?.();
   };
 
   return (

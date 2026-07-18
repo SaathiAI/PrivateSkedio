@@ -92,6 +92,48 @@ function getCalendarPalette(subject = "") {
   return { bg: tokens.bgElevated, border: tokens.borderHover, text: tokens.textSecondary };
 }
 
+function getBlockerPalette(title = "") {
+  const key = title.toLowerCase();
+  if (key.includes("lunch")) {
+    return { bg: "rgba(250, 230, 195, 0.72)", border: "rgba(217, 144, 33, 0.28)", text: "#7a4d10" };
+  }
+  if (key.includes("standup") || key.includes("meeting") || key.includes("class")) {
+    return { bg: "rgba(140, 153, 236, 0.18)", border: "rgba(140, 153, 236, 0.36)", text: "#5f69c8" };
+  }
+  if (key.includes("decompress") || key.includes("break")) {
+    return { bg: "rgba(232, 93, 122, 0.16)", border: "rgba(232, 93, 122, 0.28)", text: "#a23e55" };
+  }
+  if (key.includes("focus")) {
+    return { bg: "rgba(33, 184, 146, 0.16)", border: "rgba(33, 184, 146, 0.34)", text: "#147a63" };
+  }
+  return { bg: "rgba(237, 238, 235, 0.82)", border: "rgba(36, 34, 30, 0.12)", text: tokens.textSecondary };
+}
+
+function formatShortTime(timeStr) {
+  if (!timeStr) return "";
+  const [hourValue, minuteValue] = timeStr.split(":").map(Number);
+  const hour12 = hourValue % 12 || 12;
+  const suffix = hourValue >= 12 ? "pm" : "am";
+  return minuteValue ? `${hour12}:${String(minuteValue).padStart(2, "0")}${suffix}` : `${hour12}${suffix}`;
+}
+
+function formatShortRange(start, end) {
+  if (!start || !end) return "";
+  return `${formatShortTime(start)} – ${formatShortTime(end)}`;
+}
+
+function getTimePartsInAppTimezone(date) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Kolkata",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: false,
+  }).formatToParts(date);
+  const hour = Number(parts.find(part => part.type === "hour")?.value || 0) % 24;
+  const minute = Number(parts.find(part => part.type === "minute")?.value || 0);
+  return { hour, minute };
+}
+
 export function CalendarGrid({
   allDays,
   today,
@@ -100,9 +142,9 @@ export function CalendarGrid({
   externalEvents = [],
   draftMode = false,
 }) {
-  const baseHour = 8;
-  const endHour = 19;
-  const pixelsPerHour = 72;
+  const baseHour = 0;
+  const endHour = 23;
+  const pixelsPerHour = 56;
   const hours = Array.from({ length: endHour - baseHour + 1 }, (_, i) => baseHour + i);
 
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -232,21 +274,15 @@ export function CalendarGrid({
     );
   }
 
-  const currentHour = currentTime.getHours();
-  const currentMinute = currentTime.getMinutes();
+  const { hour: currentHour, minute: currentMinute } = getTimePartsInAppTimezone(currentTime);
   const currentTotalHours = currentHour + (currentMinute / 60);
   const currentTimePixels = (currentTotalHours - baseHour) * pixelsPerHour;
   const calendarHeight = (endHour - baseHour + 1) * pixelsPerHour;
-  const currentTimeBeforeRange = currentTimePixels < 0;
-  const currentTimeAfterRange = currentTimePixels > calendarHeight;
-  const currentTimeMarkerPixels = currentTimeBeforeRange
-    ? 0
-    : currentTimeAfterRange
-      ? calendarHeight
-      : currentTimePixels;
-  const markerNearBottom = currentTimeMarkerPixels > calendarHeight - 22;
+  const currentTimeBeforeRange = currentTotalHours < baseHour;
+  const currentTimeAfterRange = currentTotalHours > endHour + 1;
+  const currentTimeMarkerPixels = currentTimePixels;
   const todayColumnIndex = displayDays.findIndex(day => day.date === today);
-  const showCurrentTime = todayColumnIndex !== -1;
+  const showCurrentTime = todayColumnIndex !== -1 && !currentTimeBeforeRange && !currentTimeAfterRange;
   const weekEnd = useMemo(() => addDays(visibleStart, 6), [visibleStart]);
   const monthLabel = visibleStart.toLocaleDateString("en-US", { month: "long" });
   const rangeLabel = `${visibleStart.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${weekEnd.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${weekEnd.getFullYear()}`;
@@ -543,7 +579,7 @@ export function CalendarGrid({
                     paddingInline: 2,
                   }}
                 >
-                  {hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
+                  {hour === 0 ? "12 AM" : hour === 12 ? "12 PM" : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
                 </div>
               </div>
             ))}
@@ -562,17 +598,17 @@ export function CalendarGrid({
           {showCurrentTime && (
             <div style={{
               position: "absolute",
-              top: currentTimeMarkerPixels,
+              top: currentTimeMarkerPixels - 12,
               left: 0,
               right: 0,
               height: 24,
               zIndex: 30,
               pointerEvents: "none",
-              opacity: currentTimeBeforeRange || currentTimeAfterRange ? 0.92 : 1,
+              opacity: 1,
             }}>
               <div style={{
                 position: "absolute",
-                top: markerNearBottom ? 9 : 11,
+                top: 11,
                 left: 64,
                 right: 0,
                 display: "flex",
@@ -596,7 +632,7 @@ export function CalendarGrid({
               </div>
               <div style={{
                 position: "absolute",
-                top: markerNearBottom ? 6 : 8,
+                top: 8,
                 left: 64,
                 right: 0,
                 display: "flex",
@@ -621,7 +657,7 @@ export function CalendarGrid({
               <div style={{
                 position: "absolute",
                 left: 59,
-                top: markerNearBottom ? 3 : 5,
+                top: 6,
                 width: 12,
                 height: 12,
                 borderRadius: "50%",
@@ -666,24 +702,44 @@ export function CalendarGrid({
                   .map((s, idx) => {
                   const top = timeToPixels(s.start_time, baseHour, pixelsPerHour);
                   const bottom = timeToPixels(s.end_time, baseHour, pixelsPerHour);
-                  const height = Math.max(bottom - top, 28);
+                  const rawHeight = Math.max(bottom - top, 0);
+                  const height = Math.max(rawHeight, s.isBlocker ? 16 : 34);
                   
                   const derivedSubject = (s.contents && s.contents[0] && s.contents[0].subjects && s.contents[0].subjects[0]) || "General";
                   const palette = getCalendarPalette(derivedSubject);
                   const isDone = s.status === 'done';
                   const isSkipped = s.status === 'skipped';
                   const titleToUse = String(s.title || s.topic || "Calendar event");
+                  const cleanBlockerTitle = titleToUse
+                    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\uFE0F]/gu, "")
+                    .replace(/\s+/g, " ")
+                    .trim() || "Busy";
+                  const displayBlockerTitle = cleanBlockerTitle
+                    .replace(/,?\s*\d{1,2}(?::\d{2})?\s*(am|pm)?$/i, "")
+                    .trim() || cleanBlockerTitle;
+                  const blockerPalette = getBlockerPalette(titleToUse);
+                  const isCompactBlocker = s.isBlocker && height <= 48;
+                  const isTinyBlocker = s.isBlocker && height < 24;
+                  const isLongBlocker = s.isBlocker && height >= 120;
                   const isDraftSession = draftMode && !s.isBlocker;
                   const draftOrder = displayDays.findIndex(item => item.date === day.date) * 8 + idx;
                   const draftDelay = Math.min(420, draftOrder * 70);
                   
                   const boxStyles = s.isBlocker ? {
                     position: "absolute", top: top + 1, height: height - 2, left: 5, right: 5,
-                    borderRadius: 6, padding: "7px 9px",
-                    background: titleToUse.includes("Lunch") ? tokens.yellowBg : tokens.blockerBg,
-                    border: `1px solid ${titleToUse.includes("Lunch") ? tokens.yellowBorder : tokens.blockerBorder}`,
-                    color: tokens.text, display: "flex", flexDirection: "column", overflow: "hidden",
-                    cursor: "default", zIndex: 2
+                    borderRadius: 6,
+                    padding: isTinyBlocker ? "1px 7px" : isCompactBlocker ? "3px 8px" : "7px 9px",
+                    background: blockerPalette.bg,
+                    border: `1px solid ${blockerPalette.border}`,
+                    color: blockerPalette.text,
+                    boxShadow: isLongBlocker ? "inset 0 1px 0 rgba(255,255,255,0.42)" : "none",
+                    display: "flex",
+                    flexDirection: isTinyBlocker ? "row" : "column",
+                    alignItems: isTinyBlocker ? "center" : "stretch",
+                    gap: isTinyBlocker ? 6 : 0,
+                    overflow: "hidden",
+                    cursor: "default",
+                    zIndex: 2
                   } : {
                     position: "absolute",
                     top: top + 1, height: height - 2,
@@ -736,15 +792,23 @@ export function CalendarGrid({
                            }
                          }}
                     >
-                       <div style={{
-                         fontSize: 10, fontWeight: 750,
-                         color: s.isBlocker ? tokens.textMuted : (isDone ? tokens.green : palette.text),
-                         marginBottom: 4, letterSpacing: "0.04em", textTransform: "uppercase",
-                         display: "flex", alignItems: "center", gap: 4,
-                       }}>
-                         {isDone && <CheckIcon />}
-                         {s.isBlocker ? `${s.start_time} - ${s.end_time}` : derivedSubject}
-                       </div>
+                       {!s.isBlocker && (
+                         <div style={{
+                           fontSize: 10,
+                           fontWeight: 750,
+                           color: isDone ? tokens.green : palette.text,
+                           marginBottom: 4,
+                           letterSpacing: "0.04em",
+                           textTransform: "uppercase",
+                           display: "flex", alignItems: "center", gap: 4,
+                           whiteSpace: "nowrap",
+                           overflow: "hidden",
+                           textOverflow: "ellipsis",
+                         }}>
+                           {isDone && <CheckIcon />}
+                           {derivedSubject}
+                         </div>
+                       )}
 
                        {isDraftSession && (
                          <div style={{
@@ -773,13 +837,63 @@ export function CalendarGrid({
                          </div>
                        )}
 
-                       <div style={{
-                         fontSize: 13, lineHeight: 1.25, fontWeight: 750,
-                         color: s.isBlocker ? tokens.textMuted : (isDone ? tokens.textDim : tokens.text),
-                         textDecoration: isDone ? "line-through" : "none",
-                       }}>
-                          {titleToUse}
-                       </div>
+                       {s.isBlocker && (isTinyBlocker || isCompactBlocker) ? (
+                         <div style={{
+                           display: "flex",
+                           alignItems: "center",
+                           justifyContent: "space-between",
+                           gap: 8,
+                           minWidth: 0,
+                           color: blockerPalette.text,
+                           fontSize: isTinyBlocker ? 10 : 11,
+                           lineHeight: 1.15,
+                           fontWeight: 750,
+                           whiteSpace: "nowrap",
+                         }}>
+                           <span style={{
+                             minWidth: 0,
+                             overflow: "hidden",
+                             textOverflow: "ellipsis",
+                           }}>
+                             {displayBlockerTitle}
+                           </span>
+                           <span style={{
+                             flexShrink: 0,
+                             opacity: 0.82,
+                             fontWeight: 700,
+                           }}>
+                             {formatShortTime(s.start_time)}
+                           </span>
+                         </div>
+                       ) : (
+                         <div style={{
+                           fontSize: s.isBlocker ? 13 : 13,
+                           lineHeight: s.isBlocker ? 1.15 : 1.25,
+                           fontWeight: s.isBlocker ? 700 : 750,
+                           color: s.isBlocker ? blockerPalette.text : (isDone ? tokens.textDim : tokens.text),
+                           textDecoration: isDone ? "line-through" : "none",
+                           whiteSpace: s.isBlocker ? "nowrap" : "normal",
+                           overflow: "hidden",
+                           textOverflow: "ellipsis",
+                         }}>
+                            {s.isBlocker ? displayBlockerTitle : titleToUse}
+                         </div>
+                       )}
+
+                       {s.isBlocker && !isTinyBlocker && !isCompactBlocker && (
+                         <div style={{
+                           fontSize: 12,
+                           lineHeight: 1.2,
+                           marginTop: 2,
+                           color: blockerPalette.text,
+                           opacity: 0.9,
+                           whiteSpace: "nowrap",
+                           overflow: "hidden",
+                           textOverflow: "ellipsis",
+                         }}>
+                           {formatShortRange(s.start_time, s.end_time)}
+                         </div>
+                       )}
 
                        {!s.isBlocker && (
                          <div style={{
