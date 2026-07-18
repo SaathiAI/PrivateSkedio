@@ -13,7 +13,7 @@ from pydantic import Field, model_validator
 from src.models.intake import IntakeAgentOutput, StrictModel
 
 
-DEFAULT_BUFFER_RATIO = 0.8
+DEFAULT_BUFFER_RATIO = 1.0
 
 BudgetFeasibilityStatus = Literal["feasible", "infeasible", "needs_more_info"]
 

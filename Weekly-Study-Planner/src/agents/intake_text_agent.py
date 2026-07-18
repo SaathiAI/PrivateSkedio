@@ -33,6 +33,7 @@ from langsmith import traceable
 from typing_extensions import Annotated
 
 from src.agents.intake_agent import (
+    _ainvoke_with_connection_retries,
     get_active_plan,
     get_calendar_availability,
     query_backlog,
@@ -113,7 +114,12 @@ class IntakeTextAgent:
             if state.get("messages") and isinstance(state["messages"][-1], HumanMessage):
                 state["executed_tool_signatures"] = []
 
-            response = await self.llm_with_tools.ainvoke(build_messages(state))
+            response = await _ainvoke_with_connection_retries(
+                self.llm_with_tools,
+                build_messages(state),
+                logger=logger,
+                label="INTAKE_TEXT_LLM",
+            )
             return {
                 "messages": [response],
                 "executed_tool_signatures": state.get("executed_tool_signatures", []),

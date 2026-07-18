@@ -279,7 +279,7 @@ def validate_claimed_hours_guardrail(
     calendar_blocks: Optional[list[dict[str, Any]]] = None,
     deadline_datetime: Optional[str] = None,
     current_datetime: Optional[str] = None,
-    focus_ratio: float = 0.8,
+    focus_ratio: float = 1.0,
     include_debug: bool = False,
 ) -> dict[str, Any]:
     """
@@ -412,7 +412,7 @@ def validate_claimed_hours_guardrail(
 
     if not scope_feasible_on_claim:
         scope_issues.append(
-            f"Required {required_hours}h, but the student's claimed hours only give {claim_based_realistic_hours}h after the focus cushion."
+            f"Required {required_hours}h, but the student's claimed hours only give {claim_based_realistic_hours}h."
         )
 
     claimed_hours_available = len(day_issues) == 0
@@ -422,7 +422,7 @@ def validate_claimed_hours_guardrail(
         claimed_hours_available=claimed_hours_available,
     )
 
-    warnings = notes + day_issues + scope_issues
+    warnings = day_issues + scope_issues
 
     result = {
         "status": status,
@@ -480,7 +480,7 @@ def validate_confirmed_hours(
     calendar_blocks: Optional[list[dict[str, Any]]] = None,
     deadline_datetime: Optional[str] = None,
     current_datetime: Optional[str] = None,
-    focus_ratio: float = 0.8,
+    focus_ratio: float = 1.0,
     include_debug: bool = False,
 ) -> dict[str, Any]:
     """

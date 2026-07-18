@@ -14,7 +14,6 @@ Anything here should be treated as code-owned truth, not model opinion.
 
 from __future__ import annotations
 
-import json
 import logging
 from dataclasses import dataclass
 from datetime import date as _date
@@ -603,36 +602,6 @@ def _find_past_ready_date_issues(
     return issues
 
 
-def _load_calendar_blocks(
-    *,
-    start_date: str,
-    end_date: str,
-    user_id: Optional[str],
-    runtime_state: dict[str, Any],
-    logger: logging.Logger,
-) -> tuple[Optional[list[dict[str, Any]]], Optional[str]]:
-    """Load calendar blockers for the requested date window."""
-
-    try:
-        from src.tools.calendar_ops import get_non_skedioai_events_core
-
-        cal_raw = get_non_skedioai_events_core(start_date, end_date, user_id=user_id)
-        cal_data = json.loads(cal_raw)
-        blocks = cal_data.get("blocked_slots", [])
-        runtime_state["calendar_blocks"] = blocks
-        logger.info(
-            "[VALIDATOR] calendar_fetch source=api blocks=%d window=%s..%s",
-            len(blocks),
-            start_date,
-            end_date,
-        )
-        return blocks, None
-    except Exception as exc:
-        logger.warning("[VALIDATOR] calendar_fetch source=api error=%s", exc)
-        runtime_state["calendar_blocks"] = None
-        return None, str(exc)
-
-
 def validate_intake_contract(
     *,
     intake_payload: dict[str, Any],
@@ -646,7 +615,7 @@ def validate_intake_contract(
     - schema validation
     - lock-readiness checks
     - date-window and past-date checks
-    - calendar loading
+    - calendar blocks supplied by runtime/tools
     - runtime available-window derivation
     - feasibility checks
 
@@ -832,13 +801,7 @@ def validate_intake_contract(
                     ),
                 )
 
-        calendar_blocks, calendar_error = _load_calendar_blocks(
-            start_date=start_date,
-            end_date=end_date,
-            user_id=user_id,
-            runtime_state=runtime_state,
-            logger=logger,
-        )
+        calendar_blocks = runtime_state.get("calendar_blocks") or []
 
         current_datetime = (
             runtime_state.get("current_datetime")
@@ -863,14 +826,6 @@ def validate_intake_contract(
             list(runtime_state["available_time_windows"].keys()),
         )
 
-        if calendar_error:
-            logger.info(
-                "[VALIDATOR] gate=calendar_optional warning=true ready=%s error=%s",
-                intake_is_ready,
-                calendar_error,
-            )
-            runtime_state["calendar_warning"] = calendar_error
-
         if (
             intake.study_items
             and intake.availability
@@ -894,7 +849,6 @@ def validate_intake_contract(
                 calendar_blocks=calendar_blocks or [],
                 deadline_datetime=intake.goal.deadline_datetime if intake.goal else None,
                 current_datetime=current_datetime,
-                focus_ratio=0.8,
             )
 
             runtime_state["feasibility_result"] = feasibility

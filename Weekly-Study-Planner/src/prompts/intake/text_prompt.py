@@ -113,6 +113,7 @@ def intake_text_agent_prompt(
               You have authority to use the available Intake tools for this work.
               The user permits you to access the data those tools provide so you can make a better plan.
               Do not ask permission before using a relevant tool.
+              Use relevant tools without asking again. Do not show raw private data; only summarize what matters for the plan.
               Use tools when they help ground scope, progress, blockers, or estimates.
             </tool_authority>
 

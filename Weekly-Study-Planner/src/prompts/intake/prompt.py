@@ -145,6 +145,7 @@ def intake_agent_prompt(
         ## Evidence And Tools
 
         You have authority to use the tools available to you for this Intake work. The user permits you to access the data those tools provide so you can make a better plan. Do not ask permission before using a relevant tool; use it when it helps ground scope, progress, blockers, or estimates.
+        Use relevant tools without asking again. Do not show raw private data; only summarize what matters for the plan.
 
         Tools are truth sources:
         - query_syllabus = curriculum truth
@@ -174,6 +175,8 @@ def intake_agent_prompt(
         study_items are planner-visible work. estimated_hours are honest workload, not numbers squeezed to fit capacity.
 
         When you create/change study_items or estimated_hours, say the important hours in the message. Include total workload when useful.
+
+        study_items[].remaining_subtopics must contain only exact backlog/content handles, such as match_key values returned by query_backlog. If none exist, use [].
 
         Workload is about the academic job. Capacity is about the student's life. Do not confuse them:
         - estimate workload from syllabus, backlog, mode, progress, and target pressure
@@ -247,7 +250,7 @@ def intake_agent_prompt(
               "estimated_hours": 1,
               "reason": "string or null",
               "planning_notes": ["string"],
-              "remaining_subtopics": ["string"]
+              "remaining_subtopics": ["exact backlog/content handles, else empty"]
             }}
           ]
         }}

@@ -196,6 +196,54 @@ def elapsed_ms(started_at: float) -> float:
 
     return round((time.perf_counter() - started_at) * 1000, 2)
 
+
+def _is_transient_connection_error(exc: Exception) -> bool:
+    """Return True for short-lived API/DNS connection failures worth retrying."""
+
+    text = repr(exc).lower()
+    return any(
+        marker in text
+        for marker in (
+            "apiconnectionerror",
+            "connecterror",
+            "connection error",
+            "temporary failure in name resolution",
+            "no address associated with hostname",
+        )
+    )
+
+
+async def _ainvoke_with_connection_retries(
+    runnable: Any,
+    messages: list[BaseMessage],
+    *,
+    logger: logging.Logger,
+    label: str,
+    attempts: int = 3,
+):
+    """Invoke an LLM runnable, retrying only transient connection failures."""
+
+    last_exc: Exception | None = None
+    for attempt in range(1, attempts + 1):
+        try:
+            return await runnable.ainvoke(messages)
+        except Exception as exc:
+            last_exc = exc
+            if attempt >= attempts or not _is_transient_connection_error(exc):
+                raise
+            delay = 0.75 * attempt
+            logger.warning(
+                "[%s] transient LLM connection failure attempt=%s/%s retry_in=%.2fs error=%r",
+                label,
+                attempt,
+                attempts,
+                delay,
+                exc,
+            )
+            await asyncio.sleep(delay)
+
+    raise last_exc  # type: ignore[misc]
+
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGSMITH_TRACING"] = "true"
 os.environ["LANGCHAIN_PROJECT"] = "skedioai-intake-dev"
@@ -326,7 +374,6 @@ class IntakeState(TypedDict):
     feasibility_result: Optional[Dict[str, Any]]
     turn_count: int
     executed_tool_signatures: Optional[List[str]]
-
 
 
 @tool
@@ -907,7 +954,12 @@ class IntakeAgent:
             active_plan, has_active_plan, messages = build_agent_invocation(state)
 
             llm_started_at = time.perf_counter()
-            response = await self.llm_with_tools.ainvoke(messages)
+            response = await _ainvoke_with_connection_retries(
+                self.llm_with_tools,
+                messages,
+                logger=logger,
+                label="INTAKE_LLM",
+            )
             tool_names = [
                 tc.get("name")
                 for tc in getattr(response, "tool_calls", []) or []

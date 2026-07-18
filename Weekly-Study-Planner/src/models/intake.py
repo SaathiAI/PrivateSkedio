@@ -157,7 +157,10 @@ class WorkItem(StrictModel):
     )
     remaining_subtopics: List[str] = Field(
         default_factory=list,
-        description="Pending or weak subtopics for this work item.",
+        description=(
+            "Only exact backlog/content handles, such as match_key values returned "
+            "by query_backlog. Empty when none exist."
+        ),
     )
 
 
