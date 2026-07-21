@@ -1,695 +1,887 @@
-import { useMemo, useState } from "react";
-import { GoogleSignIn, SignIn, SignUp } from "./Auth.jsx";
-import { GlobalStyles } from "./GlobalStyles.jsx";
-import { Spinner } from "./ui.jsx";
-import { tokens } from "../theme.js";
+import { useEffect, useState } from "react";
+import "./LandingPage.css";
+import { OrbitingCircles } from "./orbiting-circles";
 
-const featureCards = [
+const weekDays = [
+  { day: "Tue", date: "21", active: true },
+  { day: "Wed", date: "22" },
+  { day: "Thu", date: "23" },
+  { day: "Fri", date: "24" },
+  { day: "Sat", date: "25" },
+];
+
+const sessions = [
+  { day: 0, top: 30, height: 74, title: "Math sprint", meta: "09:30 - 11:00", tone: "green", delay: "0ms" },
+  { day: 1, top: 44, height: 52, title: "Science recap", meta: "10:15 - 11:15", tone: "amber", delay: "110ms" },
+  { day: 2, top: 132, height: 70, title: "Polynomial practice", meta: "14:00 - 15:15", tone: "violet", delay: "220ms" },
+  { day: 3, top: 28, height: 78, title: "Focus block", meta: "09:30 - 11:00", tone: "green", delay: "330ms" },
+  { day: 4, top: 132, height: 70, title: "Review and recall", meta: "14:00 - 15:15", tone: "violet", delay: "440ms" },
+];
+
+const features = [
   {
-    eyebrow: "Conversation-first",
-    title: "Talk normally. SkedioAI turns it into a real study contract.",
-    body: "No rigid form filling. You speak naturally, SkedioAI understands the goal, scope, time window, and constraints.",
+    label: "Intake",
+    title: "Talk like a person.",
+    body: "SkedioAI turns messy goals into a planning contract: subject, deadline, scope, available hours, and real constraints.",
   },
   {
-    eyebrow: "Planner brain",
-    title: "Plans stay realistic, not fantasy timetables.",
-    body: "Availability, blockers, progress, and required effort are all considered before the schedule gets created.",
+    label: "Planner",
+    title: "Drafts that respect reality.",
+    body: "Sessions land around calendar blockers, lunch, sleep, progress pressure, and the time that is actually available.",
   },
   {
-    eyebrow: "Progress memory",
-    title: "Sessions, checkboxes, and completed work feed back into the next plan.",
-    body: "So the system does not keep acting like every week starts from zero.",
+    label: "Memory",
+    title: "The week learns back.",
+    body: "Checklist completion, skipped work, and active-plan history feed the next revision instead of disappearing.",
   },
 ];
 
-const workflowSteps = [
+const dashboardRows = [
+  ["Polynomials", "Core theory", "72%", "violet"],
+  ["Quadratics", "Practice set", "54%", "green"],
+  ["Electricity", "Recall pass", "38%", "amber"],
+  ["English", "Review notes", "64%", "rose"],
+];
+
+const emailLines = [
+  "Your revised July study plan is ready for review.",
+  "SkedioAI protected lunch, Daily Standup, and the Friday blocker before placing the next focus blocks.",
+  "Please approve the draft or send changes before it is committed to Google Calendar.",
+];
+
+const scheduleScores = [
+  ["Tue 09:30", "Best focus fit", "96"],
+  ["Wed 14:00", "After school", "78"],
+  ["Fri 16:30", "Light review", "66"],
+];
+
+const checklistItems = [
+  "Revise factorisation rules",
+  "Solve mixed theorem problems",
+  "Mark weak derivations",
+  "Write a 5-line recap",
+];
+
+const storyCards = [
   {
     label: "01",
-    title: "Tell SkedioAI what you need",
-    body: "Exam prep, weekly study, revision sprint, or just help choosing what matters first.",
+    title: "Messy intent becomes a contract.",
+    body: "The assistant extracts subject, deadline, effort, weak areas, and the kind of week the student can actually survive.",
+    meta: "Conversation",
   },
   {
     label: "02",
-    title: "SkedioAI figures out the real contract",
-    body: "Scope, effort, available time, blockers, and what is actually feasible.",
+    title: "Calendar reality shapes the draft.",
+    body: "Lunch, school blocks, standups, sleep, and recovery windows become hard edges before any session is placed.",
+    meta: "Scheduling",
   },
   {
     label: "03",
-    title: "You get a plan that can actually be followed",
-    body: "Then the app tracks sessions, progress, and future changes without losing context.",
+    title: "Every tick changes tomorrow.",
+    body: "A checked item updates progress, backlog pressure, and what the next revision knows about the student's truth.",
+    meta: "Memory",
+  },
+  {
+    label: "04",
+    title: "The week closes with a review.",
+    body: "SkedioAI sends a clean plan review, waits for approval, then commits the schedule back into the calendar.",
+    meta: "Loop",
   },
 ];
 
-const appHighlights = [
-  "Calendar view with planned sessions",
-  "Checklist completion and actual hours",
-  "Chat-driven planning and replanning",
-  "Saved plan history and progress memory",
+const rescheduleDays = ["Tue 21", "Wed 22", "Thu 23", "Fri 24"];
+
+const fixedBlocks = [
+  { day: 0, top: 82, height: 46, title: "School", meta: "08:00 - 08:45" },
+  { day: 1, top: 190, height: 54, title: "Lunch", meta: "11:30" },
+  { day: 2, top: 238, height: 54, title: "Standup", meta: "12:30" },
+  { day: 3, top: 178, height: 48, title: "Project call", meta: "11:15 - 12:00" },
 ];
 
-function SectionTitle({ eyebrow, title, body, align = "left" }) {
+const candidateBlocks = [
+  {
+    day: 0,
+    top: 152,
+    height: 86,
+    title: "Quadratics sprint",
+    meta: "09:30 - 11:00",
+    tone: "green",
+    delay: "0ms",
+    tasks: ["Revise discriminant rules", "Solve 6 mixed equations", "Mark one weak method"],
+  },
+  {
+    day: 1,
+    top: 266,
+    height: 92,
+    title: "Polynomials practice",
+    meta: "14:00 - 15:20",
+    tone: "violet",
+    delay: "180ms",
+    tasks: ["Factor theorem examples", "Remainder theorem drill", "Save 3 exam-style misses"],
+  },
+  {
+    day: 2,
+    top: 122,
+    height: 78,
+    title: "Electricity recall",
+    meta: "09:15 - 10:15",
+    tone: "amber",
+    delay: "360ms",
+    tasks: ["Rewrite Ohm's law notes", "Practice circuit diagrams", "Check units before answers"],
+  },
+  {
+    day: 3,
+    top: 276,
+    height: 82,
+    title: "English review",
+    meta: "14:30 - 15:45",
+    tone: "rose",
+    delay: "540ms",
+    tasks: ["Recall quote bank", "Tighten intro paragraph", "Review teacher feedback"],
+  },
+];
+
+function SnapText({ children }) {
   return (
-    <div style={{ maxWidth: 720, textAlign: align }}>
-      {eyebrow ? (
-        <div style={{
-          marginBottom: 12,
-          fontSize: 11,
-          letterSpacing: "0.18em",
-          textTransform: "uppercase",
-          color: tokens.textDim,
-        }}>
-          {eyebrow}
-        </div>
-      ) : null}
-      <h2 style={{
-        fontFamily: "'Fraunces', serif",
-        fontWeight: 400,
-        fontSize: "clamp(30px, 4.4vw, 54px)",
-        lineHeight: 1.02,
-        letterSpacing: "-0.04em",
-        color: tokens.text,
-        marginBottom: body ? 14 : 0,
-      }}>
-        {title}
-      </h2>
-      {body ? (
-        <p style={{
-          fontSize: 16,
-          lineHeight: 1.75,
-          color: tokens.textMuted,
-          maxWidth: 640,
-          margin: align === "center" ? "0 auto" : 0,
-        }}>
-          {body}
-        </p>
-      ) : null}
-    </div>
+    <span className="lp-snap-text">
+      {children.split(" ").map((word, index) => (
+        <span
+          className="lp-snap-word"
+          style={{
+            "--word": index,
+            "--scatter-x": `${((index % 5) - 2) * 11}px`,
+            "--scatter-y": `${((index % 4) - 1.5) * 10}px`,
+            "--scatter-rotate": `${((index % 6) - 2.5) * 3.5}deg`,
+          }}
+          key={`${word}-${index}`}
+        >
+          {word}
+        </span>
+      ))}
+    </span>
   );
 }
 
-function MockWindow({ title, children, style }) {
+function LogoMark({ small = false }) {
   return (
-    <div style={{
-      borderRadius: 24,
-      border: `1px solid rgba(255,255,255,0.08)`,
-      background: "linear-gradient(180deg, rgba(18,18,20,0.98), rgba(11,11,12,0.98))",
-      boxShadow: "0 30px 90px rgba(0,0,0,0.42)",
-      overflow: "hidden",
-      ...style,
-    }}>
-      <div style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "14px 16px",
-        borderBottom: `1px solid ${tokens.border}`,
-        background: "rgba(255,255,255,0.02)",
-      }}>
-        <div style={{ display: "flex", gap: 7 }}>
-          {["#fb7185", "#fbbf24", "#34d399"].map(color => (
-            <span key={color} style={{ width: 9, height: 9, borderRadius: "50%", background: color, display: "inline-block" }} />
+    <svg className={small ? "lp-logo is-small" : "lp-logo"} viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M32 28 20 16M32 28l12-12M32 28v17" />
+      <path d="M32 45c-4 4-8 5-13 5M32 45c4 4 8 5 13 5M32 45c-1 5-3 8-7 11M32 45c1 5 3 8 7 11" className="thin" />
+      <path d="M32 57c-2.2-2.8-2.2-4.9 0-7.4 2.2 2.5 2.2 4.6 0 7.4Z" className="root" />
+      <path d="M32 5c5 5.2 5 10.3 0 15.5C27 15.3 27 10.2 32 5Z" className="leaf top" />
+      <path d="M16 17c5.5.8 8.5 3.8 9.2 9.2C19.8 25.5 16.8 22.5 16 17Z" className="leaf" />
+      <path d="M48 17c-.8 5.5-3.8 8.5-9.2 9.2C39.5 20.8 42.5 17.8 48 17Z" className="leaf" />
+      <path d="M11 30c4.4-.7 7.4.9 9.1 4.8C15.8 35.4 12.8 33.8 11 30Z" className="leaf pale" />
+      <path d="M53 30c-1.8 3.8-4.8 5.4-9.1 4.8C45.6 30.9 48.6 29.3 53 30Z" className="leaf pale" />
+      <path d="M24 30c3.1.6 4.8 2.4 5.2 5.5C26.1 34.9 24.4 33.1 24 30Z" className="leaf small" />
+      <path d="M40 30c-.4 3.1-2.1 4.9-5.2 5.5C35.2 32.4 36.9 30.6 40 30Z" className="leaf small" />
+    </svg>
+  );
+}
+
+function GmailLogo() {
+  return (
+    <svg className="lp-brand-logo" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#4285F4" d="M8.5 12.5v24.8c0 1.5 1.2 2.7 2.7 2.7h6.1V24.6L8.5 18v-5.5Z" />
+      <path fill="#34A853" d="M30.7 40h6.1c1.5 0 2.7-1.2 2.7-2.7V12.5L30.7 18v22Z" />
+      <path fill="#EA4335" d="M17.3 24.6 24 29.6l6.7-5V18L24 23l-6.7-5v6.6Z" />
+      <path fill="#FBBC05" d="M30.7 18 39.5 12.5v-.6c0-2.9-3.3-4.6-5.7-2.9l-3.1 2.3V18Z" />
+      <path fill="#C5221F" d="M8.5 11.9v6.1l8.8 6.6V18L14.2 15.7c-2.4-1.8-5.7-.1-5.7-3.8Z" />
+    </svg>
+  );
+}
+
+function GoogleCalendarLogo() {
+  return (
+    <svg className="lp-brand-logo" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#4285F4" d="M10 7h21.8L38 13.2V38c0 1.7-1.3 3-3 3H10c-1.7 0-3-1.3-3-3V10c0-1.7 1.3-3 3-3Z" />
+      <path fill="#34A853" d="M7 18h31v20c0 1.7-1.3 3-3 3H10c-1.7 0-3-1.3-3-3V18Z" />
+      <path fill="#FBBC05" d="M31.8 7H35c1.7 0 3 1.3 3 3v8h-6.2V7Z" />
+      <path fill="#EA4335" d="M7 13h31v7H7v-7Z" />
+      <path fill="#fff" d="M12.5 21h23v16h-23z" />
+      <text x="24" y="34" textAnchor="middle" fill="#4285F4" fontSize="13" fontWeight="800" fontFamily="Manrope, Arial, sans-serif">
+        31
+      </text>
+    </svg>
+  );
+}
+
+function CalendarPreview() {
+  return (
+    <div className="lp-calendar-preview" aria-label="SkedioAI planner preview">
+      <aside className="lp-mini-sidebar">
+        <LogoMark small />
+        <span className="lp-side-icon is-active">□</span>
+        <span className="lp-side-icon">▦</span>
+        <span className="lp-side-icon">⌁</span>
+        <span className="lp-side-icon">☼</span>
+        <span className="lp-avatar">PR</span>
+      </aside>
+      <div className="lp-calendar-shell">
+        <div className="lp-calendar-head">
+          <div>
+            <span className="lp-kicker">Planner</span>
+            <h3>Jul 21 - Jul 27, 2026</h3>
+          </div>
+          <div className="lp-head-actions">
+            <span />
+            <span />
+            <span />
+          </div>
+        </div>
+        <div className="lp-week">
+          {weekDays.map((item) => (
+            <div className="lp-day" key={item.day}>
+              <span>{item.day}</span>
+              <b className={item.active ? "is-today" : ""}>{item.date}</b>
+            </div>
           ))}
         </div>
-        <div style={{ fontSize: 12, color: tokens.textMuted }}>{title}</div>
-        <div style={{ width: 38 }} />
-      </div>
-      <div style={{ padding: 18 }}>
-        {children}
+        <div className="lp-grid">
+          <div className="lp-now-line" />
+          {sessions.map((session) => (
+            <div
+              className={`lp-session is-${session.tone}`}
+              key={`${session.day}-${session.title}`}
+              style={{
+                "--day": session.day,
+                "--top": `${session.top}px`,
+                "--height": `${session.height}px`,
+                "--delay": session.delay,
+              }}
+            >
+              <strong>{session.title}</strong>
+              <span>{session.meta}</span>
+            </div>
+          ))}
+        </div>
+        <form className="lp-assistant-bar">
+          <LogoMark small />
+          <span>Ask SkedioAI to revise around blockers...</span>
+          <button type="button" aria-label="Open assistant">↗</button>
+        </form>
       </div>
     </div>
   );
 }
 
-function AuthCard() {
-  const [mode, setMode] = useState("signup");
+function DraftSequence() {
+  return (
+    <div className="lp-draft-stage">
+      {[
+        ["Calendar truth", "Standup and lunch stay protected."],
+        ["Backlog pressure", "Quadratics gets the first focused block."],
+        ["Draft plan", "Study slots land one by one."],
+      ].map(([title, body], index) => (
+        <div className="lp-draft-card" style={{ "--i": index }} key={title}>
+          <span>0{index + 1}</span>
+          <strong>{title}</strong>
+          <p>{body}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
 
-  const subtitle = useMemo(() => (
-    mode === "signup"
-      ? "Create your account and start building plans, tracking sessions, and syncing your study flow."
-      : "Sign in to continue your active plan, progress memory, and study coach thread."
-  ), [mode]);
+function StoryStack() {
+  return (
+    <section className="lp-story-section" id="story">
+      <div className="lp-story-copy">
+        <span className="lp-kicker">Scroll story</span>
+        <h2><SnapText>Watch the study week assemble itself.</SnapText></h2>
+        <p>
+          The landing now follows the same loop as the product: understand the student,
+          respect reality, update memory, then close the week cleanly.
+        </p>
+      </div>
+      <div className="lp-story-stack">
+        {storyCards.map((card, index) => (
+          <article className="lp-story-card" style={{ "--i": index }} key={card.title}>
+            <span>{card.label}</span>
+            <small>{card.meta}</small>
+            <h3>{card.title}</h3>
+            <p>{card.body}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function AutoRescheduleDemo() {
+  const [phase, setPhase] = useState("idle");
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const showDraft = phase !== "idle";
+
+  useEffect(() => {
+    if (phase !== "drafting") {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => setPhase("pending"), 2500);
+    return () => window.clearTimeout(timer);
+  }, [phase]);
+
+  useEffect(() => {
+    if (!showDraft) {
+      setSelectedSlot(null);
+    }
+  }, [showDraft]);
+
+  const startDraft = () => {
+    setSelectedSlot(null);
+    setPhase("drafting");
+  };
+  const approveDraft = () => setPhase("approved");
+  const replayDraft = () => {
+    setSelectedSlot(null);
+    setPhase("drafting");
+  };
+  const activeSlot = selectedSlot === null ? null : candidateBlocks[selectedSlot];
 
   return (
-    <div style={{
-      width: "min(100%, 420px)",
-      borderRadius: 28,
-      border: `1px solid rgba(255,255,255,0.08)`,
-      background: "linear-gradient(180deg, rgba(17,17,19,0.96), rgba(13,13,14,0.98))",
-      boxShadow: "0 28px 80px rgba(0,0,0,0.45)",
-      overflow: "hidden",
-    }}>
-      <div style={{ padding: "24px 24px 20px", borderBottom: `1px solid ${tokens.border}` }}>
-        <div style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 10,
-          padding: "8px 12px",
-          borderRadius: 999,
-          background: "rgba(129,140,248,0.08)",
-          border: "1px solid rgba(129,140,248,0.18)",
-          color: tokens.accent,
-          fontSize: 12,
-          marginBottom: 18,
-        }}>
-          <span style={{ width: 8, height: 8, borderRadius: "50%", background: tokens.accent, display: "inline-block" }} />
-          Live planning workspace
-        </div>
-        <h3 style={{
-          fontFamily: "'Fraunces', serif",
-          fontWeight: 400,
-          fontSize: 34,
-          lineHeight: 1.02,
-          letterSpacing: "-0.04em",
-          marginBottom: 10,
-          color: tokens.text,
-        }}>
-          Start with SkedioAI.
-        </h3>
-        <p style={{ color: tokens.textMuted, fontSize: 15, lineHeight: 1.7 }}>
-          {subtitle}
+    <section className={`lp-reschedule-section is-visible is-${phase}`} id="auto-reschedule">
+      <div className="lp-section-copy">
+        <span className="lp-kicker">Review before commit</span>
+        <h2><SnapText>Draft slots float in. One approval commits the plan.</SnapText></h2>
+        <p>
+          SkedioAI does not silently rewrite the calendar. It proposes the whole
+          revised plan, shows exactly where sessions land, then waits for approval.
         </p>
       </div>
 
-      <div style={{ padding: 24 }}>
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 8,
-          padding: 5,
-          borderRadius: 14,
-          background: "#121214",
-          border: `1px solid ${tokens.border}`,
-          marginBottom: 20,
-        }}>
-          <button
-            onClick={() => setMode("signup")}
-            style={{
-              padding: "11px 12px",
-              borderRadius: 10,
-              border: "none",
-              cursor: "pointer",
-              fontWeight: 700,
-              fontSize: 13,
-              background: mode === "signup" ? tokens.text : "transparent",
-              color: mode === "signup" ? tokens.bg : tokens.textMuted,
-              transition: "all 0.2s ease",
-            }}
-          >
-            Create account
-          </button>
-          <button
-            onClick={() => setMode("signin")}
-            style={{
-              padding: "11px 12px",
-              borderRadius: 10,
-              border: "none",
-              cursor: "pointer",
-              fontWeight: 700,
-              fontSize: 13,
-              background: mode === "signin" ? tokens.text : "transparent",
-              color: mode === "signin" ? tokens.bg : tokens.textMuted,
-              transition: "all 0.2s ease",
-            }}
-          >
-            Sign in
-          </button>
+      <div className="lp-reschedule-demo">
+        <div className="lp-reschedule-calendar" aria-label="Draft study plan preview">
+          <div className="lp-reschedule-topbar">
+            <div>
+              <span>Draft calendar</span>
+              <strong>Jul 21 - Jul 24</strong>
+            </div>
+            <div className="lp-reschedule-state" aria-live="polite">
+              {phase === "idle" && "Ready"}
+              {phase === "drafting" && "Building draft"}
+              {phase === "pending" && "Awaiting approval"}
+              {phase === "approved" && "Committed"}
+            </div>
+          </div>
+
+          <div className="lp-reschedule-days">
+            <span />
+            {rescheduleDays.map((day, index) => (
+              <b className={index === 0 ? "is-today" : ""} key={day}>{day}</b>
+            ))}
+          </div>
+
+          <div className="lp-reschedule-grid">
+            {["8 AM", "10 AM", "12 PM", "2 PM", "4 PM"].map((time) => (
+              <span className="lp-reschedule-time" key={time}>{time}</span>
+            ))}
+
+            {fixedBlocks.map((block) => (
+              <article
+                className="lp-reschedule-block is-fixed"
+                style={{
+                  "--day": block.day,
+                  "--top": `${block.top}px`,
+                  "--height": `${block.height}px`,
+                }}
+                key={`${block.day}-${block.title}`}
+              >
+                <strong>{block.title}</strong>
+                <small>{block.meta}</small>
+              </article>
+            ))}
+
+            {showDraft && candidateBlocks.map((block, index) => (
+              <article
+                className={`lp-reschedule-block is-candidate is-${block.tone}${selectedSlot === index ? " is-selected" : ""}`}
+                style={{
+                  "--day": block.day,
+                  "--top": `${block.top}px`,
+                  "--height": `${block.height}px`,
+                  "--delay": block.delay,
+                  "--i": index,
+                }}
+                key={`${block.day}-${block.title}`}
+                role="button"
+                tabIndex={0}
+                onClick={() => setSelectedSlot(index)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setSelectedSlot(index);
+                  }
+                }}
+              >
+                <span>{phase === "approved" ? "Committed" : "Draft"}</span>
+                <strong>{block.title}</strong>
+                <small>{block.meta}</small>
+              </article>
+            ))}
+
+            <div className="lp-reschedule-scan" aria-hidden="true" />
+
+            {activeSlot && (
+              <div
+                className={`lp-slot-readonly is-${activeSlot.tone}`}
+                style={{ "--day": activeSlot.day }}
+                role="dialog"
+                aria-label={`${activeSlot.title} checklist preview`}
+              >
+                <button type="button" onClick={() => setSelectedSlot(null)} aria-label="Close checklist">×</button>
+                <span>{phase === "approved" ? "Committed slot" : "Draft slot"}</span>
+                <strong>{activeSlot.title}</strong>
+                <small>{activeSlot.meta} · read-only checklist</small>
+                <div>
+                  {activeSlot.tasks.map((task, index) => (
+                    <p style={{ "--i": index }} key={task}>
+                      <i aria-hidden="true" />
+                      <b>{task}</b>
+                    </p>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
-        {mode === "signup" ? <SignUp /> : <SignIn />}
+        <div className="lp-reschedule-chat">
+          <div className="lp-chat-head">
+            <LogoMark small />
+            <div>
+              <strong>SkedioAI</strong>
+              <span>whole-plan approval</span>
+            </div>
+          </div>
 
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 16,
-          margin: "24px 0 20px",
-          color: tokens.textDim,
-          fontSize: 11,
-          letterSpacing: "0.14em",
-        }}>
-          <div style={{ height: 1, flex: 1, background: tokens.border }} />
-          <span>OR CONTINUE WITH</span>
-          <div style={{ height: 1, flex: 1, background: tokens.border }} />
+          <div className="lp-reschedule-thread" aria-live="polite">
+            {phase === "idle" && (
+              <>
+                <p className="is-user">Can you rebuild the week around blockers?</p>
+                <p className="is-ai">Yes. I will draft the full plan first, then ask before anything is committed.</p>
+              </>
+            )}
+            {phase === "drafting" && (
+              <>
+                <p className="is-ai">Reading fixed calendar blocks...</p>
+                <p className="is-ai">Scoring open gaps by focus quality and deadline pressure...</p>
+                <p className="is-ai is-thinking">Placing candidate sessions now.</p>
+              </>
+            )}
+            {phase === "pending" && (
+              <>
+                <p className="is-ai">Draft ready: 4 sessions placed, no blocker collisions.</p>
+                <p className="is-ai">Approve this plan to commit every proposed slot together.</p>
+              </>
+            )}
+            {phase === "approved" && (
+              <>
+                <p className="is-ai">Approved. I committed the full draft plan to the calendar.</p>
+                <p className="is-ai">The next dashboard and review email now use this version.</p>
+              </>
+            )}
+          </div>
+
+          <div className="lp-reschedule-actions">
+            {phase === "idle" && <button type="button" onClick={startDraft}>Draft plan</button>}
+            {phase === "drafting" && <button type="button" disabled>Drafting...</button>}
+            {phase === "pending" && (
+              <>
+                <button type="button" onClick={approveDraft}>Approve plan</button>
+                <button type="button" onClick={replayDraft}>Change it</button>
+              </>
+            )}
+            {phase === "approved" && <button type="button" onClick={replayDraft}>Replay draft</button>}
+          </div>
         </div>
+      </div>
+    </section>
+  );
+}
 
-        <GoogleSignIn />
+function DashboardPreview() {
+  return (
+    <div className="lp-dashboard-card">
+      <div className="lp-panel-title">
+        <span>Dashboard</span>
+        <b>Study momentum at a glance</b>
+      </div>
+      <div className="lp-chart">
+        <svg viewBox="0 0 520 220" aria-hidden="true">
+          <path d="M24 162 C110 138 165 124 220 98 C290 65 342 86 408 126 C450 151 486 143 502 134" />
+          <circle cx="24" cy="162" r="6" />
+          <circle cx="220" cy="98" r="6" />
+          <circle cx="502" cy="134" r="6" />
+        </svg>
+      </div>
+      <div className="lp-subject-list">
+        {dashboardRows.map(([topic, detail, pct, tone], index) => (
+          <div className="lp-subject-row" style={{ "--row": index }} key={topic}>
+            <div>
+              <strong>{topic}</strong>
+              <span>{detail}</span>
+            </div>
+            <b>{pct}</b>
+            <i className={`is-${tone}`} style={{ "--w": pct }} />
+          </div>
+        ))}
       </div>
     </div>
+  );
+}
+
+function KnowledgePreview() {
+  const nodes = [
+    ["You", 72, 70, "you", "-8px", "9px"],
+    ["maths", 53, 55, "subject", "10px", "-8px"],
+    ["Quadratics", 31, 35, "chapter", "-6px", "-10px"],
+    ["Polynomials", 61, 30, "chapter", "8px", "7px"],
+    ["Formula practice", 24, 62, "node", "-10px", "6px"],
+    ["Factor theorem", 72, 44, "node", "7px", "-9px"],
+  ];
+
+  return (
+    <div className="lp-graph-card">
+      <div className="lp-graph-bg" />
+      <svg className="lp-graph-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M72 70 53 55 31 35M53 55 61 30M53 55 24 62M53 55 72 44" />
+      </svg>
+      {nodes.map(([name, x, y, type, dx, dy], index) => (
+        <div
+          className={`lp-node is-${type}`}
+          style={{ left: `${x}%`, top: `${y}%`, "--i": index, "--dx": dx, "--dy": dy }}
+          key={name}
+        >
+          <span>{name}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SchedulerPreview() {
+  return (
+    <div className="lp-scheduler-card">
+      <div className="lp-panel-title">
+        <span>Auto scheduling</span>
+        <b>Every slot gets scored before it lands.</b>
+      </div>
+      <div className="lp-score-list">
+        {scheduleScores.map(([time, label, score], index) => (
+          <div className="lp-score-row" key={time} style={{ "--i": index, "--score": `${score}%` }}>
+            <div>
+              <strong>{time}</strong>
+              <span>{label}</span>
+            </div>
+            <b>{score}</b>
+            <i />
+          </div>
+        ))}
+      </div>
+      <div className="lp-scheduler-result">
+        <span>Chosen</span>
+        <strong>Tue 09:30 - Mathematics sprint</strong>
+        <p>Morning focus, no blocker overlap, enough buffer before lunch.</p>
+      </div>
+    </div>
+  );
+}
+
+function ChatPreview() {
+  return (
+    <div className="lp-chat-card">
+      <div className="lp-chat-head">
+        <LogoMark small />
+        <div>
+          <strong>SkedioAI</strong>
+          <span>planner assistant</span>
+        </div>
+      </div>
+      <div className="lp-chat-thread">
+        <p className="is-user">Can you plan my next study block?</p>
+        <p className="is-ai">I can. Your calendar has lunch at 11:30 and a standup at 12:30. I’ll place maths before that.</p>
+        <p className="is-user">Keep evenings lighter.</p>
+        <p className="is-ai">Done. I’ll use evenings for recall, not heavy problem solving.</p>
+      </div>
+      <div className="lp-chat-input">
+        <span>Ask SkedioAI...</span>
+        <button type="button">↑</button>
+      </div>
+    </div>
+  );
+}
+
+function ChecklistPreview() {
+  const [checkedItems, setCheckedItems] = useState(() => checklistItems.map((_, index) => index < 2));
+  const checkedCount = checkedItems.filter(Boolean).length;
+  const progress = `${Math.round((checkedCount / checklistItems.length) * 100)}%`;
+
+  return (
+    <div className="lp-checklist-card" style={{ "--progress": progress }}>
+      <div className="lp-panel-title">
+        <span>Session checklist</span>
+        <b>Ticking work updates the plan truth.</b>
+      </div>
+      <div className="lp-check-progress"><i /></div>
+      <div className="lp-check-list">
+        {checklistItems.map((item, index) => (
+          <label className="lp-check-item" style={{ "--i": index }} key={item}>
+            <input
+              type="checkbox"
+              checked={checkedItems[index]}
+              onChange={() => {
+                setCheckedItems((items) => items.map((value, itemIndex) => itemIndex === index ? !value : value));
+              }}
+            />
+            <span />
+            <b>{item}</b>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function IntegrationPreview() {
+  return (
+    <div className="lp-integration-orbit-demo" aria-label="Gmail and Google Calendar integration animation">
+      <div className="lp-integration-center">
+        <LogoMark />
+      </div>
+      <OrbitingCircles iconSize={112} radius={154} duration={18} delay={0}>
+        <div className="lp-orbit-app" aria-label="Gmail">
+          <GmailLogo />
+        </div>
+        <div className="lp-orbit-app" aria-label="Google Calendar">
+          <GoogleCalendarLogo />
+        </div>
+      </OrbitingCircles>
+    </div>
+  );
+}
+
+function EmailPreview() {
+  return (
+    <div className="lp-email-card">
+      <div className="lp-email-top">
+        <span>From SkedioAI</span>
+        <b>Plan review</b>
+      </div>
+      <h3>Your week is ready to review</h3>
+      {emailLines.map((line) => (
+        <p key={line}>{line}</p>
+      ))}
+      <div className="lp-email-actions">
+        <button type="button">Approve plan</button>
+        <button type="button">Change it</button>
+      </div>
+    </div>
+  );
+}
+
+function LandingFooter() {
+  return (
+    <footer className="lp-footer">
+      <div className="lp-footer-top">
+        <a className="lp-brand" href="#landing" aria-label="SkedioAI landing footer">
+          <LogoMark small />
+          <span>
+            <b>SkedioAI</b>
+            <small>study planner</small>
+          </span>
+        </a>
+        <div className="lp-footer-links">
+          <div>
+            <strong>Product</strong>
+            <a href="#loop">Planner</a>
+            <a href="#signals">Dashboard</a>
+            <a href="#integrations">Integrations</a>
+          </div>
+          <div>
+            <strong>Features</strong>
+            <a href="#schedule">Auto scheduling</a>
+            <a href="#signals">Checklist memory</a>
+            <a href="#integrations">Review email</a>
+          </div>
+          <div>
+            <strong>Company</strong>
+            <a href="#app">Open app</a>
+            <a href="#landing">Privacy</a>
+            <a href="#landing">Support</a>
+          </div>
+        </div>
+      </div>
+      <div className="lp-footer-close">
+        <div className="lp-footer-close-mark" aria-hidden="true">
+          <LogoMark />
+        </div>
+        <div>
+          <h2>Make the week readable.</h2>
+          <p>Open SkedioAI, connect the calendar, and let the plan bend around the life already there.</p>
+        </div>
+        <a href="#app">Open the app</a>
+      </div>
+      <div className="lp-footer-bottom">
+        <span>© 2026 SkedioAI</span>
+        <span>Calendar-aware study planning</span>
+        <span>Built for realistic weekly execution</span>
+      </div>
+    </footer>
   );
 }
 
 export function LandingPage() {
+  useEffect(() => {
+    const elements = document.querySelectorAll(
+      ".lp-section, .lp-split-section, .lp-story-section, .lp-story-card, .lp-reschedule-section, .lp-feature-card, .lp-draft-card, .lp-three-panel > *, .lp-dashboard-card, .lp-graph-card, .lp-integrations-stack > *, .lp-footer"
+    );
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.16, rootMargin: "0px 0px -8% 0px" }
+    );
+
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: `
-        radial-gradient(circle at top left, rgba(129,140,248,0.18), transparent 28%),
-        radial-gradient(circle at 85% 15%, rgba(52,211,153,0.10), transparent 20%),
-        linear-gradient(180deg, #080809 0%, #0d0d0d 42%, #090909 100%)
-      `,
-      color: tokens.text,
-    }}>
-      <GlobalStyles />
+    <main className="lp-page">
+      <div className="lp-noise" aria-hidden="true" />
+      <div className="lp-ambient-field" aria-hidden="true" />
+      <nav className="lp-nav">
+        <a className="lp-brand" href="#landing" aria-label="SkedioAI landing">
+          <LogoMark small />
+          <span>
+            <b>SkedioAI</b>
+            <small>study planner</small>
+          </span>
+        </a>
+        <div className="lp-nav-links">
+          <a href="#loop">Loop</a>
+          <a href="#signals">Signals</a>
+          <a href="#integrations">Integrations</a>
+        </div>
+        <a className="lp-nav-action" href="#app">Open app</a>
+      </nav>
 
-      <div style={{
-        position: "relative",
-        maxWidth: 1320,
-        margin: "0 auto",
-        padding: "28px clamp(20px, 4vw, 40px) 80px",
-      }}>
-        <header style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 20,
-          marginBottom: 42,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{
-              width: 36,
-              height: 36,
-              borderRadius: 12,
-              background: tokens.text,
-              color: tokens.bg,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: 800,
-              fontSize: 15,
-              boxShadow: "0 14px 32px rgba(238,238,238,0.14)",
-            }}>
-              S
-            </div>
-            <div>
-              <div style={{
-                fontFamily: "'Fraunces', serif",
-                fontStyle: "italic",
-                fontSize: 28,
-                lineHeight: 1,
-              }}>
-                SkedioAI
-              </div>
-              <div style={{ fontSize: 12, color: tokens.textDim, marginTop: 4 }}>
-                Your study companion
-              </div>
-            </div>
+      <section className="lp-hero">
+        <div className="lp-hero-copy">
+          <span className="lp-pill">Calendar-aware study OS</span>
+          <h1><SnapText>Plan the week your student can actually follow.</SnapText></h1>
+          <p>
+            SkedioAI turns syllabus pressure, real calendar blockers, active-plan memory,
+            and checklist truth into one clean weekly study flow.
+          </p>
+          <div className="lp-hero-actions">
+            <a href="#app">Start planning</a>
+            <a href="#loop">Watch the loop</a>
           </div>
+        </div>
+      </section>
 
-          <div style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 10,
-            padding: "10px 14px",
-            borderRadius: 999,
-            border: `1px solid rgba(255,255,255,0.08)`,
-            background: "rgba(255,255,255,0.03)",
-            color: tokens.textMuted,
-            fontSize: 13,
-          }}>
-            Class 10 planning • progress • replanning
+      <section className="lp-product-theatre" aria-label="SkedioAI product preview">
+        <div className="lp-theatre-glow" aria-hidden="true" />
+        <div className="lp-floating-chip lp-chip-a">Calendar connected</div>
+        <div className="lp-floating-chip lp-chip-b">3 blockers protected</div>
+        <CalendarPreview />
+      </section>
+
+      <section className="lp-strip" aria-label="Product promise">
+        <span>Intake contract</span>
+        <span>Calendar blockers</span>
+        <span>Draft preview</span>
+        <span>Checklist truth</span>
+        <span>Review email</span>
+      </section>
+
+      <StoryStack />
+
+      <AutoRescheduleDemo />
+
+      <section className="lp-section lp-centered-section" id="loop">
+        <div className="lp-section-copy">
+          <span className="lp-kicker">The planning loop</span>
+          <h2><SnapText>Not a timetable generator. A week operating system.</SnapText></h2>
+          <p>
+            The assistant captures the real contract first, then the planner places
+            work into the calendar only after the constraints make sense.
+          </p>
+        </div>
+        <div className="lp-feature-grid">
+          {features.map((feature) => (
+            <article className="lp-feature-card" key={feature.title}>
+              <span>{feature.label}</span>
+              <h3>{feature.title}</h3>
+              <p>{feature.body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="lp-split-section">
+        <div className="lp-section-copy">
+          <span className="lp-kicker">Draft preview</span>
+          <h2><SnapText>Watch the plan assemble before it commits.</SnapText></h2>
+          <p>
+            Draft sessions float into place, glow while they are provisional, and
+            become durable only after review.
+          </p>
+        </div>
+        <DraftSequence />
+      </section>
+
+      <section className="lp-section lp-centered-section" id="schedule">
+        <div className="lp-section-copy">
+          <span className="lp-kicker">Scheduling intelligence</span>
+          <h2><SnapText>It does not just place sessions. It chooses why.</SnapText></h2>
+          <p>
+            SkedioAI scores candidate slots by focus quality, blocker safety, deadline pressure,
+            and workload balance before the plan becomes visible.
+          </p>
+        </div>
+        <div className="lp-three-panel">
+          <SchedulerPreview />
+          <ChatPreview />
+          <ChecklistPreview />
+        </div>
+      </section>
+
+      <section className="lp-section lp-centered-section" id="signals">
+        <div className="lp-section-copy">
+          <span className="lp-kicker">Progress signals</span>
+          <h2><SnapText>Every checkbox changes what the system knows.</SnapText></h2>
+        </div>
+        <div className="lp-two-up">
+          <DashboardPreview />
+          <KnowledgePreview />
+        </div>
+      </section>
+
+      <section className="lp-split-section" id="integrations">
+        <div className="lp-section-copy">
+          <span className="lp-kicker">Connected apps</span>
+          <h2><SnapText>Gmail and Calendar close the loop.</SnapText></h2>
+          <p>
+            SkedioAI can read blockers, sync study sessions, and send a clean review
+            email when a new plan needs approval.
+          </p>
+        </div>
+        <div className="lp-integrations-stack">
+          <IntegrationPreview />
+          <div id="demo-email">
+            <EmailPreview />
           </div>
-        </header>
-
-        <section style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1.15fr) minmax(360px, 0.85fr)",
-          gap: 28,
-          alignItems: "start",
-        }}>
-          <div>
-            <div style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "9px 14px",
-              borderRadius: 999,
-              background: "rgba(255,255,255,0.04)",
-              border: `1px solid rgba(255,255,255,0.08)`,
-              color: tokens.textMuted,
-              fontSize: 13,
-              marginBottom: 20,
-            }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: tokens.green, display: "inline-block" }} />
-              Talk to SkedioAI. Get a plan you can actually follow.
-            </div>
-
-            <h1 style={{
-              fontFamily: "'Fraunces', serif",
-              fontWeight: 400,
-              fontSize: "clamp(48px, 8vw, 92px)",
-              lineHeight: 0.94,
-              letterSpacing: "-0.06em",
-              marginBottom: 18,
-              maxWidth: 760,
-            }}>
-              Study planning that feels human, not robotic.
-            </h1>
-
-            <p style={{
-              maxWidth: 700,
-              color: tokens.textMuted,
-              fontSize: "clamp(16px, 1.8vw, 19px)",
-              lineHeight: 1.82,
-              marginBottom: 28,
-            }}>
-              SkedioAI helps Class 10 students turn messy goals into clear study plans,
-              track real progress, respect time limits, and keep the whole system grounded in what actually happened.
-            </p>
-
-            <div style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 12,
-              marginBottom: 26,
-            }}>
-              <a
-                href="#auth"
-                style={{
-                  textDecoration: "none",
-                  padding: "14px 20px",
-                  borderRadius: 14,
-                  background: tokens.text,
-                  color: tokens.bg,
-                  fontWeight: 700,
-                  boxShadow: "0 18px 42px rgba(238,238,238,0.10)",
-                }}
-              >
-                Start with SkedioAI
-              </a>
-              <a
-                href="#features"
-                style={{
-                  textDecoration: "none",
-                  padding: "14px 20px",
-                  borderRadius: 14,
-                  border: `1px solid rgba(255,255,255,0.10)`,
-                  background: "rgba(255,255,255,0.03)",
-                  color: tokens.text,
-                  fontWeight: 600,
-                }}
-              >
-                See how it works
-              </a>
-            </div>
-
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-              gap: 12,
-              maxWidth: 740,
-            }}>
-              {[
-                ["Plans that stay realistic", "No fake perfect timetables."],
-                ["Progress-aware memory", "Finished work actually matters next time."],
-                ["Chat + calendar + checkboxes", "One system instead of ten scattered tools."],
-              ].map(([title, body]) => (
-                <div
-                  key={title}
-                  style={{
-                    padding: 16,
-                    borderRadius: 18,
-                    border: `1px solid rgba(255,255,255,0.08)`,
-                    background: "rgba(255,255,255,0.03)",
-                    backdropFilter: "blur(12px)",
-                  }}
-                >
-                  <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 6 }}>{title}</div>
-                  <div style={{ fontSize: 13, lineHeight: 1.65, color: tokens.textMuted }}>{body}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div id="auth" style={{ display: "flex", justifyContent: "center" }}>
-            <AuthCard />
-          </div>
-        </section>
-
-        <section style={{ marginTop: 72 }}>
-          <MockWindow title="SkedioAI workspace preview">
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "1.2fr 0.8fr",
-              gap: 16,
-            }}>
-              <div style={{
-                borderRadius: 18,
-                border: `1px solid ${tokens.border}`,
-                background: "#111113",
-                padding: 16,
-              }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                  <div>
-                    <div style={{ fontSize: 12, color: tokens.textDim, marginBottom: 4 }}>This week</div>
-                    <div style={{ fontSize: 24, fontFamily: "'Fraunces', serif", fontWeight: 400 }}>Study calendar</div>
-                  </div>
-                  <div style={{
-                    padding: "6px 10px",
-                    borderRadius: 999,
-                    background: tokens.indigoBg,
-                    border: `1px solid ${tokens.indigoBorder}`,
-                    color: tokens.accent,
-                    fontSize: 12,
-                  }}>
-                    Synced plan
-                  </div>
-                </div>
-                <div style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(3, 1fr)",
-                  gap: 10,
-                }}>
-                  {[
-                    ["Mon", "Quadratic Equations", "2 sessions"],
-                    ["Tue", "Polynomials", "1 deep focus"],
-                    ["Wed", "Probability", "Practice + review"],
-                    ["Thu", "Weak areas", "Adaptive catch-up"],
-                    ["Fri", "Light revision", "Protected buffer"],
-                    ["Sat", "Past paper sprint", "Checkpointed"],
-                  ].map(([day, title, meta]) => (
-                    <div
-                      key={day}
-                      style={{
-                        minHeight: 118,
-                        borderRadius: 16,
-                        border: `1px solid ${tokens.border}`,
-                        background: "#171719",
-                        padding: 12,
-                      }}
-                    >
-                      <div style={{ fontSize: 11, color: tokens.textDim, marginBottom: 8 }}>{day}</div>
-                      <div style={{ fontSize: 14, fontWeight: 700, lineHeight: 1.35, marginBottom: 8 }}>{title}</div>
-                      <div style={{ fontSize: 12, color: tokens.textMuted }}>{meta}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div style={{ display: "grid", gap: 16 }}>
-                <div style={{
-                  borderRadius: 18,
-                  border: `1px solid ${tokens.border}`,
-                  background: "#111113",
-                  padding: 16,
-                }}>
-                  <div style={{ fontSize: 12, color: tokens.textDim, marginBottom: 8 }}>Study coach</div>
-                  <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 10 }}>Chat that actually remembers your plan</div>
-                  <div style={{ color: tokens.textMuted, fontSize: 13, lineHeight: 1.7 }}>
-                    SkedioAI asks what matters, checks feasibility, and adjusts the contract before the schedule gets generated.
-                  </div>
-                </div>
-
-                <div style={{
-                  borderRadius: 18,
-                  border: `1px solid ${tokens.border}`,
-                  background: "#111113",
-                  padding: 16,
-                }}>
-                  <div style={{ fontSize: 12, color: tokens.textDim, marginBottom: 8 }}>Progress memory</div>
-                  <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 10 }}>Checkboxes feed the next plan</div>
-                  <div style={{ color: tokens.textMuted, fontSize: 13, lineHeight: 1.7 }}>
-                    Session completion, actual hours, and weak areas help future plans become smarter instead of repetitive.
-                  </div>
-                </div>
-              </div>
-            </div>
-          </MockWindow>
-        </section>
-
-        <section id="features" style={{ marginTop: 92 }}>
-          <SectionTitle
-            eyebrow="Why it feels different"
-            title="Not just another study planner."
-            body="SkedioAI combines conversation, planning logic, progress tracking, and realism checks into one flow."
-          />
-
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: 18,
-            marginTop: 28,
-          }}>
-            {featureCards.map((card) => (
-              <div
-                key={card.title}
-                style={{
-                  padding: 22,
-                  borderRadius: 24,
-                  border: `1px solid rgba(255,255,255,0.08)`,
-                  background: "linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02))",
-                }}
-              >
-                <div style={{ fontSize: 11, color: tokens.textDim, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 10 }}>
-                  {card.eyebrow}
-                </div>
-                <div style={{ fontSize: 21, lineHeight: 1.22, fontWeight: 700, marginBottom: 10 }}>
-                  {card.title}
-                </div>
-                <div style={{ color: tokens.textMuted, fontSize: 14, lineHeight: 1.75 }}>
-                  {card.body}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section style={{ marginTop: 92 }}>
-          <SectionTitle
-            eyebrow="How it works"
-            title="A cleaner path from messy intent to grounded action."
-            body="The idea is simple: capture the truth, build a realistic contract, then let the planner turn it into sessions."
-          />
-
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: 18,
-            marginTop: 28,
-          }}>
-            {workflowSteps.map((step) => (
-              <div
-                key={step.label}
-                style={{
-                  padding: 24,
-                  borderRadius: 24,
-                  border: `1px solid rgba(255,255,255,0.08)`,
-                  background: "rgba(255,255,255,0.03)",
-                }}
-              >
-                <div style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: 42,
-                  height: 42,
-                  borderRadius: 999,
-                  background: tokens.indigoBg,
-                  border: `1px solid ${tokens.indigoBorder}`,
-                  color: tokens.accent,
-                  fontSize: 12,
-                  fontWeight: 800,
-                  marginBottom: 14,
-                }}>
-                  {step.label}
-                </div>
-                <div style={{ fontSize: 20, fontWeight: 700, lineHeight: 1.25, marginBottom: 10 }}>
-                  {step.title}
-                </div>
-                <div style={{ color: tokens.textMuted, fontSize: 14, lineHeight: 1.75 }}>
-                  {step.body}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section style={{ marginTop: 92 }}>
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
-            gap: 20,
-            alignItems: "stretch",
-          }}>
-            <MockWindow title="Inside the product">
-              <div style={{ display: "grid", gap: 12 }}>
-                {appHighlights.map((item, index) => (
-                  <div
-                    key={item}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 12,
-                      padding: "14px 14px",
-                      borderRadius: 14,
-                      border: `1px solid ${tokens.border}`,
-                      background: "#121214",
-                    }}
-                  >
-                    <div style={{
-                      width: 30,
-                      height: 30,
-                      borderRadius: 999,
-                      background: index % 2 === 0 ? tokens.indigoBg : tokens.greenBg,
-                      border: `1px solid ${index % 2 === 0 ? tokens.indigoBorder : tokens.greenBorder}`,
-                      color: index % 2 === 0 ? tokens.accent : tokens.green,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 13,
-                      fontWeight: 800,
-                      flexShrink: 0,
-                    }}>
-                      {index + 1}
-                    </div>
-                    <div style={{ fontSize: 14, color: tokens.text }}>{item}</div>
-                  </div>
-                ))}
-              </div>
-            </MockWindow>
-
-            <div style={{
-              padding: "28px clamp(20px, 2vw, 30px)",
-              borderRadius: 28,
-              border: `1px solid rgba(255,255,255,0.08)`,
-              background: "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-            }}>
-              <div style={{ fontSize: 11, color: tokens.textDim, letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 12 }}>
-                Built for real usage
-              </div>
-              <div style={{
-                fontFamily: "'Fraunces', serif",
-                fontWeight: 400,
-                fontSize: "clamp(30px, 4vw, 48px)",
-                lineHeight: 1.03,
-                letterSpacing: "-0.04em",
-                marginBottom: 16,
-              }}>
-                Your app, your plan, your progress — finally in one place.
-              </div>
-              <p style={{ color: tokens.textMuted, fontSize: 15, lineHeight: 1.8, marginBottom: 22 }}>
-                SkedioAI is not just a pretty planner. It is meant to carry the whole loop:
-                intake, planning, progress truth, calendar awareness, and future replanning.
-              </p>
-              <a
-                href="#auth"
-                style={{
-                  alignSelf: "flex-start",
-                  textDecoration: "none",
-                  padding: "14px 18px",
-                  borderRadius: 14,
-                  background: tokens.text,
-                  color: tokens.bg,
-                  fontWeight: 700,
-                }}
-              >
-                Open the workspace
-              </a>
-            </div>
-          </div>
-        </section>
-      </div>
-    </div>
+        </div>
+      </section>
+      <LandingFooter />
+    </main>
   );
 }

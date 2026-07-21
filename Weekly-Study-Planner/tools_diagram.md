@@ -1,3 +1,5 @@
+# Tool Surface Diagram
+
 This document maps the main live tools used by SkedioAI's agent and runtime layers.
 
 It focuses on tools that materially affect the current planning system:
@@ -7,6 +9,11 @@ It focuses on tools that materially affect the current planning system:
 
 This is not every helper in the repo.
 It is the active tool surface that changes runtime behavior.
+
+The key design idea is consolidation:
+- Intake has the evidence and contract tools it genuinely needs
+- Planner has a much smaller tool surface
+- calendar persistence sits in backend methods instead of being sprayed across agent prompts
 
 ---
 
@@ -32,6 +39,8 @@ The current intake worker binds:
 - `verify_claim_search`
 - `update_syllabus_entry`
 - `commit_intake`
+
+Read them as one contract-driven tool family, not six unrelated buttons.
 
 ```mermaid
 flowchart LR
@@ -169,6 +178,9 @@ Validation decides what becomes accepted intake state.
 
 This is the most important intake tool.
 
+`commit_intake` is the gate that stops the intake model from pretending a
+contract is ready just because the prose sounds confident.
+
 ---
 
 ## Planner Tool Set
@@ -219,6 +231,12 @@ Planner should not invent topic structure when syllabus truth matters.
 Planner does not normally fetch fresh calendar truth as an LLM tool.
 Calendar blockers are expected to arrive through intake or runtime context, while
 durable plan truth arrives through active-plan loading and commit logic around the planner.
+
+This is intentional.
+
+```text
+Planner is a schedule-shaping worker, not a free-roaming evidence gatherer.
+```
 
 ---
 
@@ -274,3 +292,48 @@ Practical reading:
 - calendar blockers beat guessed free time
 - vector memory helps but does not override durable truth
 - model judgment should be boxed in by these sources
+
+---
+
+## Tool Ownership Rules
+
+Use these rules when deciding whether a capability belongs in a worker tool, a
+runtime service, or both.
+
+### Put a capability in an Intake tool when
+- it gathers evidence for contract formation
+- the model genuinely needs to inspect learner scope or blockers
+- the result helps decide whether planning can begin
+
+### Put a capability in a Planner tool when
+- it helps shape sessions inside an already accepted contract
+- it does not reopen ownership already settled by Intake
+
+### Keep a capability out of ordinary worker tools when
+- it mutates durable truth
+- it should be gated by deterministic validation
+- it is better modeled as backend infrastructure than LLM reasoning
+
+Examples:
+- `commit_intake`
+  - model-triggered, but validator-controlled
+- calendar event creation
+  - backend capability around commit, not everyday draft-time reasoning
+- external verification
+  - exceptional evidence tool, not normal planning behavior
+
+---
+
+## Practical Catalog Reading
+
+If a teammate asks "what tools does the system really reason with?", the short
+answer is:
+
+```text
+Intake reasons with backlog, syllabus, calendar evidence, rare verification,
+and a contract gate.
+
+Planner reasons with backlog and syllabus support only.
+
+Persistence and review are mostly deterministic runtime behavior around them.
+```

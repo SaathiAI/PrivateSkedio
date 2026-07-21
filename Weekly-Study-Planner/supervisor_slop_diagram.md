@@ -1,8 +1,21 @@
-# Supervisor Slop Diagram
+# Supervisor Routing Diagram
 
 This document maps `src/agents/supervisor_slop.py` as it exists now.
 
-It is current live truth for supervisor routing and review-state handling.
+It is the live truth for:
+- routing
+- worker handoff
+- review-state handling
+- user-facing rendering after worker execution
+
+Despite the filename, the runtime pattern is fairly disciplined:
+- one supervisor
+- one intake worker
+- one planner worker
+- one user-facing renderer
+
+The supervisor is not a planner and not an intake fallback brain.
+Its job is to decide who owns the next move.
 
 ## High-Level Flow
 
@@ -52,12 +65,15 @@ Supervisor owns:
 - worker handoff
 - `pending_ui`
 - structured UI actions
+- review-action interpretation
+- turn-level worker result storage through `worker_envelope`
 
 Supervisor does not own:
 - intake contract generation
 - plan drafting
 - verification
 - commit
+- rewriting worker ownership boundaries on the fly
 
 ## Current State Shape
 
@@ -129,6 +145,7 @@ Current routing ideology:
 - `has_active_plan` is context, not the main decider
 - user intent drives the next worker
 - worker ownership decides whether intake or planner should act
+- the supervisor should prefer explicit state over conversational guesswork
 
 ## `intake_node`
 
@@ -173,6 +190,15 @@ Rule:
   route directly to `user_facing_node` after Planner
 - a verified draft created in this turn is shown before any approval decision is
   made in a later turn
+
+This is the important product behavior:
+
+```text
+draft now
+review now
+approve later
+commit later
+```
 
 ## `user_facing_node`
 
@@ -222,3 +248,14 @@ The supervisor routes from:
 - clean `messages`
 
 Not from raw worker tool transcripts.
+
+## Practical Summary
+
+If you want one sentence for the whole file, use this:
+
+```text
+Supervisor decides the owner of the next turn, then gets out of the way.
+```
+
+That keeps the system from collapsing into one overpowered router prompt that
+tries to think, validate, schedule, and render all at once.
