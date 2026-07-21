@@ -98,47 +98,91 @@ const fixedBlocks = [
   { day: 3, top: 178, height: 48, title: "Project call", meta: "11:15 - 12:00" },
 ];
 
-const candidateBlocks = [
-  {
-    day: 0,
-    top: 152,
-    height: 86,
-    title: "Quadratics sprint",
-    meta: "09:30 - 11:00",
-    tone: "green",
-    delay: "0ms",
-    tasks: ["Revise discriminant rules", "Solve 6 mixed equations", "Mark one weak method"],
-  },
-  {
-    day: 1,
-    top: 266,
-    height: 92,
-    title: "Polynomials practice",
-    meta: "14:00 - 15:20",
-    tone: "violet",
-    delay: "180ms",
-    tasks: ["Factor theorem examples", "Remainder theorem drill", "Save 3 exam-style misses"],
-  },
-  {
-    day: 2,
-    top: 122,
-    height: 78,
-    title: "Electricity recall",
-    meta: "09:15 - 10:15",
-    tone: "amber",
-    delay: "360ms",
-    tasks: ["Rewrite Ohm's law notes", "Practice circuit diagrams", "Check units before answers"],
-  },
-  {
-    day: 3,
-    top: 276,
-    height: 82,
-    title: "English review",
-    meta: "14:30 - 15:45",
-    tone: "rose",
-    delay: "540ms",
-    tasks: ["Recall quote bank", "Tighten intro paragraph", "Review teacher feedback"],
-  },
+const candidateDrafts = [
+  [
+    {
+      day: 0,
+      top: 152,
+      height: 86,
+      title: "Quadratics sprint",
+      meta: "09:30 - 11:00",
+      tone: "green",
+      delay: "0ms",
+      tasks: ["Revise discriminant rules", "Solve 6 mixed equations", "Mark one weak method"],
+    },
+    {
+      day: 1,
+      top: 266,
+      height: 92,
+      title: "Polynomials practice",
+      meta: "14:00 - 15:20",
+      tone: "violet",
+      delay: "180ms",
+      tasks: ["Factor theorem examples", "Remainder theorem drill", "Save 3 exam-style misses"],
+    },
+    {
+      day: 2,
+      top: 122,
+      height: 78,
+      title: "Electricity recall",
+      meta: "09:15 - 10:15",
+      tone: "amber",
+      delay: "360ms",
+      tasks: ["Rewrite Ohm's law notes", "Practice circuit diagrams", "Check units before answers"],
+    },
+    {
+      day: 3,
+      top: 276,
+      height: 82,
+      title: "English review",
+      meta: "14:30 - 15:45",
+      tone: "rose",
+      delay: "540ms",
+      tasks: ["Recall quote bank", "Tighten intro paragraph", "Review teacher feedback"],
+    },
+  ],
+  [
+    {
+      day: 0,
+      top: 126,
+      height: 74,
+      title: "Light notes",
+      meta: "09:05 - 10:05",
+      tone: "amber",
+      delay: "0ms",
+      tasks: ["Sketch ray diagrams", "Review mirror formula", "Practice sign convention"],
+    },
+    {
+      day: 1,
+      top: 292,
+      height: 78,
+      title: "English recall",
+      meta: "14:25 - 15:30",
+      tone: "rose",
+      delay: "180ms",
+      tasks: ["Recall 6 key quotes", "Group quote themes", "Write one analysis paragraph"],
+    },
+    {
+      day: 2,
+      top: 146,
+      height: 86,
+      title: "Quadratics drill",
+      meta: "09:45 - 11:00",
+      tone: "green",
+      delay: "360ms",
+      tasks: ["Solve roots set", "Check graph questions", "Mark formula mistakes"],
+    },
+    {
+      day: 3,
+      top: 252,
+      height: 88,
+      title: "Polynomial finish",
+      meta: "13:45 - 15:00",
+      tone: "violet",
+      delay: "540ms",
+      tasks: ["Finish remainder theorem", "Do exam-style set", "Summarise traps"],
+    },
+  ],
 ];
 
 function SnapText({ children }) {
@@ -311,6 +355,7 @@ function StoryStack() {
 function AutoRescheduleDemo() {
   const [phase, setPhase] = useState("idle");
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const [draftIndex, setDraftIndex] = useState(0);
   const showDraft = phase !== "idle";
 
   useEffect(() => {
@@ -335,9 +380,11 @@ function AutoRescheduleDemo() {
   const approveDraft = () => setPhase("approved");
   const replayDraft = () => {
     setSelectedSlot(null);
+    setDraftIndex((current) => (current + 1) % candidateDrafts.length);
     setPhase("drafting");
   };
-  const activeSlot = selectedSlot === null ? null : candidateBlocks[selectedSlot];
+  const activeCandidateBlocks = candidateDrafts[draftIndex];
+  const activeSlot = selectedSlot === null ? null : activeCandidateBlocks[selectedSlot];
 
   return (
     <section className={`lp-reschedule-section is-visible is-${phase}`} id="auto-reschedule">
@@ -392,7 +439,7 @@ function AutoRescheduleDemo() {
               </article>
             ))}
 
-            {showDraft && candidateBlocks.map((block, index) => (
+            {showDraft && activeCandidateBlocks.map((block, index) => (
               <article
                 className={`lp-reschedule-block is-candidate is-${block.tone}${selectedSlot === index ? " is-selected" : ""}`}
                 style={{
@@ -402,7 +449,7 @@ function AutoRescheduleDemo() {
                   "--delay": block.delay,
                   "--i": index,
                 }}
-                key={`${block.day}-${block.title}`}
+                key={`${draftIndex}-${block.day}-${block.title}`}
                 role="button"
                 tabIndex={0}
                 onClick={() => setSelectedSlot(index)}
@@ -431,7 +478,7 @@ function AutoRescheduleDemo() {
                 <button type="button" onClick={() => setSelectedSlot(null)} aria-label="Close checklist">×</button>
                 <span>{phase === "approved" ? "Committed slot" : "Draft slot"}</span>
                 <strong>{activeSlot.title}</strong>
-                <small>{activeSlot.meta} · read-only checklist</small>
+                <small>{activeSlot.meta}</small>
                 <div>
                   {activeSlot.tasks.map((task, index) => (
                     <p style={{ "--i": index }} key={task}>

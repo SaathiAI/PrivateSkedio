@@ -1187,21 +1187,9 @@
   width: 18px;
   height: 18px;
   border-radius: 6px;
-  border: 1px solid rgba(33, 184, 146, 0.42);
-  background: rgba(33, 184, 146, 0.1);
+  border: 1px solid rgba(140, 153, 236, 0.34);
+  background: rgba(255, 254, 250, 0.82);
   position: relative;
-}
-
-.lp-slot-readonly i::after {
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 4px;
-  width: 7px;
-  height: 4px;
-  border-left: 2px solid #21b892;
-  border-bottom: 2px solid #21b892;
-  transform: rotate(-45deg);
 }
 
 .lp-slot-readonly b {
